@@ -18,6 +18,10 @@ all: $(TARGET)
 $(TARGET): $(OBJS)
 	$(CC) $(CFLAGS) -o $@ $(OBJS)
 
+# Documentacion
+open-doc: doc/index.html
+	open doc/index.html
+
 # Generar lexer con Flex
 lexer/lex.yy.c: lexer/lexer.l
 	$(FLEX) -o $@ $<

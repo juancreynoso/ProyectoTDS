@@ -5,75 +5,70 @@
 #include <string.h>
 #include <stdio.h>
 
+#include "sintax.tab.h"
+
 %}
 
 %option noyywrap yylineno
 
-ID [a-zA-Z][a-zA-Z0-9]*    
+ID [a-zA-Z][a-zA-Z0-9_]*    
 digit [0-9]
-bool_val true|false
+val_bool true|false
 
 %%
-    /*Rules section*/
+"Program"   { printf("PROGRAM \n"); return PROGRAM; }
+"extern"    { printf("EXTERN \n"); return EXTERN; }
+"void"      { printf("VOID \n"); return VOID; }
+"bool"      { printf("BOOL \n"); return BOOL; }
+"integer"   { printf("INT \n"); return INT; }
+"return"    { printf("RETURN \n"); return RETURN; }
+"const"     { printf("CONST \n"); return CONST; }
+"if"        { printf("IF \n"); return IF; }
+"else"      { printf("ELSE \n"); return ELSE; }
+"then"      { printf("THEN \n"); return THEN; }
+"while"     { printf("WHILE \n"); return WHILE; }
 
-"program"   { printf("PROGRAM \n"); //return PROGRAM; }
-"extern"   { printf("EXTERN \n"); //return EXTERN; }
-"void"      { printf("VOID \n"); //return VOID; }
-"bool"      { printf("BOOL \n"); //return BOOL; }
-"integer"       { printf("INT \n"); //return INT; }
-"return"    { printf("RETURN \n"); //return RETURN; }
-"const"     { printf("CONST \n"); //return CONST; }
-"if"     { printf("IF \n"); //return IF; }
-"else"     { printf("ELSE \n"); //return ELSE; }
-"then"     { printf("THEN \n"); //return THEN; }
-"while"     { printf("WHILE \n"); //return WHILE; }       
-"=="        { printf("EQUALS \n"); //return EQUALS; }
-"="         { printf("ASSIGN \n"); //return ASSIGN; }
-"+"         { printf("PLUS \n"); //return PLUS; }
-"-"         { printf("SUB \n"); //return SUB; }
-"*"         { printf("MULT \n"); //return MULT; }             
-"/"         { printf("DIV \n"); //return DIV; }
-"%"         {printf("MOD \n"); }
-"<"         {printf("LT \n"); }
-">"         {printf("GT \n"); }
-"||"        { printf("OR \n"); //return OR; }    
-"&&"        { printf("AND \n"); //return AND; }
-"!"         { printf("NEG \n"); //return NEG; }
-"("         { printf("PAREN_L \n"); //return PAREN_L; }   
-")"         { printf("PAREN_R \n"); //return PAREN_R; }
-"{"         { printf("LLAVE_L \n"); //return LLAVE_L; }   
-"}"         { printf("LLAVE_R \n"); //return LLAVE_R; }
-"//"        { printf("COMEN1 \n"); //return COMEN1; }
-"/*"        { printf("COMEN2_L \n"); //return COMEN2_L; }
-"*/"        { printf("COMEN2_R \n"); //return COMEN2_R; }
-{bool_val}   {
-                printf("VAL_BOOL \n");
+"=="        { printf("EQUALS \n"); return EQUALS; }
+"="         { printf("ASSIGN \n"); return ASSIGN; }
+"+"         { printf("PLUS \n"); return PLUS; }
+"-"         { printf("SUB \n"); return SUB; }
+"*"         { printf("MULT \n"); return MULT; }
+"/"         { printf("DIV \n"); return DIV; }
+"%"         { printf("MOD \n"); return MOD; }
+"<"         { printf("LT \n"); return LT; }
+">"         { printf("GT \n"); return GT; }
+"||"        { printf("OR \n"); return OR; }
+"&&"        { printf("AND \n"); return AND; }
+"!"         { printf("NEG \n"); return NEG; }
 
-                if(strcmp(yytext, "true") == 0){
-                    //yylval.ival = 1;
-                } else {
-                    //yylval.ival = 0;
-                }
-                    
-                //return VAL_BOOL;
-            }   
-{digit}+   {
-                printf("NUM \n");
-                //yylval.ival = atoi(yytext);
-                //return NUM;
-            }
-{ID}        {
-                printf("ID \n");
-                //yylval.sval = strdup(yytext);
-                //return ID;
-            }
-[ \t\n]+   { /* ignorar espacios, tabs y saltos de línea */ }
-";"         { printf("PUNTO_Y_COMA \n");  //return PUNTO_Y_COMA; }
-.   { printf("Error léxico: caracter no reconocido '%s'\n", yytext); exit(EXIT_FAILURE);}
-          
+"("         { printf("PAREN_L \n"); return PAREN_L; }
+")"         { printf("PAREN_R \n"); return PAREN_R; }
+"{"         { printf("LLAVE_L \n"); return LLAVE_L; }
+"}"         { printf("LLAVE_R \n"); return LLAVE_R; }
+
+"//"        { printf("COMEN_OLINE \n"); return COMEN_OLINE; }
+"/*"        { printf("COMEN_MLINE_L \n"); return COMEN_MLINE_L; }
+"*/"        { printf("COMEN_MLINE_R \n"); return COMEN_MLINE_R;}
+
+{val_bool}  { printf("VAL_BOOL \n"); return VAL_BOOL;}
+{digit}+    { printf("NUM \n"); return NUM;}
+{ID}        { printf("ID \n"); return ID;}
+
+[ \t\n]+    { /* ignorar espacios, tabs y saltos de línea */ }
+
+";"         { printf("PYC\n"); return PYQ; }
+
+.           { printf("Error léxico: caracter no reconocido '%s'\n", yytext);
+              exit(EXIT_FAILURE); }
 %%
-
-int main(int argc,char *argv[]){
-	yylex();
+int main(int argc, char *argv[]) {
+    if (argc > 1) {
+        yyin = fopen(argv[1], "r");
+        if (!yyin) {
+            perror("No se pudo abrir el archivo");
+            exit(1);
+        }
+    }
+    yylex();
     return 0;
 }
