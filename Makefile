@@ -7,7 +7,7 @@ BISON = bison -v -d
 FLEX = flex
 
 SRC_DIRS = sintax lexer ast st semantic compile
-OBJS = lexer/lex.yy.o
+OBJS = sintax/sintax.tab.o lexer/lex.yy.o 
 
 TARGET = parser
 
@@ -22,10 +22,21 @@ $(TARGET): $(OBJS)
 open-doc: doc/index.html
 	open doc/index.html
 
+# Generar parser con bison
+sintax/sintax.tab.c sintax/sintax.tab.h: sintax/sintax.y
+	$(BISON) -o sintax/sintax.tab.c $<
+
 # Generar lexer con Flex
 lexer/lex.yy.c: lexer/lexer.l
 	$(FLEX) -o $@ $<
 
+# Compilar cada objeto
+sintax/sintax.tab.o: sintax/sintax.tab.c
+	${CC} ${CFLAGS} -c -o $@ $<
+
+lexer/lex.yy.o: lexer/lex.yy.c
+	${CC} ${CFLAGS} -c -o $@ $<
+
 # Limpiar archivos generados
 clean:
-	rm -f $(OBJS) $(TARGET) sintax/calc-sintaxis.tab.* lexer/lex.yy.c sintax/calc-sintaxis.output compile/assembly.txt
+	rm -f $(OBJS) $(TARGET) sintax/sintax.tab.* lexer/lex.yy.c sintax/sintax.output

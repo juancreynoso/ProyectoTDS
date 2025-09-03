@@ -5,7 +5,7 @@
 #include <string.h>
 #include <stdio.h>
 
-#include "sintax.tab.h"
+#include "sintax/sintax.tab.h"
 
 %}
 
@@ -34,12 +34,12 @@ val_bool true|false
 "-"         { printf("SUB \n"); return SUB; }
 "*"         { printf("MULT \n"); return MULT; }
 "/"         { printf("DIV \n"); return DIV; }
-"%"         { printf("MOD \n"); return MOD; }
+"%"         { printf("REST \n"); return REST; }
 "<"         { printf("LT \n"); return LT; }
 ">"         { printf("GT \n"); return GT; }
 "||"        { printf("OR \n"); return OR; }
 "&&"        { printf("AND \n"); return AND; }
-"!"         { printf("NEG \n"); return NEG; }
+"!"         { printf("NOT \n"); return NOT; }
 
 "("         { printf("PAREN_L \n"); return PAREN_L; }
 ")"         { printf("PAREN_R \n"); return PAREN_R; }
@@ -56,19 +56,8 @@ val_bool true|false
 
 [ \t\n]+    { /* ignorar espacios, tabs y saltos de línea */ }
 
-";"         { printf("PYC\n"); return PYQ; }
+";"         { printf("PYC\n"); return PYC; }
 
 .           { printf("Error léxico: caracter no reconocido '%s'\n", yytext);
               exit(EXIT_FAILURE); }
 %%
-int main(int argc, char *argv[]) {
-    if (argc > 1) {
-        yyin = fopen(argv[1], "r");
-        if (!yyin) {
-            perror("No se pudo abrir el archivo");
-            exit(1);
-        }
-    }
-    yylex();
-    return 0;
-}

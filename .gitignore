@@ -4,9 +4,9 @@ main
 tree
 
 # archivos generados por Bison/Flex
-calc-sintaxis.tab.c
-calc-sintaxis.tab.h
-calc-sintaxis.output
+sintax.tab.c
+sintax.tab.h
+sintax.output
 lex.yy.c
 
 .vscode
