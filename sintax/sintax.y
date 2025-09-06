@@ -22,15 +22,24 @@
 
 %%
 
-prog: PROGRAM LLAVE_L var_decl_list LLAVE_R
+prog: PROGRAM LLAVE_L declarations LLAVE_R
     ;
 
-var_decl_list: 
-             | var_decl var_decl_list
-             ;
+declarations:
+            | declarations decl
+            ;
 
-var_decl: type ID ASSIGN expr PYC
-        ;
+decl: var_decl
+    | meth_decl
+    ;
+
+var_decl: var_type ID ASSIGN expr PYC
+   ;
+
+meth_decl: var_type ID PAREN_L PAREN_R LLAVE_L LLAVE_R
+         | VOID ID PAREN_L PAREN_R LLAVE_L LLAVE_R
+         ;
+    
 
 expr: ID
     | NUM
@@ -46,10 +55,9 @@ expr: ID
     | expr AND expr
     ;
 
-type: BOOL
-    | INT
-    ;
-
+var_type: BOOL
+        | INT
+        ;
 
 %%
 
@@ -64,3 +72,15 @@ int main() {
     }
     return 0;
 }
+
+/*
+block: LLAVE_L var_decl statements LLAVE_R
+     ;
+
+statements: statement statements
+          ;
+
+statement: ID ASSIGN expr PYC
+         | method_call PYC
+         | IF PAREN_L expr PAREN_R THEN block ELSE block
+*/
