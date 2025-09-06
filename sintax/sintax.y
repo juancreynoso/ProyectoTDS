@@ -10,7 +10,7 @@
 
 %token PROGRAM EXTERN VOID BOOL INT RETURN CONST IF ELSE THEN WHILE
 %token EQUALS ASSIGN PLUS SUB MULT DIV REST LT GT OR AND NOT 
-%token PAREN_L PAREN_R LLAVE_L LLAVE_R
+%token PAREN_L PAREN_R LLAVE_L LLAVE_R COMA
 %token COMEN_OLINE COMEN_MLINE_L COMEN_MLINE_R
 %token VAL_BOOL NUM ID 
 %token PYC
@@ -26,29 +26,63 @@ prog: PROGRAM LLAVE_L declarations LLAVE_R
     ;
 
 declarations:
-            | declarations decl
+            | declarations declaration
             ;
 
-decl: var_decl
-    | meth_decl
-    ;
+declaration: var_decl 
+           | meth_decl
+           ;
 
 var_decl: var_type ID ASSIGN expr PYC
-   ;
+        ;
 
-meth_decl: var_type ID PAREN_L PAREN_R LLAVE_L LLAVE_R
-         | VOID ID PAREN_L PAREN_R LLAVE_L LLAVE_R
+meth_decl: var_type ID PAREN_L args PAREN_R block
+         | var_type ID PAREN_L args PAREN_R EXTERN PYC
+         | VOID ID PAREN_L args PAREN_R block
+         | VOID ID PAREN_L args PAREN_R EXTERN PYC
          ;
-    
+
+args: 
+    | args_list
+    ;
+
+args_list: var_type ID args_list_tail
+         ; 
+
+args_list_tail:
+              | COMA var_type ID  args_list_tail
+              ;
+
+block: LLAVE_L body LLAVE_R
+     ;
+
+body:
+    | body contains
+    ; 
+
+contains: var_decl
+        | statement
+        ;
+
+statement: ID ASSIGN expr PYC
+         | meth_call
+         | IF PAREN_L expr PAREN_R 
+         | RETURN expr PYC
+         ;
 
 expr: ID
     | NUM
+    | meth_call
     | expr PLUS expr
+    | expr GT expr
+    | expr LT expr
     | expr SUB expr
     | expr MULT expr
     | expr DIV expr
     | expr REST expr
+    | expr EQUALS expr 
     | PAREN_L expr PAREN_R
+    | SUB expr
     | VAL_BOOL
     | NOT expr
     | expr OR expr
@@ -58,6 +92,21 @@ expr: ID
 var_type: BOOL
         | INT
         ;
+
+meth_call: ID PAREN_L param_call_method PAREN_R PYC
+         ;
+
+param_call_method: 
+                 | param_list
+                 ;
+
+param_list: expr param_list_tail
+          ;
+
+param_list_tail: 
+               | COMA expr param_list_tail
+               ;
+
 
 %%
 
