@@ -16,9 +16,12 @@
 %token PYC
 
 %left PLUS SUB
+%left EQUALS
 %left MULT DIV REST
+%left LT GT
 %left AND OR
-%right NOT  
+%right NOT
+
 
 %%
 
@@ -36,33 +39,30 @@ declaration: var_decl
 var_decl: var_type ID ASSIGN expr PYC
         ;
 
-meth_decl: var_type ID PAREN_L args PAREN_R block
-         | var_type ID PAREN_L args PAREN_R EXTERN PYC
-         | VOID ID PAREN_L args PAREN_R block
-         | VOID ID PAREN_L args PAREN_R EXTERN PYC
+meth_decl: var_type ID PAREN_L meth_args PAREN_R block
+         | var_type ID PAREN_L meth_args PAREN_R EXTERN PYC
+         | VOID ID PAREN_L meth_args PAREN_R block
+         | VOID ID PAREN_L meth_args PAREN_R EXTERN PYC
          ;
 
-args: 
-    | args_list
-    ;
+meth_args: 
+         | args_list
+         ;
 
-args_list: var_type ID args_list_tail
+args_list: var_type ID
+         | args_list COMA var_type ID
          ; 
 
-args_list_tail:
-              | COMA var_type ID  args_list_tail
-              ;
-
-block: LLAVE_L body LLAVE_R
+block: LLAVE_L var_decls statements LLAVE_R
      ;
 
-body:
-    | body contains
-    ; 
+var_decls: 
+         | var_decl var_decls
+         ;
 
-contains: var_decl
-        | statement
-        ;
+statements: 
+          | statement statements
+          ;
 
 statement: ID ASSIGN expr PYC
          | meth_call
