@@ -12,9 +12,9 @@
 
   <main>
     <h2>Descripción</h2>
-    <p>El análisis léxico se encarga de transformar la entrada de texto en una
-    secuencia de <strong>tokens</strong>. Estos tokens son unidades atómicas
-    que alimentan al parser.</p>
+    <p>El análisis léxico se lleva a cabo en la primera etapa del compilador y se encarga de transformar 
+      la entrada de texto en una secuencia de <strong>tokens</strong>. 
+      Estos tokens son unidades atómicas que alimentan al parser.</p>
 
     <h2>Herramientas</h2>
     <ul>
@@ -22,18 +22,106 @@
       <li>Integración con Bison a través de yylval</li>
     </ul>
 
-    <h2>Ejemplo de regla en el lexer</h2>
+    <h2>Reglas definidas</h2>
     <pre>
-{ID}    { yylval.sval = strdup(yytext); return TOKEN_ID; }
+      "program"   { return PROGRAM; }
+      "extern"    { return EXTERN; }
+      "void"      { return VOID; }
+      "bool"      { return BOOL; }
+      "integer"   { return INT; }
+      "return"    { return RETURN; }
+      "const"     { return CONST; }
+      "if"        { return IF; }
+      "else"      { return ELSE; }
+      "then"      { return THEN; }
+      "while"     { return WHILE; }
+
+      "=="        { return EQUALS; }
+      "="         { return ASSIGN; }
+      "+"         { return PLUS; }
+      "-"         { return SUB; }
+      "*"         { return MULT; }
+      "/"         { return DIV; }
+      "%"         { return REST; }
+      "<"         { return LT; }
+      ">"         { return GT; }
+      "||"        { return OR; }
+      "&&"        { return AND; }
+      "!"         { return NOT; }
+
+      "("         { return PAREN_L; }
+      ")"         { return PAREN_R; }
+      "{"         { return LLAVE_L; }
+      "}"         { return LLAVE_R; }
+      ","         { return COMA; }
+
+      {val_bool}  { return VAL_BOOL; }
+      {digit}+    { return NUM; }
+      {ID}        { return ID; }
+
+      [ \t\n]+    { /* ignorar espacios, tabs y saltos de línea */ }
+
+      ";"         { return PYC; }
+
+      .           {
+                    fprintf(stderr, "Error léxico: caracter no reconocido '%s'\n", yytext);
+                    exit(EXIT_FAILURE);
+                  }
+
+      "//".*       { /* ignorar comentario de línea */ }
+      "/*"([^*]|\*+[^*/])*\*+"/"   { /* ignorar comentario multilínea */ }
     </pre>
+    El lexer reconoce cadenas de texto específicas y las devuelve como <strong>tokens</strong>, quienes serán utilizados
+    en la proxima etapa por el analizador sintáctico.
 
     <h2>Tabla de Tokens</h2>
-    <table>
+    <table border="1" cellspacing="0" cellpadding="5">
       <tr><th>Token</th><th>Lexema</th><th>Ejemplo</th></tr>
-      <tr><td>TOKEN_INT</td><td>"int"</td><td>int x;</td></tr>
-      <tr><td>TOKEN_ID</td><td>[a-zA-Z_][a-zA-Z0-9_]*</td><td>varName</td></tr>
-      <tr><td>TOKEN_NUM</td><td>[0-9]+</td><td>42</td></tr>
+
+      <tr><td>PROGRAM</td><td>"program"</td><td>program { ... }</td></tr>
+      <tr><td>EXTERN</td><td>"extern"</td><td>extern int x;</td></tr>
+      <tr><td>VOID</td><td>"void"</td><td>void f()</td></tr>
+      <tr><td>BOOL</td><td>"bool"</td><td>bool flag;</td></tr>
+      <tr><td>INT</td><td>"integer"</td><td>integer n;</td></tr>
+      <tr><td>RETURN</td><td>"return"</td><td>return 0;</td></tr>
+      <tr><td>CONST</td><td>"const"</td><td>const integer a = 5;</td></tr>
+      <tr><td>IF</td><td>"if"</td><td>if (x > 0)</td></tr>
+      <tr><td>ELSE</td><td>"else"</td><td>else { ... }</td></tr>
+      <tr><td>THEN</td><td>"then"</td><td>then { ... }</td></tr>
+      <tr><td>WHILE</td><td>"while"</td><td>while (x &lt; 10)</td></tr>
+
+      <tr><td>EQUALS</td><td>"=="</td><td>x == y</td></tr>
+      <tr><td>ASSIGN</td><td>"="</td><td>x = 5;</td></tr>
+      <tr><td>PLUS</td><td>"+"</td><td>x + y</td></tr>
+      <tr><td>SUB</td><td>"-"</td><td>x - y</td></tr>
+      <tr><td>MULT</td><td>"*"</td><td>x * y</td></tr>
+      <tr><td>DIV</td><td>"/"</td><td>x / y</td></tr>
+      <tr><td>REST</td><td>"%"</td><td>x % 2</td></tr>
+      <tr><td>LT</td><td>"&lt;"</td><td>x &lt; y</td></tr>
+      <tr><td>GT</td><td>"&gt;"</td><td>x &gt; y</td></tr>
+      <tr><td>OR</td><td>"||"</td><td>x || y</td></tr>
+      <tr><td>AND</td><td>"&amp;&amp;"</td><td>x &amp;&amp; y</td></tr>
+      <tr><td>NOT</td><td>"!"</td><td>!flag</td></tr>
+
+      <tr><td>PAREN_L</td><td>"("</td><td>(expr)</td></tr>
+      <tr><td>PAREN_R</td><td>")"</td><td>(expr)</td></tr>
+      <tr><td>LLAVE_L</td><td>"{"</td><td>{</td></tr>
+      <tr><td>LLAVE_R</td><td>"}"</td><td>}</td></tr>
+      <tr><td>COMA</td><td>","</td><td>f(x, y)</td></tr>
+      <tr><td>PYC</td><td>";"</td><td>x = 1;</td></tr>
+
+      <tr><td>VAL_BOOL</td><td>"true" | "false"</td><td>true</td></tr>
+      <tr><td>NUM</td><td>[0-9]+</td><td>42</td></tr>
+      <tr><td>ID</td><td>[a-zA-Z_][a-zA-Z0-9_]*</td><td>var_name</td></tr>
     </table>
+
+
+    <h2>Dificultades Encontradas y Resolución</h2>
+    <p>Durante la implementación del lexer se presentaron algunos desafíos, entre ellos el tratamiento de los comentarios.
+      En un principio intentamos reconocerlos y devolver tokens, tanto para los comentarios de una sola línea como para los multilínea.
+      Sin embargo, dado que los comentarios no poseen valor gramatical dentro del lenguaje, la solución adoptada fue reconocerlos 
+      únicamente para descartarlos, evitando así la generación de cualquier token asociado.
+    </p>
   </main>
 
   <footer>
