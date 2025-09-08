@@ -36,11 +36,11 @@ declaration: var_decl
            | meth_decl
            ;
 
-var_decl: var_type ID ASSIGN expr PYC
+var_decl: type ID ASSIGN expr PYC
         ;
 
-meth_decl: var_type ID PAREN_L meth_args PAREN_R block
-         | var_type ID PAREN_L meth_args PAREN_R EXTERN PYC
+meth_decl: type ID PAREN_L meth_args PAREN_R block
+         | type ID PAREN_L meth_args PAREN_R EXTERN PYC
          | VOID ID PAREN_L meth_args PAREN_R block
          | VOID ID PAREN_L meth_args PAREN_R EXTERN PYC
          ;
@@ -49,8 +49,8 @@ meth_args:
          | args_list
          ;
 
-args_list: var_type ID
-         | args_list COMA var_type ID
+args_list: type ID
+         | args_list COMA type ID
          ; 
 
 block: LLAVE_L var_decls statements LLAVE_R
@@ -89,9 +89,9 @@ expr: ID
     | expr AND expr
     ;
 
-var_type: BOOL
-        | INT
-        ;
+type: BOOL
+    | INT
+    ;
 
 meth_call: ID PAREN_L param_call_method PAREN_R PYC
          ;
@@ -100,12 +100,9 @@ param_call_method:
                  | param_list
                  ;
 
-param_list: expr param_list_tail
+param_list: expr 
+          | param_list COMA expr
           ;
-
-param_list_tail: 
-               | COMA expr param_list_tail
-               ;
 
 
 %%
