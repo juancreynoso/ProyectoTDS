@@ -47,10 +47,6 @@ val_bool true|false
 "}"         { printf("LLAVE_R \n"); return LLAVE_R; }
 ","         { printf("COMA \n"); return ','; }
 
-"//"        { printf("COMEN_OLINE \n"); return COMEN_OLINE; }
-"/*"        { printf("COMEN_MLINE_L \n"); return COMEN_MLINE_L; }
-"*/"        { printf("COMEN_MLINE_R \n"); return COMEN_MLINE_R;}
-
 {val_bool}  { printf("VAL_BOOL \n"); return VAL_BOOL;}
 {digit}+    { printf("NUM \n"); return NUM;}
 {ID}        { printf("ID \n"); return ID;}
@@ -61,4 +57,7 @@ val_bool true|false
 
 .           { printf("Error léxico: caracter no reconocido '%s'\n", yytext);
               exit(EXIT_FAILURE); }
+
+"//".*      { /* ignorar comentario de línea */ }
+"/*"([^*]|\*+[^*/])*\*+"/"    { /* ignorar comentario multilínea */ }
 %%
