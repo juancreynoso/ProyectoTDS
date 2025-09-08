@@ -66,9 +66,12 @@ statements:
 
 statement: ID ASSIGN expr PYC
          | meth_call
-         | IF PAREN_L expr PAREN_R 
+         | IF PAREN_L expr PAREN_R THEN block if_else
          | RETURN expr PYC
          ;
+
+if_else: 
+       | ELSE block
 
 expr: ID
     | NUM
@@ -118,15 +121,3 @@ int main() {
     }
     return 0;
 }
-
-/*
-block: LLAVE_L var_decl statements LLAVE_R
-     ;
-
-statements: statement statements
-          ;
-
-statement: ID ASSIGN expr PYC
-         | method_call PYC
-         | IF PAREN_L expr PAREN_R THEN block ELSE block
-*/
