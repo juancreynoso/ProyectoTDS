@@ -11,7 +11,6 @@
 %token PROGRAM EXTERN VOID BOOL INT RETURN CONST IF ELSE THEN WHILE
 %token EQUALS ASSIGN PLUS SUB MULT DIV REST LT GT OR AND NOT 
 %token PAREN_L PAREN_R LLAVE_L LLAVE_R
-%token COMEN_OLINE COMEN_MLINE_L COMEN_MLINE_R
 %token VAL_BOOL NUM ID 
 %token PYC
 
@@ -21,7 +20,6 @@
 %left LT GT
 %left AND OR
 %right NOT
-
 
 %%
 
@@ -69,6 +67,8 @@ statement: ID ASSIGN expr PYC
          | IF PAREN_L expr PAREN_R THEN block if_else
          | WHILE expr block
          | RETURN expr PYC
+         | PYC
+         | block
          ;
 
 if_else: 
