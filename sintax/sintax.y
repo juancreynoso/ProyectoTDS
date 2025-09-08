@@ -10,7 +10,7 @@
 
 %token PROGRAM EXTERN VOID BOOL INT RETURN CONST IF ELSE THEN WHILE
 %token EQUALS ASSIGN PLUS SUB MULT DIV REST LT GT OR AND NOT 
-%token PAREN_L PAREN_R LLAVE_L LLAVE_R COMA
+%token PAREN_L PAREN_R LLAVE_L LLAVE_R
 %token COMEN_OLINE COMEN_MLINE_L COMEN_MLINE_R
 %token VAL_BOOL NUM ID 
 %token PYC
@@ -50,7 +50,7 @@ meth_args:
          ;
 
 args_list: type ID
-         | args_list COMA type ID
+         | args_list ',' type ID
          ; 
 
 block: LLAVE_L var_decls statements LLAVE_R
@@ -105,7 +105,7 @@ param_call_method:
                  ;
 
 param_list: expr 
-          | param_list COMA expr
+          | param_list ',' expr
           ;
 
 %%

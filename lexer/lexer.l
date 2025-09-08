@@ -45,7 +45,7 @@ val_bool true|false
 ")"         { printf("PAREN_R \n"); return PAREN_R; }
 "{"         { printf("LLAVE_L \n"); return LLAVE_L; }
 "}"         { printf("LLAVE_R \n"); return LLAVE_R; }
-","         { printf("COMA \n"); return COMA; }
+","         { printf("COMA \n"); return ','; }
 
 "//"        { printf("COMEN_OLINE \n"); return COMEN_OLINE; }
 "/*"        { printf("COMEN_MLINE_L \n"); return COMEN_MLINE_L; }
