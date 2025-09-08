@@ -22,40 +22,19 @@
       <li>Integración con Bison a través de yylval</li>
     </ul>
 
-    <h2>Reglas definidas</h2>
+    <h2>Ejemplo de Definición de Reglas</h2>
     <pre>
       "program"   { return PROGRAM; }
       "extern"    { return EXTERN; }
-      "void"      { return VOID; }
-      "bool"      { return BOOL; }
-      "integer"   { return INT; }
-      "return"    { return RETURN; }
-      "const"     { return CONST; }
-      "if"        { return IF; }
-      "else"      { return ELSE; }
       "then"      { return THEN; }
       "while"     { return WHILE; }
 
-      "=="        { return EQUALS; }
-      "="         { return ASSIGN; }
-      "+"         { return PLUS; }
-      "-"         { return SUB; }
-      "*"         { return MULT; }
-      "/"         { return DIV; }
-      "%"         { return REST; }
-      "<"         { return LT; }
       ">"         { return GT; }
       "||"        { return OR; }
-      "&&"        { return AND; }
-      "!"         { return NOT; }
 
       "("         { return PAREN_L; }
-      ")"         { return PAREN_R; }
       "{"         { return LLAVE_L; }
-      "}"         { return LLAVE_R; }
-      ","         { return COMA; }
 
-      {val_bool}  { return VAL_BOOL; }
       {digit}+    { return NUM; }
       {ID}        { return ID; }
 
@@ -63,13 +42,7 @@
 
       ";"         { return PYC; }
 
-      .           {
-                    fprintf(stderr, "Error léxico: caracter no reconocido '%s'\n", yytext);
-                    exit(EXIT_FAILURE);
-                  }
-
       "//".*       { /* ignorar comentario de línea */ }
-      "/*"([^*]|\*+[^*/])*\*+"/"   { /* ignorar comentario multilínea */ }
     </pre>
     El lexer reconoce cadenas de texto específicas y las devuelve como <strong>tokens</strong>, quienes serán utilizados
     en la proxima etapa por el analizador sintáctico.

@@ -12,8 +12,42 @@
 
   <main>
     <h2>Descripción</h2>
-    <p>El análisis sintáctico es realizado por el parser, que Bison genera a partir de la gramática definida en el archivo .y. 
+    <p>El análisis sintáctico es realizado por el parser, que Bison genera a partir de la gramática definida en el archivo <i>sintax.y</i>. 
         El parser recibe los tokens del lexer y verifica que el programa cumpla con la estructura del lenguaje.”</p>
+
+    <h2>Herramientas</h2>
+    <ul>
+      <li><strong>Bison</strong>: construye el parser</li>
+    </ul>
+
+    <h2>Ejemplo de Definición de Reglas</h2>
+    Los tokens que fueron generados por el analizador léxico son utilizados en esta etapa. Para que Bison pueda
+    reconocerlos en el archivo se deben declarar con <strong>%token NOMBRE_TOKEN</strong>.
+    <pre>
+      prog: PROGRAM LLAVE_L declarations LLAVE_R
+          ;
+
+      declarations:
+                  | declarations declaration
+                  ;
+
+      declaration: var_decl 
+                | meth_decl
+                ;
+
+      meth_decl: type ID PAREN_L meth_args PAREN_R block
+         | type ID PAREN_L meth_args PAREN_R EXTERN PYC
+         | VOID ID PAREN_L meth_args PAREN_R block
+         | VOID ID PAREN_L meth_args PAREN_R EXTERN PYC
+         ;
+
+      expr: ID
+          | NUM
+          | meth_call
+          | expr PLUS expr
+    </pre>
+
+    <h2>Dificultades Encontradas y Resolución</h2>
   </main>
 
   <footer>
