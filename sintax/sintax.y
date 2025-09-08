@@ -65,8 +65,9 @@ statements:
           ;
 
 statement: ID ASSIGN expr PYC
-         | meth_call
+         | meth_call PYC
          | IF PAREN_L expr PAREN_R THEN block if_else
+         | WHILE expr block
          | RETURN expr PYC
          ;
 
@@ -96,7 +97,7 @@ type: BOOL
     | INT
     ;
 
-meth_call: ID PAREN_L param_call_method PAREN_R PYC
+meth_call: ID PAREN_L param_call_method PAREN_R
          ;
 
 param_call_method: 
@@ -106,7 +107,6 @@ param_call_method:
 param_list: expr 
           | param_list COMA expr
           ;
-
 
 %%
 
