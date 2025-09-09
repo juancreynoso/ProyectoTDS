@@ -1,0 +1,15 @@
+Program {
+    /* this is 
+    a multi line 
+    comment
+    */
+
+    integer print() extern;
+
+    void main(){
+        integer i_1 = 4;
+        while (i == 0) {
+            i = i - 1;
+        }
+    }
+}

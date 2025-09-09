@@ -1,5 +1,9 @@
-Program {
-    integer return(int a){
-        return 00;
+Program { // This is a one-line comment
+    integer sum(integer a, integer b){
+    }
+
+    void main(){
+        integer result = sum(1, 1);
+        return 0;
     }
 }
