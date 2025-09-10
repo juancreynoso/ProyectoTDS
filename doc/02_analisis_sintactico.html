@@ -48,6 +48,144 @@
     </pre>
 
     <h2>Dificultades Encontradas y Resolución</h2>
+    <p>En el desarrollo del analizador sintáctico nos enfrentamos a diversos conflictos durante la construcción de la gramática. 
+      Particularmente, tuvimos conflictos reduce/reduce y shift/reduce al intentar modelar la relación entre declaraciones de variables 
+      y declaraciones de métodos. A continuación, mostramos algunas versiones de la gramática inicial y cómo fuimos corrigiéndolas.
+    </p>
+    <h3>Primer intento</h3>
+    <pre>
+      prog: PROGRAM LLAVE_L  declarations LLAVE_R
+          ;
+
+      type:
+          | BOOL
+          | INT
+          ;
+
+      return_type:
+                | VOID
+                ;
+
+      declarations: var_decl
+                  | method_decl
+                  ;
+
+      var_decl:
+              /* vacio */
+              | type ID PYC var_decl
+              ;
+
+      method_decl:
+                /* vacio */
+                | return_type ID PAREN_L PAREN_R LLAVE_L LLAVE_R
+                ;
+
+    </pre>
+    <p><strong>Problema: </strong>El uso de producciones vacías en casi todas las reglas (/* vacío */) generaba ambigüedad: 
+      el parser no sabía si reducir hacia un var_decl o hacia un method_decl, lo que causaba reduce/reduce conflicts.</p>
+
+    <h3>Segundo intento</h3>
+    <pre>
+      prog: PROGRAM LLAVE_L  var_decl_list method_decl_list LLAVE_R
+          ;
+
+      type:
+          | BOOL
+          | INT
+          ;
+
+      var_decl_list:
+                  | var_decl_list var_decl
+                  ;   
+
+      method_decl_list:
+                      | method_decl_list method_decl
+                      ;    
+
+      var_decl:
+              /* vacio */
+              | type ID PYC var_decl
+              ;
+
+      method_decl:
+                /* vacio */
+                | return_type ID PAREN_L PAREN_R LLAVE_L LLAVE_R
+                ;
+
+    </pre>
+    <p><strong>Problema: </strong>Aunque separamos var_decl_list y method_decl_list, 
+      el uso reiterado de producciones vacías seguía generando shift/reduce conflicts. 
+      El parser quedaba en duda si continuar leyendo declaraciones o reducir inmediatamente una lista vacía.</p>
+
+      <h3>Versión refinada</h3>
+    <pre>
+      prog: PROGRAM LLAVE_L declarations LLAVE_R
+          ;
+
+      declarations:
+                  | declarations declaration
+                  ;
+
+      declaration: var_decl
+          | meth_decl
+          ;
+
+      var_decl: var_type ID ASSIGN expr PYC
+        ;
+
+      meth_decl: var_type ID PAREN_L meth_args PAREN_R block
+              | var_type ID PAREN_L meth_args PAREN_R  EXTERN PYC
+              | VOID ID PAREN_L args PAREN_R block
+              | VOID ID PAREN_L args PAREN_R EXTERN PYC
+              ;
+
+      meth_args: 
+               | args_list
+               ;
+
+      args_list: var_type ID args_list_tail
+              ; 
+
+      args_list_tail:
+                    | ',' var_type ID  args_list_tail
+                    ;
+
+      block: 
+          | var_decl block
+          | statement block
+          ;
+
+      statement: ID
+              ;
+
+      expr: ID
+          | NUM
+          | expr PLUS expr
+          | expr SUB expr
+          | expr MULT expr
+          | expr DIV expr
+          | expr REST expr
+          | PAREN_L expr PAREN_R
+          | VAL_BOOL
+          | NOT expr
+          | expr OR expr
+          | expr AND expr
+          ;
+
+      var_type: BOOL
+              | INT
+              ;
+    </pre>
+    <p><strong>Solución: </strong></p>
+      <li>
+        Se eliminó la mayoría de las producciones vacías innecesarias.
+      </li>
+      <li>
+        Se unificó var_decl y meth_decl bajo una regla común declaration.
+      </li>
+      <li>
+         Las listas (declarations, args_list, block) se construyen de forma recursiva a la derecha, evitando ambigüedades.
+      </li>      
   </main>
 
   <footer>
