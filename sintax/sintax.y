@@ -4,22 +4,22 @@
 
     int yylex(void);
     int yyerror(const char *s);
-
     extern int yylineno;
 %}
 
 %token PROGRAM EXTERN VOID BOOL INT RETURN CONST IF ELSE THEN WHILE
-%token EQUALS ASSIGN PLUS SUB MULT DIV REST LT GT OR AND NOT 
+%token EQUALS ASSIGN PLUS SUB MULT DIV REST LT GT OR AND NOT
 %token PAREN_L PAREN_R LLAVE_L LLAVE_R
 %token VAL_BOOL NUM ID 
 %token PYC
 
-%left PLUS SUB
-%left EQUALS
-%left MULT DIV REST
-%left LT GT
 %left AND OR
+%left EQUALS
+%left LT GT
+%left PLUS SUB
+%left MULT DIV REST
 %right NOT
+%right MINUS
 
 %%
 
@@ -86,7 +86,7 @@ expr: ID
     | expr REST expr
     | expr EQUALS expr 
     | PAREN_L expr PAREN_R
-    | SUB expr
+    | SUB expr %prec MINUS
     | VAL_BOOL
     | NOT expr
     | expr OR expr
@@ -112,12 +112,5 @@ param_list: expr
 
 int yyerror(const char *s) {
     fprintf(stderr, "Error: %s near line %d\n", s, yylineno);
-    return 0;
-}
-
-int main() {
-    if (yyparse() == 0) {
-        printf("Parseado correctamente, sin errores.\n");
-    }
     return 0;
 }
