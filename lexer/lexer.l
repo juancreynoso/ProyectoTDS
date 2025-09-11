@@ -10,6 +10,7 @@
 %}
 
 %option noyywrap yylineno
+%option nounput noinput
 
 ID [a-zA-Z][a-zA-Z0-9_]*    
 digit [0-9]

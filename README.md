@@ -2,6 +2,11 @@
   
 Este proyecto implementa un mini compilador para un lenguaje de programación que soporta dos tipos de datos: `int` y `bool`. El compilador realiza actualmente análisis léxico y sintáctico
 
+## Entregas
+
+- **Primera entrega**  
+  Rama: `scanner-parser`
+
 ## Características
 
 * Tipos de datos soportados: int y bool
@@ -11,7 +16,6 @@ Este proyecto implementa un mini compilador para un lenguaje de programación qu
 * Análisis semántico: Verificación de tipos y tabla de símbolos
 
 ##  Estructura del proyecto
-
 ### Directorios principales
 * `doc`
     *   Contiene la documentacion del proyecto en formato `html`
