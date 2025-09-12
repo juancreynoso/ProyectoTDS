@@ -48,9 +48,26 @@ val_bool true|false
 "}"         { printf("LLAVE_R \n"); return LLAVE_R; }
 ","         { printf("COMA \n"); return ','; }
 
-{val_bool}  { printf("VAL_BOOL \n"); return VAL_BOOL;}
-{digit}+    { printf("NUM \n"); return NUM;}
-{ID}        { printf("ID \n"); return ID;}
+{val_bool}  {  
+                printf("VAL_BOOL \n"); 
+
+                if(strcmp("true", yytext) == 0){
+                    yylval.ival = 1;
+                } else {
+                    yylval.ival = 0;
+                }
+                return VAL_BOOL;
+            }
+{digit}+    {   
+                printf("NUM \n"); 
+                yylval.ival = atoi(yytext);
+                return NUM;
+            }
+{ID}        { 
+                printf("ID \n"); 
+                yylval.sval = yytext;
+                return ID;
+            }
 
 [ \t\n]+    { /* ignorar espacios, tabs y saltos de línea */ }
 

@@ -4,13 +4,21 @@
 
     int yylex(void);
     int yyerror(const char *s);
+    node* root;
     extern int yylineno;
 %}
+
+%union {
+    int ival;
+    char* sval;
+    node* nd;
+}
 
 %token PROGRAM EXTERN VOID BOOL INT RETURN CONST IF ELSE THEN WHILE
 %token EQUALS ASSIGN PLUS SUB MULT DIV REST LT GT OR AND NOT
 %token PAREN_L PAREN_R LLAVE_L LLAVE_R
-%token VAL_BOOL NUM ID 
+%token <ival> VAL_BOOL NUM 
+%token <sval> ID 
 %token PYC
 
 %left AND OR
@@ -20,6 +28,8 @@
 %left MULT DIV REST
 %right NOT
 %right MINUS
+
+%type <nd> declarations declaration var_decl meth_decl
 
 %%
 

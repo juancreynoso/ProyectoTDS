@@ -42,7 +42,7 @@ make
 ## Ejecución de tests
 Utilizar archivos del directorio test/ para probar el  funcionamiento mini compilador.
 ```
-./parser test/<archivo_fuente>
+./c-tds test/<archivo_fuente>
 ```
 
 ## Limpiar archivos generados
