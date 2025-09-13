@@ -1,10 +1,11 @@
+// common.h
 #ifndef COMMON_H
 #define COMMON_H
 
 typedef enum {
-    INT;
-    BOOL;
-    NONE;
-}VarType;
+    TYPE_INT,
+    TYPE_BOOL,
+    NONE
+} VarType;
 
-#endif COMMON_H
+#endif

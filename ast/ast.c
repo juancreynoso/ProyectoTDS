@@ -11,7 +11,7 @@
  */
 node* create_int_node(int value){
     node* root = new_node(NODE_NUM);
-    root->info->INT.type = TYPE_INT
+    root->info->INT.type = TYPE_INT;
     root->info->INT.value = value;
 
     return root;
@@ -22,11 +22,20 @@ node* create_int_node(int value){
  */
 node* create_bool_node(int value){
     node* root = new_node(NODE_BOOL);
-    root->info->INT.type = TYPE_BOOL
+    root->info->INT.type = TYPE_BOOL;
     root->info->INT.value = value;
 
     return root;
 }
+
+node* create_op_node(OpType name, VarType type){
+    node* root = new_node(NODE_OP);
+    root->info->OP.name = name;
+    root->info->ID.type = type;
+
+    return root;
+}
+
 
 node* create_id_node(char* name, VarType typeVar, NodeType type){
     node* root = new_node(type);
@@ -46,6 +55,22 @@ node* create_return_node(VarType type){
     return root;
 }
 
+/**
+ * Crea un nodo que se utiliza para llevar info sobre el ast
+ */
+node* create_node(char* info, VarType type){
+    node* root = new_node(NODE_INFO);
+    root->info->NODE_INFO.type = type;
+    root->info->NODE_INFO.info = info;
+
+    return root;
+}
+
+/**
+ * Recibe un tipo de nodo y lo crea
+ * Esta funcion se utiliza para crear nodos de un tipo en especifico
+ */
+
 node* new_node(NodeType type){
     node* root = malloc(sizeof(node));
     root->info = malloc(sizeof(union type));
@@ -60,8 +85,8 @@ node* new_node(NodeType type){
  */ 
 
 node* create_tree(node* root, node* left, node* right){
-    root.left = left;
-    root.right = right;
+    root->left = left;
+    root->right = right;
     return root;
 }
 
@@ -74,7 +99,7 @@ void print_node(node *root) {
         return;
     switch (root->type) {
         case NODE_NUM:
-            printf("%d\n", root->info->NUM.value);
+            printf("%d\n", root->info->INT.value);
             break;
         case NODE_DECL:
             switch(root->info->ID.type){
@@ -96,25 +121,15 @@ void print_node(node *root) {
         case NODE_BOOL:
             printf("%s\n", root->info->BOOL.value ? "true" : "false");
             break;
-        case NODE_FUNC:
-            switch(root->info->FUNC.returnType) {
-                case TYPE_INT:
-                    printf("int ");
-                    printf("%s \n", root->info->FUNC.name);
-                    break;
-                case TYPE_BOOL:
-                    printf("bool ");
-                    printf("%s \n", root->info->FUNC.name);
-                    break; 
-                case NONE:
-                    printf("void ");
-                    printf("%s \n", root->info->FUNC.name);
-                    break;
-            }
-            break;
         case NODE_OP:
             switch (root->info->OP.name) {
-            case OP_ADD:
+            case OP_GT:
+                printf(">\n");
+                break;
+            case OP_LT:
+                printf("<\n");
+                break;                                
+            case OP_PLUS:
                 printf("+\n");
                 break;
             case OP_SUB:
@@ -128,7 +143,13 @@ void print_node(node *root) {
                 break;
             case OP_ASSIGN:
                 printf("=\n");
-                break;
+                break; 
+            case OP_EQUALS:
+                printf("==\n");
+                break;                           
+            case OP_NOT:
+                printf("!\n");
+                break;                
             case OP_OR:
                 printf("||\n");
                 break;
@@ -139,8 +160,8 @@ void print_node(node *root) {
                 printf("OP?\n");
             }
             break;
-        case NODE:
-             printf("%s\n", root->info->NODE.info ? root->info->NODE.info : "NULL");
+        case NODE_INFO:
+             printf("%s\n", root->info->NODE_INFO.info ? root->info->NODE_INFO.info : "NULL");
             break;
         case NODE_RET:
             printf("ret \n");

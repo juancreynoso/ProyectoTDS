@@ -1,7 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "ast.h"
 
 int yyparse(void);
+extern node* root;
 extern FILE* yyin;
 extern int yylineno;
 
@@ -21,6 +23,9 @@ int main(int argc, char *argv[]) {
     yylineno = 1;
     if (yyparse() == 0) {
         printf("Parseado correctamente, sin errores.\n");
+
+        printf("--- AST ----.\n");
+        print_tree(root, 0);
     }
 
     fclose(input_file);
