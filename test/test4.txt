@@ -1,0 +1,9 @@
+//Ejemplo de falta de llave que cierra
+
+Program {
+    integer i = 1;
+
+    void main(){
+        bool x = true; 
+    
+}
