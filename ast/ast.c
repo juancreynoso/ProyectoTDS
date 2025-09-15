@@ -36,12 +36,26 @@ node* create_op_node(OpType name, VarType type){
     return root;
 }
 
-
+/**
+ * Crea un nodo correspondiente a la ocurrencia de un ID (declaracion o expresion)
+ */
 node* create_id_node(char* name, VarType typeVar, NodeType type){
     node* root = new_node(type);
     root->info->ID.name = name;
     root->info->ID.type = typeVar;
 
+    return root;
+}
+
+/**
+ * Crea un nodo correspondiente a un metodo
+ */
+node* create_meth_node(char* name, Args_List arguments, VarType returnType){
+    node* root = create_node(NODE_METH);
+    root->info->METH.name = name
+    root->info->METH.arguments = arguments;
+    root->info->METH.returnType =returnType;
+    
     return root;
 }
 
@@ -70,7 +84,6 @@ node* create_node(char* info, VarType type){
  * Recibe un tipo de nodo y lo crea
  * Esta funcion se utiliza para crear nodos de un tipo en especifico
  */
-
 node* new_node(NodeType type){
     node* root = malloc(sizeof(node));
     root->info = malloc(sizeof(union type));
@@ -82,18 +95,47 @@ node* new_node(NodeType type){
 
 /**
  * Crea un arbol a partir de un nodo raiz y dos sub arboles
- */ 
-
+ */
 node* create_tree(node* root, node* left, node* right){
     root->left = left;
     root->right = right;
     return root;
 }
 
+Arg new_arg(char* name, VarType type, int value){
+    Arg a;
+    a.name = name;
+    a.type = type;
+
+    switch(type){
+        case TYPE_INT:
+            break;
+        case TYPE_BOOL:
+            break;
+        default:
+            break;
+    }
+    return a;
+}
+
+void insert_arg(Args_List list, Arg a){
+    if (list == NULL) {
+        list = malloc(sizeof(Args_List));
+        list->p = a;
+
+        return;
+    }
+
+    Args_List* new;
+    new->p = a;
+
+    new->next = list;
+    list = new;
+}
+
 /**
  * Imprime los distintos nodo del arbols
  */
-
 void print_node(node *root) {
     if (!root)
         return;
@@ -141,6 +183,9 @@ void print_node(node *root) {
             case OP_DIV:
                 printf("/\n");
                 break;
+            case OP_MINUS:
+                printf("-\n");
+                break;                
             case OP_ASSIGN:
                 printf("=\n");
                 break; 
@@ -175,7 +220,6 @@ void print_node(node *root) {
 /**
  * Funcion de entrada que se encarga de imprimir el arbol
  */
-
 void print_tree(node *root, int level) {
     if (root == NULL)
         return;
