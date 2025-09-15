@@ -61,12 +61,29 @@
       <div class="architecture-flow">
         <div class="phase">
           <h4>1. Análisis Léxico</h4>
-          <p>Conversión del código fuente en tokens usando <b>Flex</b></p>
+          <p>Scanner y generador de tokens con <b>Flex</b></p>
         </div>
         <div class="arrow">→</div>
         <div class="phase">
           <h4>2. Análisis Sintáctico</h4>
-          <p>Verificación de estructura con <b>Bison</b></p>
+          <p>Uso de Tokens para construir la gramática con <b>Bison</b> </p>
+        </div>
+        <div class="arrow">→</div>
+        <div class="phase">
+          <h4>3. Análisis Semántico</h4>
+          <p>Construcción del AST y Tabla de Símbolos para el chequeo de tipos </p>
+        </div>
+        <div class="arrow">→</div>
+        <div class="phase">
+          <h4>4. Generador de Código Intermedio</h4>
+        </div>
+        <div class="arrow">→</div>
+        <div class="phase">
+          <h4>5. Generador Código Objeto</h4>
+        </div>
+        <div class="arrow">→</div>
+        <div class="phase">
+          <h4>6. Optimizador</h4>
         </div>
       </div>
 
@@ -118,8 +135,8 @@
       <p>En el menú de navegación superior para acceder a los detalles específicos de cada fase:</p>
       <ul>
         <li><b>Análisis Léxico:</b> Detalles del scanner, tokens y expresiones regulares</li>
-        <li><b>Análisis Sintáctico:</b> Gramática, parser LALR(1) y construcción del AST</li>
-        <li><b>Fases posteriores:</b> La documentación se completará en siguientes etapas</li>
+        <li><b>Análisis Sintáctico:</b> Gramática, parser LALR(1)</li>
+        <li><b>Fases posteriores:</b> La documentación se irá complentando en siguientes etapas</li>
       </ul>
     </section>
   </main>
