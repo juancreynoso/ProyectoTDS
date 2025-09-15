@@ -1,0 +1,17 @@
+// Ejemplo de código donde la expresión que se asigna es inválida y parentesis no balanceado
+
+Program {
+    /* this is 
+    a multi line 
+    comment
+    */
+
+    integer print) extern;
+
+    void main(){
+        integer i_1 = 4;
+        while (i == 0) {
+            i = i 1;
+        }
+    }
+}

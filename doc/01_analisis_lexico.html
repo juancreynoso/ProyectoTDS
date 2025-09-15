@@ -8,93 +8,175 @@
 <body>
   <header>
     <h1>Análisis Léxico</h1>
+    <nav>
+      <ul>
+        <li><a href="index.html">Inicio</a></li>
+        <li><a href="01_analisis_lexico.html">Análisis Léxico</a></li>
+        <li><a href="02_analisis_sintactico.html">Análisis Sintáctico</a></li>
+        <li><a href="03_analisis_semantico.html">Análisis Semántico</a></li>
+        <li><a href="04_codigo_intermedio.html">Generación de Código Intermedio</a></li>
+        <li><a href="05_codigo_objeto.html">Generación de Código Objeto</a></li>
+        <li><a href="06_optimizacion.html">Optimización</a></li>
+      </ul>
+    </nav>
   </header>
 
   <main>
     <h2>Descripción</h2>
     <p>El análisis léxico se lleva a cabo en la primera etapa del compilador y se encarga de transformar 
       la entrada de texto en una secuencia de <strong>tokens</strong>. 
-      Estos tokens son unidades atómicas que alimentan al parser.</p>
+      Estos tokens son unidades atómicas que alimentan al parser, permitiendo abstraer los detalles 
+      de formato del código fuente y establecer el vocabulario básico del lenguaje.</p>
 
     <h2>Herramientas</h2>
     <ul>
-      <li><strong>Flex</strong> para el scanner</li>
-      <li>Integración con Bison a través de yylval</li>
+      <li><strong>Flex</strong> para el scanner: generador de analizadores léxicos que produce código C eficiente</li>
+      <li><strong>Integración con Bison</strong> a través de yylval: comunicación directa entre lexer y parser</li>
+      <li><strong>Variables automáticas</strong>: yylineno para tracking de líneas de código</li>
     </ul>
 
     <h2>Ejemplo de Definición de Reglas</h2>
-    <pre>
-      "program"   { return PROGRAM; }
-      "extern"    { return EXTERN; }
-      "then"      { return THEN; }
-      "while"     { return WHILE; }
+    <p>El archivo <code>lexer.l</code> contiene las expresiones regulares que definen los patrones de tokens:</p>
+    
+    <h3>Palabras Reservadas</h3>
+    <pre>"program"   { return PROGRAM; }
+"extern"    { return EXTERN; }
+"then"      { return THEN; }
+"while"     { return WHILE; }
+"bool"      { return BOOL; }
+"integer"   { return INT; }
+"void"      { return VOID; }
+"if"        { return IF; }
+"else"      { return ELSE; }
+"return"    { return RETURN; }
+"const"     { return CONST; }</pre>
 
-      ">"         { return GT; }
-      "||"        { return OR; }
+    <h3>Operadores</h3>
+    <pre>">"         { return GT; }
+"<"         { return LT; }
+"=="        { return EQUALS; }
+"="         { return ASSIGN; }
+"||"        { return OR; }
+"&&"        { return AND; }
+"+"         { return PLUS; }
+"-"         { return SUB; }
+"*"         { return MULT; }
+"/"         { return DIV; }
+"%"         { return REST; }
+"!"         { return NOT; }</pre>
 
-      "("         { return PAREN_L; }
-      "{"         { return LLAVE_L; }
+    <h3>Delimitadores y Otros</h3>
+    <pre>"("         { return PAREN_L; }
+")"         { return PAREN_R; }
+"{"         { return LLAVE_L; }
+"}"         { return LLAVE_R; }
+","         { return COMA; }
+";"         { return PYC; }
 
-      {digit}+    { return NUM; }
-      {ID}        { return ID; }
+{digit}+    { yylval.integer = atoi(yytext); return NUM; }
+{ID}        { yylval.string = strdup(yytext); return ID; }
 
-      [ \t\n]+    { /* ignorar espacios, tabs y saltos de línea */ }
+[ \t\n]+    { /* ignorar espacios, tabs y saltos de línea */ }
+"//".*      { /* ignorar comentario de línea */ }</pre>
 
-      ";"         { return PYC; }
-
-      "//".*       { /* ignorar comentario de línea */ }
-    </pre>
-    El lexer reconoce cadenas de texto específicas y las devuelve como <strong>tokens</strong>, quienes serán utilizados
-    en la proxima etapa por el analizador sintáctico.
+    <p>El lexer reconoce cadenas de texto específicas y las devuelve como <strong>tokens</strong>, 
+    que serán utilizados en la próxima etapa por el analizador sintáctico. Además, para tokens 
+    que requieren valor (como números e identificadores), se utiliza <code>yylval</code> para 
+    transferir el valor semántico al parser.</p>
 
     <h2>Tabla de Tokens</h2>
     <table border="1" cellspacing="0" cellpadding="5">
-      <tr><th>Token</th><th>Lexema</th><th>Ejemplo</th></tr>
+      <tr><th>Token</th><th>Lexema</th><th>Ejemplo de Uso</th><th>Categoría</th></tr>
+      
+      <!-- Palabras Reservadas -->
+      <tr><td>PROGRAM</td><td>"program"</td><td>program { ... }</td><td>Palabra reservada</td></tr>
+      <tr><td>EXTERN</td><td>"extern"</td><td>extern int x;</td><td>Palabra reservada</td></tr>
+      <tr><td>VOID</td><td>"void"</td><td>void f()</td><td>Tipo</td></tr>
+      <tr><td>BOOL</td><td>"bool"</td><td>bool flag;</td><td>Tipo</td></tr>
+      <tr><td>INT</td><td>"integer"</td><td>integer n;</td><td>Tipo</td></tr>
+      <tr><td>RETURN</td><td>"return"</td><td>return 0;</td><td>Control</td></tr>
+      <tr><td>CONST</td><td>"const"</td><td>const integer a = 5;</td><td>Modificador</td></tr>
+      <tr><td>IF</td><td>"if"</td><td>if (x > 0)</td><td>Control</td></tr>
+      <tr><td>ELSE</td><td>"else"</td><td>else { ... }</td><td>Control</td></tr>
+      <tr><td>THEN</td><td>"then"</td><td>then { ... }</td><td>Control</td></tr>
+      <tr><td>WHILE</td><td>"while"</td><td>while (x &lt; 10)</td><td>Control</td></tr>
 
-      <tr><td>PROGRAM</td><td>"program"</td><td>program { ... }</td></tr>
-      <tr><td>EXTERN</td><td>"extern"</td><td>extern int x;</td></tr>
-      <tr><td>VOID</td><td>"void"</td><td>void f()</td></tr>
-      <tr><td>BOOL</td><td>"bool"</td><td>bool flag;</td></tr>
-      <tr><td>INT</td><td>"integer"</td><td>integer n;</td></tr>
-      <tr><td>RETURN</td><td>"return"</td><td>return 0;</td></tr>
-      <tr><td>CONST</td><td>"const"</td><td>const integer a = 5;</td></tr>
-      <tr><td>IF</td><td>"if"</td><td>if (x > 0)</td></tr>
-      <tr><td>ELSE</td><td>"else"</td><td>else { ... }</td></tr>
-      <tr><td>THEN</td><td>"then"</td><td>then { ... }</td></tr>
-      <tr><td>WHILE</td><td>"while"</td><td>while (x &lt; 10)</td></tr>
+      <!-- Operadores -->
+      <tr><td>EQUALS</td><td>"=="</td><td>x == y</td><td>Relacional</td></tr>
+      <tr><td>ASSIGN</td><td>"="</td><td>x = 5;</td><td>Asignación</td></tr>
+      <tr><td>PLUS</td><td>"+"</td><td>x + y</td><td>Aritmético</td></tr>
+      <tr><td>SUB</td><td>"-"</td><td>x - y</td><td>Aritmético</td></tr>
+      <tr><td>MULT</td><td>"*"</td><td>x * y</td><td>Aritmético</td></tr>
+      <tr><td>DIV</td><td>"/"</td><td>x / y</td><td>Aritmético</td></tr>
+      <tr><td>REST</td><td>"%"</td><td>x % 2</td><td>Aritmético</td></tr>
+      <tr><td>LT</td><td>"&lt;"</td><td>x &lt; y</td><td>Relacional</td></tr>
+      <tr><td>GT</td><td>"&gt;"</td><td>x &gt; y</td><td>Relacional</td></tr>
+      <tr><td>OR</td><td>"||"</td><td>x || y</td><td>Lógico</td></tr>
+      <tr><td>AND</td><td>"&amp;&amp;"</td><td>x &amp;&amp; y</td><td>Lógico</td></tr>
+      <tr><td>NOT</td><td>"!"</td><td>!flag</td><td>Lógico</td></tr>
 
-      <tr><td>EQUALS</td><td>"=="</td><td>x == y</td></tr>
-      <tr><td>ASSIGN</td><td>"="</td><td>x = 5;</td></tr>
-      <tr><td>PLUS</td><td>"+"</td><td>x + y</td></tr>
-      <tr><td>SUB</td><td>"-"</td><td>x - y</td></tr>
-      <tr><td>MULT</td><td>"*"</td><td>x * y</td></tr>
-      <tr><td>DIV</td><td>"/"</td><td>x / y</td></tr>
-      <tr><td>REST</td><td>"%"</td><td>x % 2</td></tr>
-      <tr><td>LT</td><td>"&lt;"</td><td>x &lt; y</td></tr>
-      <tr><td>GT</td><td>"&gt;"</td><td>x &gt; y</td></tr>
-      <tr><td>OR</td><td>"||"</td><td>x || y</td></tr>
-      <tr><td>AND</td><td>"&amp;&amp;"</td><td>x &amp;&amp; y</td></tr>
-      <tr><td>NOT</td><td>"!"</td><td>!flag</td></tr>
+      <!-- Delimitadores -->
+      <tr><td>PAREN_L</td><td>"("</td><td>(expr)</td><td>Delimitador</td></tr>
+      <tr><td>PAREN_R</td><td>")"</td><td>(expr)</td><td>Delimitador</td></tr>
+      <tr><td>LLAVE_L</td><td>"{"</td><td>{ ... }</td><td>Delimitador</td></tr>
+      <tr><td>LLAVE_R</td><td>"}"</td><td>{ ... }</td><td>Delimitador</td></tr>
+      <tr><td>COMA</td><td>","</td><td>f(x, y)</td><td>Delimitador</td></tr>
+      <tr><td>PYC</td><td>";"</td><td>x = 1;</td><td>Delimitador</td></tr>
 
-      <tr><td>PAREN_L</td><td>"("</td><td>(expr)</td></tr>
-      <tr><td>PAREN_R</td><td>")"</td><td>(expr)</td></tr>
-      <tr><td>LLAVE_L</td><td>"{"</td><td>{</td></tr>
-      <tr><td>LLAVE_R</td><td>"}"</td><td>}</td></tr>
-      <tr><td>COMA</td><td>","</td><td>f(x, y)</td></tr>
-      <tr><td>PYC</td><td>";"</td><td>x = 1;</td></tr>
-
-      <tr><td>VAL_BOOL</td><td>"true" | "false"</td><td>true</td></tr>
-      <tr><td>NUM</td><td>[0-9]+</td><td>42</td></tr>
-      <tr><td>ID</td><td>[a-zA-Z_][a-zA-Z0-9_]*</td><td>var_name</td></tr>
+      <!-- Literales e Identificadores -->
+      <tr><td>VAL_BOOL</td><td>"true" | "false"</td><td>true</td><td>Literal</td></tr>
+      <tr><td>NUM</td><td>[0-9]+</td><td>42</td><td>Literal</td></tr>
+      <tr><td>ID</td><td>[a-zA-Z_][a-zA-Z0-9_]*</td><td>var_name</td><td>Identificador</td></tr>
     </table>
 
+    <h2>Características de Implementación</h2>
+    
+    <h3>Expresiones Regulares Utilizadas</h3>
+    <ul>
+      <li><strong>Identificadores:</strong> <code>{ID} = [a-zA-Z_][a-zA-Z0-9_]*</code> - Comienzan con letra o underscore, seguidos de letras, dígitos o underscores</li>
+      <li><strong>Números:</strong> <code>{digit} = [0-9]</code> y <code>{digit}+</code> para enteros - Secuencia de uno o más dígitos</li>
+      <li><strong>Comentarios:</strong> <code>"//".* </code> para comentarios de línea - Desde // hasta el final de línea</li>
+    </ul>
+
+    <h3>Integración con Bison</h3>
+    <ul>
+      <li><strong>Comunicación automática:</strong> tokens definidos en <code>sintax.tab.h</code></li>
+      <li><strong>Valores semánticos:</strong> transferencia via <code>yylval</code> para números e identificadores</li>
+      <li><strong>Información de contexto:</strong> tracking de líneas con <code>yylineno</code></li>
+    </ul>
 
     <h2>Dificultades Encontradas y Resolución</h2>
-    <p>Durante la implementación del lexer se presentaron algunos desafíos, entre ellos el tratamiento de los comentarios.
-      En un principio intentamos reconocerlos y devolver tokens, tanto para los comentarios de una sola línea como para los multilínea.
-      Sin embargo, dado que los comentarios no poseen valor gramatical dentro del lenguaje, la solución adoptada fue reconocerlos 
-      únicamente para descartarlos, evitando así la generación de cualquier token asociado.
-    </p>
+    
+    <h3>Problema: Tratamiento de Comentarios</h3>
+    <p><strong>Situación Inicial:</strong> En un principio intentamos reconocer los comentarios y devolver tokens, 
+    tanto para los comentarios de una sola línea como para los multilínea. Esto causaba complicaciones en el 
+    parser ya que los comentarios aparecían en lugares inesperados de la gramática.</p>
+    
+    <p><strong>Solución Adoptada:</strong> Dado que los comentarios no poseen valor gramatical dentro del lenguaje, 
+    la solución adoptada fue reconocerlos únicamente para descartarlos, evitando así la generación de cualquier 
+    token asociado. Esto simplificó significativamente la gramática y mejoró la robustez del parser.</p>
+    
+    <pre>"//".*       { /* ignorar comentario de línea */ }
+"/*"([^*]|\*+[^*/])*\*+"/"    { /* ignorar comentario multilínea */ }</pre>
+
+    <h3>Otros Desafíos Resueltos</h3>
+    <ul>
+      <li><strong>Manejo de whitespace:</strong> eliminación eficiente sin afectar el flujo de tokens</li>
+      <li><strong>Palabras reservadas vs identificadores:</strong> uso de tabla de keywords de Flex</li>
+      <li><strong>Operadores compuestos:</strong> reconocimiento correcto de == vs = </li>
+      <li><strong>Gestión de memoria:</strong> uso de <code>strdup()</code> para strings que requieren persistencia</li>
+    </ul>
+
+    <h2>Testing y Validación</h2>
+    
+    <h3>Casos de Prueba Implementados</h3>
+    <ul>
+      <li>Programas con todos los tipos de tokens</li>
+      <li>Casos límite: identificadores largos, números grandes</li>
+      <li>Comentarios en diferentes posiciones</li>
+      <li>Manejo de caracteres especiales y secuencias</li>
+      <li>Archivos con diferentes formatos de salto de línea</li>
+    </ul>
   </main>
 
   <footer>
