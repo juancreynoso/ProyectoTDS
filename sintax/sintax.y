@@ -1,17 +1,23 @@
 %{
     #include <stdlib.h>
     #include <stdio.h>
+    #include "ast.h"
 
     int yylex(void);
     int yyerror(const char *s);
     node* root;
     extern int yylineno;
 %}
+%code requires{
+    #include "ast.h"
+}
 
 %union {
     int ival;
     char* sval;
     node* nd;
+    Args_List* args;
+    VarType vType;
 }
 
 %token PROGRAM EXTERN VOID BOOL INT RETURN CONST IF ELSE THEN WHILE
@@ -29,95 +35,139 @@
 %right NOT
 %right MINUS
 
-%type <nd> declarations declaration var_decl meth_decl
+%type <nd> declarations declaration var_decl meth_decl expr block
+%type <args> meth_args args_list
+%type <vType> type
 
 %%
 
-prog: PROGRAM LLAVE_L declarations LLAVE_R
+prog: PROGRAM LLAVE_L declarations LLAVE_R {
+        node* rt = create_node("Program", NONE);
+        root = create_tree(rt, $3, NULL);
+    }
     ;
 
-declarations:
-            | declarations declaration
+declarations: { $$ = NULL; }
+            | declarations declaration { 
+                node* decl = create_node("decl", NONE);
+                $$ = create_tree(decl, $2, $1);
+            }
             ;
 
-declaration: var_decl 
-           | meth_decl
-           ;
+declaration: var_decl  {
+                $$ = $1;
+            }
+            | meth_decl {
+                $$ = $1;
+            } 
+            ;
 
-var_decl: type ID ASSIGN expr PYC
+var_decl: type ID ASSIGN expr PYC {
+            node* id = create_id_node($2, $1, NODE_DECL);
+            node* assign = create_op_node(OP_ASSIGN, NONE);
+            $$ = create_tree(assign, id,$4);
+        }
         ;
 
-meth_decl: type ID PAREN_L meth_args PAREN_R block
-         | type ID PAREN_L meth_args PAREN_R EXTERN PYC
-         | VOID ID PAREN_L meth_args PAREN_R block
-         | VOID ID PAREN_L meth_args PAREN_R EXTERN PYC
+meth_decl: type ID PAREN_L meth_args PAREN_R block {
+            node* meth = create_meth_node($2, $4, $1);
+            $$ = create_tree(meth, $6, NULL);
+         }  
+         | type ID PAREN_L meth_args PAREN_R EXTERN PYC {
+            node* meth = create_meth_node($2, $4, $1);
+            $$ = create_tree(meth, NULL, NULL);
+         }
+         | VOID ID PAREN_L meth_args PAREN_R block {
+            node* meth = create_meth_node($2, $4, NONE);
+            $$ = create_tree(meth, $6, NULL);
+         }
+         | VOID ID PAREN_L meth_args PAREN_R EXTERN PYC {
+            node* meth = create_meth_node($2, $4, NONE);
+            $$ = create_tree(meth, NULL, NULL);
+         }
          ;
 
-meth_args: 
-         | args_list
+meth_args: {$$ = NULL;}
+         | args_list {
+            $$ = $1;
+         }
          ;
 
-args_list: type ID
-         | args_list ',' type ID
-         ; 
+args_list: type ID {
+            Arg p = new_arg($2, $1, 0);
+            Args_List* list = new_arg_list();
+            insert_arg(list, p);
+            $$ = list;
+         }
+         | args_list ',' type ID {
+            Arg p = new_arg($4, $3, 0);
+            insert_arg($1, p);
+            $$ = $1;
+         }
+         ;
 
-block: LLAVE_L var_decls statements LLAVE_R
+block: LLAVE_L LLAVE_R {
+        $$ = NULL;
+     }
      ;
 
-var_decls: 
-         | var_decl var_decls
-         ;
-
-statements: 
-          | statement statements
-          ;
-
-statement: ID ASSIGN expr PYC
-         | meth_call PYC
-         | IF PAREN_L expr PAREN_R THEN block if_else
-         | WHILE expr block
-         | RETURN expr PYC
-         | PYC
-         | block
-         ;
-
-if_else: 
-       | ELSE block
-
-expr: ID
-    | NUM
-    | meth_call
-    | expr PLUS expr
-    | expr GT expr
-    | expr LT expr
-    | expr SUB expr
-    | expr MULT expr
-    | expr DIV expr
-    | expr REST expr
-    | expr EQUALS expr 
-    | PAREN_L expr PAREN_R
-    | SUB expr %prec MINUS
-    | VAL_BOOL
-    | NOT expr
-    | expr OR expr
-    | expr AND expr
+expr: ID { $$ = create_id_node($1, NONE, NODE_ID_USE); }
+    | NUM { $$ = create_int_node($1); }
+    | expr PLUS expr {
+        node* plus = create_op_node(OP_PLUS, TYPE_INT);
+        $$ = create_tree(plus, $1, $3);
+    }
+    | expr GT expr {
+        node* gt = create_op_node(OP_GT, TYPE_INT);
+        $$ = create_tree(gt, $1, $3);
+    }
+    | expr LT expr {
+        node* lt = create_op_node(OP_LT, TYPE_INT);
+        $$ = create_tree(lt, $1, $3);
+    }
+    | expr SUB expr {
+        node* sub = create_op_node(OP_SUB, TYPE_INT);
+        $$ = create_tree(sub, $1, $3);
+    }
+    | expr MULT expr {
+        node* mult = create_op_node(OP_MULT, TYPE_INT);
+        $$ = create_tree(mult, $1, $3);
+    }
+    | expr DIV expr {
+        node* div = create_op_node(OP_DIV, TYPE_INT);
+        $$ = create_tree(div, $1, $3);
+    }
+    | expr REST expr {
+        node* rest = create_op_node(OP_REST, TYPE_INT);
+        $$ = create_tree(rest, $1, $3);
+    }
+    | expr EQUALS expr {
+        node* equals = create_op_node(OP_EQUALS, NONE);
+        $$ = create_tree(equals, $1, $3);
+    }
+    | PAREN_L expr PAREN_R { $$ = $2; }
+    | SUB expr %prec MINUS {
+        node* minus = create_op_node(OP_MINUS, TYPE_BOOL); 
+        $$ = create_tree(minus, $2, NULL);
+    }
+    | VAL_BOOL { $$ = create_bool_node($1); }
+    | NOT expr { 
+        node* not = create_op_node(OP_NOT, TYPE_BOOL); 
+        $$ = create_tree(not, $2, NULL);
+    }
+    | expr OR expr {
+        node* or = create_op_node(OP_OR, TYPE_BOOL);
+        $$ = create_tree(or, $1, $3);
+    } 
+    | expr AND expr {
+        node* and = create_op_node(OP_AND, TYPE_BOOL);
+        $$ = create_tree(and, $1, $3);
+    }
     ;
 
-type: BOOL
-    | INT
+type: BOOL { $$ = TYPE_BOOL; }
+    | INT { $$ = TYPE_INT; }
     ;
-
-meth_call: ID PAREN_L param_call_method PAREN_R
-         ;
-
-param_call_method: 
-                 | param_list
-                 ;
-
-param_list: expr 
-          | param_list ',' expr
-          ;
-
 %%
 
 int yyerror(const char *s) {

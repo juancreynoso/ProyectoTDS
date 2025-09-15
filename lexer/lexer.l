@@ -65,7 +65,7 @@ val_bool true|false
             }
 {ID}        { 
                 printf("ID \n"); 
-                yylval.sval = yytext;
+                yylval.sval = strdup(yytext);
                 return ID;
             }
 

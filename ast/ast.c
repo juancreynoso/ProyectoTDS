@@ -50,9 +50,9 @@ node* create_id_node(char* name, VarType typeVar, NodeType type){
 /**
  * Crea un nodo correspondiente a un metodo
  */
-node* create_meth_node(char* name, Args_List arguments, VarType returnType){
-    node* root = create_node(NODE_METH);
-    root->info->METH.name = name
+node* create_meth_node(char* name, Args_List* arguments, VarType returnType){
+    node* root = new_node(NODE_METH);
+    root->info->METH.name = name;
     root->info->METH.arguments = arguments;
     root->info->METH.returnType =returnType;
     
@@ -95,12 +95,14 @@ node* new_node(NodeType type){
 
 /**
  * Crea un arbol a partir de un nodo raiz y dos sub arboles
- */
+*/
+
 node* create_tree(node* root, node* left, node* right){
     root->left = left;
     root->right = right;
     return root;
 }
+
 
 Arg new_arg(char* name, VarType type, int value){
     Arg a;
@@ -118,19 +120,21 @@ Arg new_arg(char* name, VarType type, int value){
     return a;
 }
 
-void insert_arg(Args_List list, Arg a){
+void insert_arg(Args_List* list, Arg a){
     if (list == NULL) {
-        list = malloc(sizeof(Args_List));
-        list->p = a;
-
         return;
     }
-
-    Args_List* new;
+    Args_List* new = malloc(sizeof(Args_List));
     new->p = a;
 
     new->next = list;
     list = new;
+}
+
+Args_List* new_arg_list(){
+    Args_List* list = malloc(sizeof(Args_List));
+
+    return list;
 }
 
 /**
@@ -162,6 +166,22 @@ void print_node(node *root) {
             break;
         case NODE_BOOL:
             printf("%s\n", root->info->BOOL.value ? "true" : "false");
+            break;
+        case NODE_METH:
+            switch(root->info->METH.returnType) {
+                case TYPE_INT:
+                    printf("int ");
+                    printf("%s \n", root->info->METH.name);
+                    break;
+                case TYPE_BOOL:
+                    printf("bool ");
+                    printf("%s \n", root->info->METH.name);
+                    break; 
+                case NONE:
+                    printf("void ");
+                    printf("%s \n", root->info->METH.name);
+                    break;
+            }
             break;
         case NODE_OP:
             switch (root->info->OP.name) {

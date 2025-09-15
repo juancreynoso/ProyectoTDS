@@ -41,6 +41,18 @@ union values{
     int boolean;
 };
 
+/*Estructuras para poder almacenar argumentos */
+typedef struct Arg{
+    char* name;
+    VarType type;
+    union values value;
+}Arg;
+
+typedef struct Args_List{
+    Arg p;
+    struct Args_List* next;
+}Args_List;
+
 /* Estructuras correspondientes a los distintos tipos de nodo */
 typedef struct  IntInfo{
     int value;
@@ -66,7 +78,7 @@ typedef struct IdInfo{
 
 typedef struct MethInfo{
     char* name;
-    Args_List arguments;
+    Args_List* arguments;
     VarType returnType;
 }MethInfo;
 
@@ -91,18 +103,6 @@ union type{
     NodeInfo NODE_INFO;
 };
 
-/*Estructuras para poder almacenar argumentos */
-typedef struct Arg{
-    char* name;
-    VarType type;
-    union values value;
-}Arg;
-
-typedef struct Args_List{
-    Argument p;
-    struct Args_List* next;
-}Args_List;
-
 /* Estructura de los nodos del ast */
 typedef struct node{
     NodeType type;
@@ -116,14 +116,15 @@ node* create_int_node(int value);
 node* create_bool_node(int value);
 node* create_op_node(OpType name, VarType type);
 node* create_id_node(char* name, VarType typeVar, NodeType type);
-node* create_meth_node(char* name, Args_List arguments, VarType returnType);
+node* create_meth_node(char* name, Args_List* arguments, VarType returnType);
 node* create_return_node(VarType type);
 node* create_node(char* info, VarType type);
 node* new_node(NodeType type);
 node* create_tree(node* root, node* left, node* right);
 
 Arg new_arg(char* name, VarType type, int value);
-void insert_arg(Args_List list, Argument);
+void insert_arg(Args_List* list, Arg a);
+Args_List* new_arg_list();
 
 /* Funciones para imprimir el arbol */
 void print_node(node* root);
