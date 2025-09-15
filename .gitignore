@@ -13,5 +13,5 @@ lex.yy.c
 script
 prueba.txt
 assembly.txt
-parser
+c-tds
 *.o

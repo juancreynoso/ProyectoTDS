@@ -12,7 +12,8 @@ typedef enum{
     NODE_RET,
     NODE_DECL,
     NODE_ID_USE,
-    NODE_FUNC,
+    NODE_METH,
+    NODE_CALL_METH,
     NODE_WHILE,
     NODE_IF,
     NODE_INFO
@@ -63,6 +64,12 @@ typedef struct IdInfo{
     union values value;
 }IdInfo;
 
+typedef struct MethInfo{
+    char* name;
+    Args_List arguments;
+    VarType returnType;
+}MethInfo;
+
 typedef struct ReturnInfo{
     VarType type;
     union values value;
@@ -79,9 +86,22 @@ union type{
     BoolInfo BOOL;
     OpInfo OP;
     IdInfo ID;
+    MethInfo METH;
     ReturnInfo RETURN;
     NodeInfo NODE_INFO;
 };
+
+/*Estructuras para poder almacenar argumentos */
+typedef struct Arg{
+    char* name;
+    VarType type;
+    union values value;
+}Arg;
+
+typedef struct Args_List{
+    Argument p;
+    struct Args_List* next;
+}Args_List;
 
 /* Estructura de los nodos del ast */
 typedef struct node{
@@ -96,10 +116,14 @@ node* create_int_node(int value);
 node* create_bool_node(int value);
 node* create_op_node(OpType name, VarType type);
 node* create_id_node(char* name, VarType typeVar, NodeType type);
+node* create_meth_node(char* name, Args_List arguments, VarType returnType);
 node* create_return_node(VarType type);
 node* create_node(char* info, VarType type);
 node* new_node(NodeType type);
 node* create_tree(node* root, node* left, node* right);
+
+Arg new_arg(char* name, VarType type, int value);
+void insert_arg(Args_List list, Argument);
 
 /* Funciones para imprimir el arbol */
 void print_node(node* root);

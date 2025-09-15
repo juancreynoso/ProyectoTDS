@@ -24,7 +24,7 @@ int main(int argc, char *argv[]) {
     if (yyparse() == 0) {
         printf("Parseado correctamente, sin errores.\n");
 
-        printf("--- AST ----.\n");
+        printf("\n--- AST ----\n");
         print_tree(root, 0);
     }
 
