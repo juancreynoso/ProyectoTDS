@@ -7,7 +7,7 @@
 </head>
 <body>
   <header>
-    <h1>Proyecto TDS25 - Documentación</h1>
+    <h1>Proyecto TDS25 - Documentación del Compilador</h1>
     <nav>
       <ul>
         <li><a href="01_analisis_lexico.html">Análisis Léxico</a></li>
@@ -21,14 +21,169 @@
   </header>
 
   <main>
-    <h2>Introducción</h2>
-    <p>Este proyecto tiene como objetivo implementar un compilador para un lenguaje diseñado
-    a medida, siguiendo las fases clásicas de compilación: <b>análisis léxico</b>, <b>análisis sintáctico</b>, 
-      <b>análisis semántico</b>, <b>generación código intermedio</b>, <b>generación código objeto</b> y <b>optimización</b>.</p>
+    <section>
+      <h2>Introducción</h2>
+      <p>Este proyecto tiene como objetivo implementar un compilador para un lenguaje diseñado
+      a medida, siguiendo las fases clásicas de compilación: <b>análisis léxico</b>, <b>análisis sintáctico</b>, 
+        <b>análisis semántico</b>, <b>generación código intermedio</b>, <b>generación código objeto</b> y <b>optimización</b>.</p>
+      
+      <p>El compilador está implementado utilizando las herramientas estándar <b>Flex</b> y <b>Bison</b>, 
+      que permiten la generación automática del analizador léxico y sintáctico respectivamente, 
+      garantizando robustez y eficiencia en el proceso de compilación.</p>
+    </section>
+
+    <section>
+      <h2>División del Trabajo</h2>
+      <p>En esta primera etapa del proyecto, ambos integrantes del equipo trabajamos de manera colaborativa 
+      en todas las fases implementadas. No hubo una división específica de tareas, sino que se adoptó un 
+      enfoque de <b>programación en conjunto</b> que permitió:</p>
+      
+      <ul>
+        <li>Mejor comprensión compartida del código y arquitectura</li>
+        <li>Detección temprana de errores mediante revisión continua</li>
+        <li>Decisiones de diseño consensuadas entre ambos integrantes</li>
+        <li>Aprendizaje mutuo de las herramientas Flex y Bison</li>
+      </ul>
+
+      <h3>Metodología de Trabajo</h3>
+      <ul>
+        <li><b>Sesiones de desarrollo conjunto:</b> Implementación colaborativa utilizando Live Share (Extensión de VSCode)</li>
+        <li><b>Testing compartido:</b> Ambos integrantes aportamos diferentes casos de prueba</li>
+        <li><b>Documentación paralela:</b> Registro de decisiones y problemas durante el desarrollo</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Arquitectura General</h2>
+      <p>El compilador sigue la arquitectura tradicional de pipeline, donde cada fase procesa la salida 
+      de la fase anterior:</p>
+
+      <div class="architecture-flow">
+        <div class="phase">
+          <h4>1. Análisis Léxico</h4>
+          <p>Conversión del código fuente en tokens usando <b>Flex</b></p>
+        </div>
+        <div class="arrow">→</div>
+        <div class="phase">
+          <h4>2. Análisis Sintáctico</h4>
+          <p>Verificación de estructura con <b>Bison</b></p>
+        </div>
+      </div>
+
+      <p><em>Las fases posteriores (generación de código intermedio, código objeto y optimización) 
+      se implementarán en etapas siguientes del proyecto. Esta página irá siendo actualizada así como las que corresponden a cada etapa.</em></p>
+    </section>
+
+    <section>
+      <h2>Decisiones de Diseño Principales</h2>
+
+      <h3>Representación Intermedia</h3>
+      <p><b>Decisión:</b> Construcción de AST durante parsing (Próxima etapa)</p>
+      <p><b>Justificación:</b></p>
+      <ul>
+        <li>Representación natural del programa para análisis semántico</li>
+        <li>Facilita transformaciones y optimizaciones posteriores</li>
+        <li>Mejor para generación de mensajes de error con contexto</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Estado Actual del Proyecto</h2>
+      <p>En esta primera etapa se han implementado exitosamente:</p>
+      
+      <div class="status-grid">
+        <div class="status-item completed">
+          <h4>✓ Análisis Léxico</h4>
+          <p>Scanner completo con Flex, reconocimiento de todos los tokens del lenguaje</p>
+        </div>
+        <div class="status-item completed">
+          <h4>✓ Análisis Sintáctico</h4>
+          <p>Parser LALR(1) con Bison y manejo de errores</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Herramientas Utilizadas</h2>
+      <ul>
+        <li><b>Flex 2.6.x:</b> Generador del analizador léxico</li>
+        <li><b>Bison 3.x:</b> Generador del analizador sintáctico</li>
+        <li><b>GCC:</b> Compilador C para generar el ejecutable final</li>
+        <li><b>Make:</b> Automatización del proceso de compilación</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Navegación de la Documentación</h2>
+      <p>En el menú de navegación superior para acceder a los detalles específicos de cada fase:</p>
+      <ul>
+        <li><b>Análisis Léxico:</b> Detalles del scanner, tokens y expresiones regulares</li>
+        <li><b>Análisis Sintáctico:</b> Gramática, parser LALR(1) y construcción del AST</li>
+        <li><b>Fases posteriores:</b> La documentación se completará en siguientes etapas</li>
+      </ul>
+    </section>
   </main>
 
   <footer>
-    <p>&copy; 2025 - Proyecto de Compiladores</p>
+    <p>&copy; 2025 - Proyecto de Compiladores | Juan Cruz Reynoso - Marcelo Juarez</p>
   </footer>
+
+  <style>
+    .architecture-flow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 20px 0;
+      flex-wrap: wrap;
+    }
+    
+    .phase {
+      background: #f0f8ff;
+      border: 2px solid #4682b4;
+      border-radius: 8px;
+      padding: 15px;
+      margin: 10px;
+      text-align: center;
+      min-width: 200px;
+    }
+    
+    .phase h4 {
+      margin-top: 0;
+      color: #2c3e50;
+    }
+    
+    .arrow {
+      font-size: 24px;
+      color: #4682b4;
+      margin: 0 10px;
+    }
+    
+    .status-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin: 20px 0;
+    }
+    
+    .status-item {
+      padding: 15px;
+      border-radius: 8px;
+      border: 2px solid;
+    }
+    
+    .status-item.completed {
+      background: #d4edda;
+      border-color: #28a745;
+    }
+    
+    .status-item.in-progress {
+      background: #fff3cd;
+      border-color: #ffc107;
+    }
+    
+    .status-item h4 {
+      margin-top: 0;
+    }
+  </style>
 </body>
 </html>
