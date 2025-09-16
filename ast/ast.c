@@ -47,11 +47,28 @@ node* create_id_node(char* name, VarType typeVar, NodeType type){
     return root;
 }
 
+node* create_if_else_node(node* expr, node* if_block, node* else_block){
+    node* root = new_node(NODE_IF_ELSE);
+    root->info->IF_ELSE.expr = expr;
+    root->info->IF_ELSE.if_block = if_block;
+    root->info->IF_ELSE.else_block = else_block;
+
+    return root;
+}
+
+node* create_while_node(node* expr, node* block){
+    node* root = new_node(NODE_WHILE);
+    root->info->WHILE.expr = expr;
+    root->info->WHILE.block = block;
+    
+    return root;
+}
+
 /**
  * Crea un nodo correspondiente a un metodo
  */
-node* create_meth_node(char* name, Args_List* arguments, VarType returnType){
-    node* root = new_node(NODE_METH);
+node* create_meth_node(char* name, Args_List* arguments, VarType returnType, NodeType type){
+    node* root = new_node(type);
     root->info->METH.name = name;
     root->info->METH.arguments = arguments;
     root->info->METH.returnType =returnType;
@@ -103,7 +120,6 @@ node* create_tree(node* root, node* left, node* right){
     return root;
 }
 
-
 Arg new_arg(char* name, VarType type, int value){
     Arg a;
     a.name = name;
@@ -147,6 +163,9 @@ void print_node(node *root) {
         case NODE_NUM:
             printf("%d\n", root->info->INT.value);
             break;
+        case NODE_BOOL:
+            printf("%s\n", root->info->BOOL.value ? "true" : "false");
+            break;
         case NODE_DECL:
             switch(root->info->ID.type){
                 case TYPE_INT:
@@ -164,8 +183,14 @@ void print_node(node *root) {
         case NODE_ID_USE:
             printf("%s\n", root->info->ID.name ? root->info->ID.name : "NULL");
             break;
-        case NODE_BOOL:
-            printf("%s\n", root->info->BOOL.value ? "true" : "false");
+        case NODE_IF_ELSE:
+            print_node(root->info->IF_ELSE.expr);
+            print_node(root->info->IF_ELSE.if_block);
+            print_node(root->info->IF_ELSE.else_block);
+            break;
+        case NODE_WHILE:
+            print_node(root->info->WHILE.expr);
+            print_node(root->info->WHILE.block);
             break;
         case NODE_METH:
             switch(root->info->METH.returnType) {
@@ -182,6 +207,11 @@ void print_node(node *root) {
                     printf("%s \n", root->info->METH.name);
                     break;
             }
+        case NODE_CALL_METH:
+            printf("call %s",root->info->METH.name);
+            break;
+        case NODE_PYC:
+            printf("PYC");
             break;
         case NODE_OP:
             switch (root->info->OP.name) {

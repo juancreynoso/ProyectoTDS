@@ -35,7 +35,7 @@
 %right NOT
 %right MINUS
 
-%type <nd> declarations declaration var_decl meth_decl expr block
+%type <nd> declarations declaration var_decl meth_decl expr block meth_call statement statements if_else
 %type <args> meth_args args_list
 %type <vType> type
 
@@ -70,19 +70,19 @@ var_decl: type ID ASSIGN expr PYC {
         ;
 
 meth_decl: type ID PAREN_L meth_args PAREN_R block {
-            node* meth = create_meth_node($2, $4, $1);
+            node* meth = create_meth_node($2, $4, $1, NODE_METH);
             $$ = create_tree(meth, $6, NULL);
          }  
          | type ID PAREN_L meth_args PAREN_R EXTERN PYC {
-            node* meth = create_meth_node($2, $4, $1);
+            node* meth = create_meth_node($2, $4, $1, NODE_METH);
             $$ = create_tree(meth, NULL, NULL);
          }
          | VOID ID PAREN_L meth_args PAREN_R block {
-            node* meth = create_meth_node($2, $4, NONE);
+            node* meth = create_meth_node($2, $4, NONE, NODE_METH);
             $$ = create_tree(meth, $6, NULL);
          }
          | VOID ID PAREN_L meth_args PAREN_R EXTERN PYC {
-            node* meth = create_meth_node($2, $4, NONE);
+            node* meth = create_meth_node($2, $4, NONE, NODE_METH);
             $$ = create_tree(meth, NULL, NULL);
          }
          ;
@@ -106,10 +106,44 @@ args_list: type ID {
          }
          ;
 
-block: LLAVE_L LLAVE_R {
-        $$ = NULL;
+block: LLAVE_L statements LLAVE_R {
+        $$ = $2 ;
      }
      ;
+
+statements: { $$ = NULL; }
+          | statement statements {
+            node* st = create_node("stmt", NONE);
+            $$ = create_tree(st, $1, $2);
+          }
+          ;
+
+statement: ID ASSIGN expr PYC {
+            node* id = create_id_node($1, NONE, NODE_ID_USE);
+            node* op = create_op_node(OP_ASSIGN, NONE);
+            $$ = create_tree(op, id, $3);
+         }
+         | meth_call PYC {
+            $$ = $1;
+         }
+         | IF PAREN_L expr PAREN_R THEN block if_else {
+            $$ = create_if_else_node($3, $6, $7);
+         }
+         | WHILE expr block {
+            $$ = create_while_node($2, $3);
+         }
+         | RETURN expr PYC {
+            node* ret = create_node("ret", NONE);
+            $$ = create_tree(ret, $2, NULL);
+         }
+         | PYC {$$ = new_node(NODE_PYC); }
+         | block { $$ = $1; }
+         ;
+
+if_else: { $$ = NULL; }
+       | ELSE block {
+         
+       }
 
 expr: ID { $$ = create_id_node($1, NONE, NODE_ID_USE); }
     | NUM { $$ = create_int_node($1); }
@@ -164,6 +198,11 @@ expr: ID { $$ = create_id_node($1, NONE, NODE_ID_USE); }
         $$ = create_tree(and, $1, $3);
     }
     ;
+
+meth_call: ID PAREN_L PAREN_R {
+            $$ = create_meth_node($1 , NULL, NONE, NODE_CALL_METH);
+         }
+         ;
 
 type: BOOL { $$ = TYPE_BOOL; }
     | INT { $$ = TYPE_INT; }

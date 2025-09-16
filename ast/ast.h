@@ -15,7 +15,8 @@ typedef enum{
     NODE_METH,
     NODE_CALL_METH,
     NODE_WHILE,
-    NODE_IF,
+    NODE_IF_ELSE,
+    NODE_PYC,
     NODE_INFO
 }NodeType;
 
@@ -40,6 +41,14 @@ union values{
     int num;
     int boolean;
 };
+
+/* Estructura de los nodos del ast */
+typedef struct node{
+    NodeType type;
+    union type *info;
+    struct node* left;
+    struct node* right;
+}node;
 
 /*Estructuras para poder almacenar argumentos */
 typedef struct Arg{
@@ -76,6 +85,17 @@ typedef struct IdInfo{
     union values value;
 }IdInfo;
 
+typedef struct If_Else_Info{
+    node* expr;
+    node* if_block;
+    node* else_block;
+}If_Else_Info;
+
+typedef struct WhileInfo{
+    node* expr;
+    node* block;
+}WhileInfo;
+
 typedef struct MethInfo{
     char* name;
     Args_List* arguments;
@@ -98,25 +118,21 @@ union type{
     BoolInfo BOOL;
     OpInfo OP;
     IdInfo ID;
+    If_Else_Info IF_ELSE;
+    WhileInfo WHILE;
     MethInfo METH;
     ReturnInfo RETURN;
     NodeInfo NODE_INFO;
 };
-
-/* Estructura de los nodos del ast */
-typedef struct node{
-    NodeType type;
-    union type *info;
-    struct node* left;
-    struct node* right;
-}node;
 
 /* Constructores de nodos*/
 node* create_int_node(int value);
 node* create_bool_node(int value);
 node* create_op_node(OpType name, VarType type);
 node* create_id_node(char* name, VarType typeVar, NodeType type);
-node* create_meth_node(char* name, Args_List* arguments, VarType returnType);
+node* create_if_else_node(node* expr, node* if_block, node* else_block);
+node* create_while_node(node* expr, node* block);
+node* create_meth_node(char* name, Args_List* arguments, VarType returnType, NodeType type);
 node* create_return_node(VarType type);
 node* create_node(char* info, VarType type);
 node* new_node(NodeType type);
