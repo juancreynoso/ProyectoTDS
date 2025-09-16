@@ -1,0 +1,11 @@
+Program {
+    integer sum(integer x, integer y){
+        return x + y;
+    }
+    integer x = 1;
+
+    void main() {
+        integer y = 1;
+    }
+    
+}
