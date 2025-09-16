@@ -143,7 +143,7 @@ void insert_arg(Args_List* list, Arg a);
 Args_List* new_arg_list();
 
 /* Funciones para imprimir el arbol */
-void print_node(node* root);
+void print_node(node* root, int level);
 void print_tree(node* root, int level); 
 
 #endif

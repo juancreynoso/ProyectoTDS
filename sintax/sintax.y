@@ -142,7 +142,7 @@ statement: ID ASSIGN expr PYC {
 
 if_else: { $$ = NULL; }
        | ELSE block {
-         
+        $$ = $2;  
        }
 
 expr: ID { $$ = create_id_node($1, NONE, NODE_ID_USE); }

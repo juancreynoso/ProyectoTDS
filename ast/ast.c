@@ -156,7 +156,7 @@ Args_List* new_arg_list(){
 /**
  * Imprime los distintos nodo del arbols
  */
-void print_node(node *root) {
+void print_node(node *root, int level) {
     if (!root)
         return;
     switch (root->type) {
@@ -184,13 +184,15 @@ void print_node(node *root) {
             printf("%s\n", root->info->ID.name ? root->info->ID.name : "NULL");
             break;
         case NODE_IF_ELSE:
-            print_node(root->info->IF_ELSE.expr);
-            print_node(root->info->IF_ELSE.if_block);
-            print_node(root->info->IF_ELSE.else_block);
+            printf("if \n");
+            print_tree(root->info->IF_ELSE.expr, level + 1);
+            print_tree(root->info->IF_ELSE.if_block, level+1);
+            print_tree(root->info->IF_ELSE.else_block, level+1);
             break;
         case NODE_WHILE:
-            print_node(root->info->WHILE.expr);
-            print_node(root->info->WHILE.block);
+            printf("while \n");
+            print_node(root->info->WHILE.expr, level+1);
+            print_node(root->info->WHILE.block, level+1);
             break;
         case NODE_METH:
             switch(root->info->METH.returnType) {
@@ -207,6 +209,7 @@ void print_node(node *root) {
                     printf("%s \n", root->info->METH.name);
                     break;
             }
+            break;
         case NODE_CALL_METH:
             printf("call %s",root->info->METH.name);
             break;
@@ -253,6 +256,7 @@ void print_node(node *root) {
                 break;
             default:
                 printf("OP?\n");
+                break;
             }
             break;
         case NODE_INFO:
@@ -278,7 +282,7 @@ void print_tree(node *root, int level) {
         printf("   ");
     }
 
-    print_node(root);
+    print_node(root, level);
     print_tree(root->left, level + 1);
     print_tree(root->right, level + 1);
 }
