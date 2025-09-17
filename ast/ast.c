@@ -100,15 +100,26 @@ node* create_while_node(node* expr, node* block){
 }
 
 /**
- * Crea un nodo correspondiente a la llamada de un metodo
+ * Crea un nodo correspondiente a la declaracion de un metodo
  */
-node* create_meth_decl_node(char* name, Formal_P_List* f_params, VarType returnType, NodeType type, int is_extern){
-    node* root = new_node(type);
+node* create_meth_decl_node(char* name, Formal_P_List* f_params, VarType returnType, int is_extern){
+    node* root = new_node(NODE_DECL_METH);
     root->info->METH_DECL.name = name;
     root->info->METH_DECL.f_params = f_params;
     root->info->METH_DECL.returnType = returnType;
     root->info->METH_DECL.is_extern = is_extern;
     
+    return root;
+}
+
+/**
+ * Crea un nodo correspondiente a la llamada de un metodo
+ */
+node* create_meth_call_node(char*name, Current_P_List* c_params){
+    node* root = new_node(NODE_CALL_METH);
+    root->info->METH_CALL.name = name;
+    root->info->METH_CALL.c_params = c_params;
+
     return root;
 }
 
@@ -172,7 +183,7 @@ Formal_P new_arg(char* name, VarType type, int value){
     return a;
 }
 
-void insert_arg(Formal_P_List** f_params, Formal_P a){
+void insert_f_param(Formal_P_List** f_params, Formal_P a){
         Formal_P_List* new = malloc(sizeof(Formal_P_List));
         new->p.name = a.name;
         new->p.type = a.type;
@@ -188,6 +199,21 @@ void insert_arg(Formal_P_List** f_params, Formal_P a){
     }
 }
    
+void insert_c_param(Current_P_List** c_params, node* expr){
+    Current_P_List* new = malloc(sizeof(Current_P_List));
+    new->p = expr;
+    new->next = NULL;
+    if (*c_params ==  NULL) {
+        *c_params = new;
+    } else {
+        Current_P_List* temp = *c_params;
+        while(temp->next != NULL) {
+            temp = temp->next;
+        }
+        temp->next = new;
+    }
+}
+
 /**
  * Imprime los distintos nodo del arbols
  */

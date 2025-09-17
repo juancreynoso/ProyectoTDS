@@ -16,7 +16,8 @@
     int ival;
     char* sval;
     node* nd;
-    Formal_P_List* args;
+    Formal_P_List* f_params;
+    Current_P_List* c_params;
     VarType vType;
 }
 
@@ -36,7 +37,8 @@
 %right MINUS
 
 %type <nd> declarations declaration var_decl meth_decl expr block meth_call statement statements if_else
-%type <args> meth_args args_list param_call_method param_list
+%type <f_params> meth_args args_list 
+%type <c_params> param_call_method param_list
 %type <vType> type
 
 %%
@@ -48,9 +50,9 @@ prog: PROGRAM LLAVE_L declarations LLAVE_R {
     ;
 
 declarations: { $$ = NULL; }
-            | declarations declaration { 
+            | declaration declarations { 
                 node* decl = create_node("decl", NONE);
-                $$ = create_tree(decl, $2, $1);
+                $$ = create_tree(decl, $1, $2);
             }
             ;
 
@@ -70,18 +72,18 @@ var_decl: type ID ASSIGN expr PYC {
         ;
 
 meth_decl: type ID PAREN_L meth_args PAREN_R block {
-            node* meth = create_meth_decl_node($2, $4, $1, NODE_DECL_METH, 0);
+            node* meth = create_meth_decl_node($2, $4, $1, 0);
             $$ = create_tree(meth, $6, NULL);
          }  
          | type ID PAREN_L meth_args PAREN_R EXTERN PYC {
-            $$ = create_meth_decl_node($2, $4, $1, NODE_DECL_METH, 1);
+            $$ = create_meth_decl_node($2, $4, $1, 1);
          }
          | VOID ID PAREN_L meth_args PAREN_R block {
-            node* meth = create_meth_decl_node($2, $4, NONE, NODE_DECL_METH, 0);
+            node* meth = create_meth_decl_node($2, $4, NONE, 0);
             $$ = create_tree(meth, $6, NULL);
          }
          | VOID ID PAREN_L meth_args PAREN_R EXTERN PYC {
-            $$ = create_meth_decl_node($2, $4, NONE, NODE_DECL_METH, 1);
+            $$ = create_meth_decl_node($2, $4, NONE, 1);
          }
          ;
 
@@ -95,13 +97,13 @@ args_list: type ID {
             Formal_P p = new_arg($2, $1, 0);
             
             Formal_P_List* list = NULL;
-            insert_arg(&list, p);
+            insert_f_param(&list, p);
             printf("%s",list_to_string(list));
             $$ = list;
          }
          | args_list ',' type ID {
             Formal_P p = new_arg($4, $3, 0);
-            insert_arg(&$1, p);
+            insert_f_param(&$1, p);
             $$ = $1;
          }
          ;
@@ -203,7 +205,7 @@ expr: ID { $$ = create_id_node($1, NONE, NODE_ID_USE); }
     ;
 
 meth_call: ID PAREN_L param_call_method  PAREN_R {
-            $$ = create_meth_decl_node($1 , NULL, NONE, NODE_CALL_METH, 0);
+            $$ = create_meth_call_node($1 , $3);
          }
          ;
 
@@ -214,10 +216,13 @@ param_call_method: { $$ = NULL; }
                  ;
 
 param_list: expr { 
-                
+                Current_P_List* list = NULL;
+                insert_c_param(&list, $1);  
+                $$ = list;
             }
           | param_list ',' expr {
-
+                insert_c_param(&$1, $3);  
+                $$ = $1;
           }
           ;
 

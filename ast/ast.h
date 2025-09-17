@@ -149,8 +149,8 @@ node* create_op_node(OpType name, VarType type);
 node* create_id_node(char* name, VarType typeVar, NodeType type);
 node* create_if_else_node(node* expr, node* if_block, node* else_block);
 node* create_while_node(node* expr, node* block);
-node* create_meth_decl_node(char* name, Formal_P_List* f_params, VarType returnType, NodeType type, int is_extern);
-//node* create_meth_call_node(char*name);
+node* create_meth_decl_node(char* name, Formal_P_List* f_params, VarType returnType, int is_extern);
+node* create_meth_call_node(char*name, Current_P_List* c_params);
 node* create_return_node(VarType type);
 node* create_node(char* info, VarType type);
 node* new_node(NodeType type);
@@ -158,7 +158,10 @@ node* create_tree(node* root, node* left, node* right);
 
 /* -- Funciones para manipular la lista de parametros formales -- */
 Formal_P new_arg(char* name, VarType type, int value);
-void insert_arg(Formal_P_List** f_params, Formal_P a);
+void insert_f_param(Formal_P_List** f_params, Formal_P a);
+
+/* -- Funcion para manipular la lista de parametros actuales -- */
+void insert_c_param(Current_P_List** c_params, node* expr);
 
 /* -- Funciones para imprimir el arbol -- */
 void print_node(node* root, int level);
