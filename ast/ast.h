@@ -12,7 +12,7 @@ typedef enum{
     NODE_RET,
     NODE_DECL,
     NODE_ID_USE,
-    NODE_METH,
+    NODE_DECL_METH,
     NODE_CALL_METH,
     NODE_IF_ELSE,
     NODE_WHILE,
@@ -50,19 +50,26 @@ typedef struct node{
     struct node* right;
 }node;
 
-/*Estructuras para poder almacenar argumentos */
-typedef struct Arg{
+/* Estructura para los parametros formales */
+typedef struct Formal_P{
     char* name;
     VarType type;
-    union values value;
-}Arg;
+}Formal_P;
 
-typedef struct Args_List{
-    Arg p;
-    struct Args_List* next;
-}Args_List;
+/* Lista de parametros formales */
+typedef struct Formal_P_List{
+    Formal_P p;
+    struct Formal_P_List* next;
+}Formal_P_List;
 
-/* Estructuras correspondientes a los distintos tipos de nodo */
+/* Lista de parametros reales */
+typedef struct Current_P_List{
+    node* p;
+    struct Current_P_List* next;
+}Current_P_List;
+
+/* ---- Estructuras correspondientes a los distintos tipos de nodo ---- */
+
 typedef struct  IntInfo{
     int value;
     VarType type;
@@ -96,12 +103,19 @@ typedef struct WhileInfo{
     node* block;
 }WhileInfo;
 
-typedef struct MethInfo{
+typedef struct MethDecl_Info{
     char* name;
-    Args_List* arguments;
+    Formal_P_List* f_params;
     VarType returnType;
     int is_extern;
-}MethInfo;
+}MethDecl_Info;
+
+typedef struct MethCall_Info{
+    char* name;
+    Formal_P_List* f_params;
+    Current_P_List* c_params;
+    VarType returnType;
+}MethCall_Info;
 
 typedef struct ReturnInfo{
     VarType type;
@@ -121,33 +135,37 @@ union type{
     IdInfo ID;
     If_Else_Info IF_ELSE;
     WhileInfo WHILE;
-    MethInfo METH;
+    MethDecl_Info METH_DECL;
+    MethCall_Info METH_CALL;
     ReturnInfo RETURN;
     NodeInfo NODE_INFO;
 };
 
-/* Constructores de nodos*/
+
+/* ---- Constructores de nodos ---- */
 node* create_int_node(int value);
 node* create_bool_node(int value);
 node* create_op_node(OpType name, VarType type);
 node* create_id_node(char* name, VarType typeVar, NodeType type);
 node* create_if_else_node(node* expr, node* if_block, node* else_block);
 node* create_while_node(node* expr, node* block);
-node* create_meth_node(char* name, Args_List* arguments, VarType returnType, NodeType type, int is_extern);
+node* create_meth_decl_node(char* name, Formal_P_List* f_params, VarType returnType, NodeType type, int is_extern);
+//node* create_meth_call_node(char*name);
 node* create_return_node(VarType type);
 node* create_node(char* info, VarType type);
 node* new_node(NodeType type);
 node* create_tree(node* root, node* left, node* right);
 
-Arg new_arg(char* name, VarType type, int value);
-void insert_arg(Args_List** list, Arg a);
+/* -- Funciones para manipular la lista de parametros formales -- */
+Formal_P new_arg(char* name, VarType type, int value);
+void insert_arg(Formal_P_List** f_params, Formal_P a);
 
-/* Funciones para imprimir el arbol */
+/* -- Funciones para imprimir el arbol -- */
 void print_node(node* root, int level);
 void print_tree(node* root, int level); 
 
 /* Funciones auxiliares para imprimir el ast correctamente */
 char* var_type_to_string(VarType type);
-char* list_to_string(Args_List* args);
+char* list_to_string(Formal_P_List* f_params);
 
 #endif

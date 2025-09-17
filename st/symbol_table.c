@@ -20,7 +20,7 @@ void aux_create_symbol_table_of_tree(node* root, tables_stack* stack, symbol_tab
     if (!root) return;
 
     switch (root->type) {
-        case NODE_METH:
+        case NODE_DECL_METH:
         case NODE_IF_ELSE:
         case NODE_WHILE: {
             // Nuevo scope

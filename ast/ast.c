@@ -21,11 +21,11 @@ char* var_type_to_string(VarType type){
     }
 }
 
-char* list_to_string(Args_List* args) {
+char* list_to_string(Formal_P_List* args) {
     char *result = malloc(1024);
     result[0] = '\0';
 
-    Args_List* cursor = args;
+    Formal_P_List* cursor = args;
     
     strcat(result, "[ ");
     while (cursor != NULL) {
@@ -100,14 +100,14 @@ node* create_while_node(node* expr, node* block){
 }
 
 /**
- * Crea un nodo correspondiente a un metodo
+ * Crea un nodo correspondiente a la llamada de un metodo
  */
-node* create_meth_node(char* name, Args_List* arguments, VarType returnType, NodeType type, int is_extern){
+node* create_meth_decl_node(char* name, Formal_P_List* f_params, VarType returnType, NodeType type, int is_extern){
     node* root = new_node(type);
-    root->info->METH.name = name;
-    root->info->METH.arguments = arguments;
-    root->info->METH.returnType = returnType;
-    root->info->METH.is_extern = is_extern;
+    root->info->METH_DECL.name = name;
+    root->info->METH_DECL.f_params = f_params;
+    root->info->METH_DECL.returnType = returnType;
+    root->info->METH_DECL.is_extern = is_extern;
     
     return root;
 }
@@ -156,8 +156,8 @@ node* create_tree(node* root, node* left, node* right){
     return root;
 }
 
-Arg new_arg(char* name, VarType type, int value){
-    Arg a;
+Formal_P new_arg(char* name, VarType type, int value){
+    Formal_P a;
     a.name = name;
     a.type = type;
 
@@ -172,15 +172,15 @@ Arg new_arg(char* name, VarType type, int value){
     return a;
 }
 
-void insert_arg(Args_List** list, Arg a){
-        Args_List* new = malloc(sizeof(Args_List));
+void insert_arg(Formal_P_List** f_params, Formal_P a){
+        Formal_P_List* new = malloc(sizeof(Formal_P_List));
         new->p.name = a.name;
         new->p.type = a.type;
         new->next = NULL;
-    if (*list == NULL) {
-        *list = new;
+    if (*f_params == NULL) {
+        *f_params = new;
     } else {
-        Args_List* temp = *list;
+        Formal_P_List* temp = *f_params;
         while(temp->next != NULL) {
             temp = temp->next;
         }
@@ -264,29 +264,29 @@ void print_node(node *root, int level) {
         case NODE_ID_USE:
             printf("%s\n", root->info->ID.name ? root->info->ID.name : "NULL");
             break;
-        case NODE_METH:
-            switch(root->info->METH.returnType) {
+        case NODE_DECL_METH:
+            switch(root->info->METH_DECL.returnType) {
                 case TYPE_INT:
                     printf("int ");
-                    printf("%s ", root->info->METH.name);
+                    printf("%s ", root->info->METH_DECL.name);
                     break;
                 case TYPE_BOOL:
                     printf("bool ");
-                    printf("%s ", root->info->METH.name);
+                    printf("%s ", root->info->METH_DECL.name);
                     break; 
                 case NONE:
                     printf("void ");
-                    printf("%s ", root->info->METH.name);
+                    printf("%s ", root->info->METH_DECL.name);
                     break;
             }
-            if (root->info->METH.arguments != NULL) {
-                printf("%s \n", list_to_string(root->info->METH.arguments));
+            if (root->info->METH_DECL.f_params != NULL) {
+                printf("%s \n", list_to_string(root->info->METH_DECL.f_params));
             } else {
                 printf("\n");
             }      
             break;
         case NODE_CALL_METH:
-            printf("call %s",root->info->METH.name);
+            printf("call %s",root->info->METH_CALL.name);
             break;
         case NODE_IF_ELSE:
             printf("if \n");
