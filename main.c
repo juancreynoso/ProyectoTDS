@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "ast.h"
-#include "symbol_table.h"
+#include "semantic_analyzer.h"
 
 int yyparse(void);
 extern node* root;
@@ -27,7 +27,7 @@ int main(int argc, char *argv[]) {
 
         printf("\n--- AST ----\n");
         print_tree(root, 0);
-        //create_symbol_table_of_tree(root);
+        //analyze_semantics(root);
     }
 
     fclose(input_file);

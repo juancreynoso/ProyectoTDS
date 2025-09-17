@@ -6,9 +6,8 @@ CFLAGS = -Wall -g -I. -Iast -Ist -Isintax -Ilexer -Isemantic -Icompile
 BISON = bison -v -d
 FLEX = flex
 
-SRC_DIRS = sintax lexer ast st semantic compile
-OBJS = sintax/sintax.tab.o lexer/lex.yy.o ast/ast.o main.o st/symbol_table.o
-
+SRC_DIRS = sintax lexer ast semantic compile
+OBJS = sintax/sintax.tab.o lexer/lex.yy.o ast/ast.o main.o semantic/semantic_analyzer.o semantic/type_checker.o semantic/expr_solver.o
 TARGET = c-tds
 
 # Regla principal
@@ -40,7 +39,7 @@ lexer/lex.yy.o: lexer/lex.yy.c
 ast/ast.o: ast/ast.c ast/ast.h
 	${CC} ${CFLAGS} -c -o $@ $<
 
-st/symbol_table.o: st/symbol_table.c st/symbol_table.h
+semantic/semantic_analyzer.o: semantic/semantic_analyzer.c semantic/semantic_analyzer.h
 	${CC} ${CFLAGS} -c -o $@ $<
 
 main.o: main.c
