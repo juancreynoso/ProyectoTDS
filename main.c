@@ -27,7 +27,7 @@ int main(int argc, char *argv[]) {
 
         printf("\n--- AST ----\n");
         print_tree(root, 0);
-        create_symbol_table_of_tree(root);
+        //create_symbol_table_of_tree(root);
     }
 
     fclose(input_file);

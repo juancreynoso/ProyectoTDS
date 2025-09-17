@@ -1,11 +1,46 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "ast.h"
 
-/**
- * Constructores de nodos
+/** 
+ * Devuelve un string por cada valor del enumerado VariableType 
+ * Utilizado para mostrar resultados mas claros 
  */
+char* var_type_to_string(VarType type){
+    switch(type){
+        case TYPE_INT:
+            return "int";
+            break;
+        case TYPE_BOOL:
+            return "bool";
+            break; 
+        case NONE:
+            return "void";
+            break;
+    }
+}
 
+char* list_to_string(Args_List* args) {
+    char *result = malloc(1024);
+    result[0] = '\0';
+
+    Args_List* cursor = args;
+    
+    strcat(result, "[ ");
+    while (cursor != NULL) {
+        char buffer[128];
+
+        sprintf(buffer, "%s %s", var_type_to_string(cursor->p.type), cursor->p.name);
+        strcat(result, buffer);
+        if (cursor->next != NULL) strcat(result, ", "); // separador
+        cursor = cursor->next;
+    }
+    strcat(result, " ]");
+    return result;
+}
+
+/* Constructores de nodos */
 /**
  * Crea un nodo correspondiente a una constante entera
  */
@@ -67,11 +102,12 @@ node* create_while_node(node* expr, node* block){
 /**
  * Crea un nodo correspondiente a un metodo
  */
-node* create_meth_node(char* name, Args_List* arguments, VarType returnType, NodeType type){
+node* create_meth_node(char* name, Args_List* arguments, VarType returnType, NodeType type, int is_extern){
     node* root = new_node(type);
     root->info->METH.name = name;
     root->info->METH.arguments = arguments;
-    root->info->METH.returnType =returnType;
+    root->info->METH.returnType = returnType;
+    root->info->METH.is_extern = is_extern;
     
     return root;
 }
@@ -136,23 +172,22 @@ Arg new_arg(char* name, VarType type, int value){
     return a;
 }
 
-void insert_arg(Args_List* list, Arg a){
-    if (list == NULL) {
-        return;
+void insert_arg(Args_List** list, Arg a){
+        Args_List* new = malloc(sizeof(Args_List));
+        new->p.name = a.name;
+        new->p.type = a.type;
+        new->next = NULL;
+    if (*list == NULL) {
+        *list = new;
+    } else {
+        Args_List* temp = *list;
+        while(temp->next != NULL) {
+            temp = temp->next;
+        }
+        temp->next = new;
     }
-    Args_List* new = malloc(sizeof(Args_List));
-    new->p = a;
-
-    new->next = list;
-    list = new;
 }
-
-Args_List* new_arg_list(){
-    Args_List* list = malloc(sizeof(Args_List));
-
-    return list;
-}
-
+   
 /**
  * Imprime los distintos nodo del arbols
  */
@@ -165,56 +200,6 @@ void print_node(node *root, int level) {
             break;
         case NODE_BOOL:
             printf("%s\n", root->info->BOOL.value ? "true" : "false");
-            break;
-        case NODE_DECL:
-            switch(root->info->ID.type){
-                case TYPE_INT:
-                    printf("int ");
-                    break;
-                case TYPE_BOOL:
-                    printf("bool ");
-                    break;
-                case NONE:
-                    printf("none ");
-                    break;
-            }
-            printf("%s\n", root->info->ID.name ? root->info->ID.name : "NULL");
-            break;
-        case NODE_ID_USE:
-            printf("%s\n", root->info->ID.name ? root->info->ID.name : "NULL");
-            break;
-        case NODE_IF_ELSE:
-            printf("if \n");
-            print_tree(root->info->IF_ELSE.expr, level + 1);
-            print_tree(root->info->IF_ELSE.if_block, level+1);
-            print_tree(root->info->IF_ELSE.else_block, level+1);
-            break;
-        case NODE_WHILE:
-            printf("while \n");
-            print_node(root->info->WHILE.expr, level+1);
-            print_node(root->info->WHILE.block, level+1);
-            break;
-        case NODE_METH:
-            switch(root->info->METH.returnType) {
-                case TYPE_INT:
-                    printf("int ");
-                    printf("%s \n", root->info->METH.name);
-                    break;
-                case TYPE_BOOL:
-                    printf("bool ");
-                    printf("%s \n", root->info->METH.name);
-                    break; 
-                case NONE:
-                    printf("void ");
-                    printf("%s \n", root->info->METH.name);
-                    break;
-            }
-            break;
-        case NODE_CALL_METH:
-            printf("call %s",root->info->METH.name);
-            break;
-        case NODE_PYC:
-            printf("PYC");
             break;
         case NODE_OP:
             switch (root->info->OP.name) {
@@ -259,11 +244,66 @@ void print_node(node *root, int level) {
                 break;
             }
             break;
-        case NODE_INFO:
-             printf("%s\n", root->info->NODE_INFO.info ? root->info->NODE_INFO.info : "NULL");
-            break;
         case NODE_RET:
             printf("ret \n");
+            break;
+        case NODE_DECL:
+            switch(root->info->ID.type){
+                case TYPE_INT:
+                    printf("int ");
+                    break;
+                case TYPE_BOOL:
+                    printf("bool ");
+                    break;
+                case NONE:
+                    printf("none ");
+                    break;
+            }
+            printf("%s\n", root->info->ID.name ? root->info->ID.name : "NULL");
+            break;
+        case NODE_ID_USE:
+            printf("%s\n", root->info->ID.name ? root->info->ID.name : "NULL");
+            break;
+        case NODE_METH:
+            switch(root->info->METH.returnType) {
+                case TYPE_INT:
+                    printf("int ");
+                    printf("%s ", root->info->METH.name);
+                    break;
+                case TYPE_BOOL:
+                    printf("bool ");
+                    printf("%s ", root->info->METH.name);
+                    break; 
+                case NONE:
+                    printf("void ");
+                    printf("%s ", root->info->METH.name);
+                    break;
+            }
+            if (root->info->METH.arguments != NULL) {
+                printf("%s \n", list_to_string(root->info->METH.arguments));
+            } else {
+                printf("\n");
+            }      
+            break;
+        case NODE_CALL_METH:
+            printf("call %s",root->info->METH.name);
+            break;
+        case NODE_IF_ELSE:
+            printf("if \n");
+            print_tree(root->info->IF_ELSE.expr, level + 1);
+            print_tree(root->info->IF_ELSE.if_block, level+1);
+            print_tree(root->info->IF_ELSE.else_block, level+1);
+            break;
+        case NODE_WHILE:
+            printf("while \n");
+            print_node(root->info->WHILE.expr, level+1);
+            print_node(root->info->WHILE.block, level+1);
+            break;
+        case NODE_PYC:
+            printf("PYC");
+            break;
+        case NODE_INFO:
+             printf("%s\n", root->info->NODE_INFO.info ? root->info->NODE_INFO.info : "NULL");
             break;
         default:
             printf("UNKNOWN NODE\n");
@@ -286,3 +326,5 @@ void print_tree(node *root, int level) {
     print_tree(root->left, level + 1);
     print_tree(root->right, level + 1);
 }
+
+

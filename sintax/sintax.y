@@ -36,7 +36,7 @@
 %right MINUS
 
 %type <nd> declarations declaration var_decl meth_decl expr block meth_call statement statements if_else
-%type <args> meth_args args_list
+%type <args> meth_args args_list param_call_method param_list
 %type <vType> type
 
 %%
@@ -70,20 +70,18 @@ var_decl: type ID ASSIGN expr PYC {
         ;
 
 meth_decl: type ID PAREN_L meth_args PAREN_R block {
-            node* meth = create_meth_node($2, $4, $1, NODE_METH);
+            node* meth = create_meth_node($2, $4, $1, NODE_METH, 0);
             $$ = create_tree(meth, $6, NULL);
          }  
          | type ID PAREN_L meth_args PAREN_R EXTERN PYC {
-            node* meth = create_meth_node($2, $4, $1, NODE_METH);
-            $$ = create_tree(meth, NULL, NULL);
+            $$ = create_meth_node($2, $4, $1, NODE_METH, 1);
          }
          | VOID ID PAREN_L meth_args PAREN_R block {
-            node* meth = create_meth_node($2, $4, NONE, NODE_METH);
+            node* meth = create_meth_node($2, $4, NONE, NODE_METH, 0);
             $$ = create_tree(meth, $6, NULL);
          }
          | VOID ID PAREN_L meth_args PAREN_R EXTERN PYC {
-            node* meth = create_meth_node($2, $4, NONE, NODE_METH);
-            $$ = create_tree(meth, NULL, NULL);
+            $$ = create_meth_node($2, $4, NONE, NODE_METH, 1);
          }
          ;
 
@@ -95,13 +93,15 @@ meth_args: {$$ = NULL;}
 
 args_list: type ID {
             Arg p = new_arg($2, $1, 0);
-            Args_List* list = new_arg_list();
-            insert_arg(list, p);
+            
+            Args_List* list = NULL;
+            insert_arg(&list, p);
+            printf("%s",list_to_string(list));
             $$ = list;
          }
          | args_list ',' type ID {
             Arg p = new_arg($4, $3, 0);
-            insert_arg($1, p);
+            insert_arg(&$1, p);
             $$ = $1;
          }
          ;
@@ -147,6 +147,9 @@ if_else: { $$ = NULL; }
 
 expr: ID { $$ = create_id_node($1, NONE, NODE_ID_USE); }
     | NUM { $$ = create_int_node($1); }
+    | meth_call {
+        $$ = $1;
+    }
     | expr PLUS expr {
         node* plus = create_op_node(OP_PLUS, TYPE_INT);
         $$ = create_tree(plus, $1, $3);
@@ -199,10 +202,24 @@ expr: ID { $$ = create_id_node($1, NONE, NODE_ID_USE); }
     }
     ;
 
-meth_call: ID PAREN_L PAREN_R {
-            $$ = create_meth_node($1 , NULL, NONE, NODE_CALL_METH);
+meth_call: ID PAREN_L param_call_method  PAREN_R {
+            $$ = create_meth_node($1 , NULL, NONE, NODE_CALL_METH, 0);
          }
          ;
+
+param_call_method: { $$ = NULL; }
+                 | param_list {
+                    $$ = $1;
+                 }
+                 ;
+
+param_list: expr { 
+                
+            }
+          | param_list ',' expr {
+
+          }
+          ;
 
 type: BOOL { $$ = TYPE_BOOL; }
     | INT { $$ = TYPE_INT; }

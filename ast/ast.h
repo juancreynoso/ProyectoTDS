@@ -14,8 +14,8 @@ typedef enum{
     NODE_ID_USE,
     NODE_METH,
     NODE_CALL_METH,
-    NODE_WHILE,
     NODE_IF_ELSE,
+    NODE_WHILE,
     NODE_PYC,
     NODE_INFO
 }NodeType;
@@ -100,6 +100,7 @@ typedef struct MethInfo{
     char* name;
     Args_List* arguments;
     VarType returnType;
+    int is_extern;
 }MethInfo;
 
 typedef struct ReturnInfo{
@@ -132,18 +133,21 @@ node* create_op_node(OpType name, VarType type);
 node* create_id_node(char* name, VarType typeVar, NodeType type);
 node* create_if_else_node(node* expr, node* if_block, node* else_block);
 node* create_while_node(node* expr, node* block);
-node* create_meth_node(char* name, Args_List* arguments, VarType returnType, NodeType type);
+node* create_meth_node(char* name, Args_List* arguments, VarType returnType, NodeType type, int is_extern);
 node* create_return_node(VarType type);
 node* create_node(char* info, VarType type);
 node* new_node(NodeType type);
 node* create_tree(node* root, node* left, node* right);
 
 Arg new_arg(char* name, VarType type, int value);
-void insert_arg(Args_List* list, Arg a);
-Args_List* new_arg_list();
+void insert_arg(Args_List** list, Arg a);
 
 /* Funciones para imprimir el arbol */
 void print_node(node* root, int level);
 void print_tree(node* root, int level); 
+
+/* Funciones auxiliares para imprimir el ast correctamente */
+char* var_type_to_string(VarType type);
+char* list_to_string(Args_List* args);
 
 #endif
