@@ -166,9 +166,9 @@ void insert_c_param(Current_P_List** c_params, node* expr);
 /* -- Funciones para imprimir el arbol -- */
 void print_node(node* root, int level);
 void print_tree(node* root, int level); 
-
-/* Funciones auxiliares para imprimir el ast correctamente */
 char* var_type_to_string(VarType type);
 char* list_to_string(Formal_P_List* f_params);
+void print_c_params(Current_P_List* c_params);
+void expr_to_str(node* expr);
 
 #endif

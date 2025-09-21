@@ -36,7 +36,7 @@
 %right NOT
 %right MINUS
 
-%type <nd> declarations declaration var_decl meth_decl expr block meth_call statement statements if_else
+%type <nd> declarations declaration var_decl var_decls meth_decl expr block meth_call statement statements if_else
 %type <f_params> meth_args args_list 
 %type <c_params> param_call_method param_list
 %type <vType> type
@@ -98,7 +98,6 @@ args_list: type ID {
             
             Formal_P_List* list = NULL;
             insert_f_param(&list, p);
-            printf("%s",list_to_string(list));
             $$ = list;
          }
          | args_list ',' type ID {
@@ -108,10 +107,18 @@ args_list: type ID {
          }
          ;
 
-block: LLAVE_L statements LLAVE_R {
-        $$ = $2 ;
+block: LLAVE_L var_decls statements LLAVE_R {
+        node* block = create_node("block", NONE);
+        $$ = create_tree(block, $2, $3);
      }
      ;
+
+var_decls: { $$ = NULL; }
+         | var_decl var_decls {
+            node* decl = create_node("decl", NONE);
+            $$ = create_tree(decl, $1, $2);
+         }
+         ;
 
 statements: { $$ = NULL; }
           | statement statements {

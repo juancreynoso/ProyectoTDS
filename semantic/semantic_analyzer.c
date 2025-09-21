@@ -1,6 +1,6 @@
 #include "semantic_analyzer.h"
-#include "type_checker.h"
-#include "expr_solver.h"
+//#include "type_checker.h"
+//#include "expr_solver.h"
 
 /*
   Dado un arbol como parametro, crea la tabla de simbolos
