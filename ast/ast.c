@@ -21,8 +21,9 @@ char* var_type_to_string(VarType type){
     }
 }
 
-/*  */
-
+/**
+ * Construye una cadena que representa la lista de parametros
+ */ 
 char* list_to_string(Formal_P_List* f_params) {
     char *result = malloc(1024);
     result[0] = '\0';
@@ -44,6 +45,9 @@ char* list_to_string(Formal_P_List* f_params) {
     return result;
 }
 
+/**
+ * Imprime un arbol que representa una expresion
+ */
 void expr_to_str(node* root){
     if (root == NULL) {
         return;
@@ -131,14 +135,14 @@ void expr_to_str(node* root){
 
 }
 
-/* imprime los argumentos que se pasan en la llamada de un metodo  */
-
+/**
+ * Imprime los argumentos que se pasan en la llamada de un metodo
+ */
 void print_c_params(Current_P_List* c_params){
     Current_P_List* cursor = c_params;
 
     printf("(");
     while (cursor != NULL) {
-        // funcion para imprimir recursivamente cada nodo
         expr_to_str(cursor->p);
         if (cursor->next != NULL) {
             printf(", ");
@@ -149,8 +153,9 @@ void print_c_params(Current_P_List* c_params){
     printf(")");
 }
 
-/* crear un parametro formal */
-
+/**
+ *  Crear un parametro formal
+ */
 Formal_P new_arg(char* name, VarType type, int value){
     Formal_P a;
     a.name = name;
@@ -167,8 +172,9 @@ Formal_P new_arg(char* name, VarType type, int value){
     return a;
 }
 
-/* insertar un parametro en la lista de parametros formales*/
-
+/**
+ * Insertar un parametro en la lista de parametros formales
+ */
 void insert_f_param(Formal_P_List** f_params, Formal_P a){
         Formal_P_List* new = malloc(sizeof(Formal_P_List));
         new->p.name = a.name;
@@ -185,8 +191,9 @@ void insert_f_param(Formal_P_List** f_params, Formal_P a){
     }
 }
    
-/* insertar un argumento en la lista de parametros actuales*/
-
+/**
+ * Insertar un parametro en la lista de parametros reales
+ */ 
 void insert_c_param(Current_P_List** c_params, node* expr){
     Current_P_List* new = malloc(sizeof(Current_P_List));
     new->p = expr;
@@ -201,8 +208,6 @@ void insert_c_param(Current_P_List** c_params, node* expr){
         temp->next = new;
     }
 }
-
-
 
 /* -----  Constructores de nodos ----- */
 
@@ -231,7 +236,6 @@ node* create_bool_node(int value){
 /**
  * Crea un nodo correspondiente a una operacion
  */
-
 node* create_op_node(OpType name, VarType type){
     node* root = new_node(NODE_OP);
     root->info->OP.name = name;
@@ -308,7 +312,7 @@ node* create_return_node(VarType type){
 }
 
 /**
- * Crea un nodo que se utiliza para llevar info sobre el ast
+ * Crea un nodo que se utiliza para llevar informacion sobre el ast
  */
 node* create_node(char* info, VarType type){
     node* root = new_node(NODE_INFO);
@@ -334,7 +338,6 @@ node* new_node(NodeType type){
 /**
  * Crea un arbol a partir de un nodo raiz y dos sub arboles
 */
-
 node* create_tree(node* root, node* left, node* right){
     root->left = left;
     root->right = right;
