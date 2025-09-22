@@ -27,7 +27,7 @@ int main(int argc, char *argv[]) {
 
         printf("\n--- AST ----\n");
         print_tree(root, 0);
-        //analyze_semantics(root);
+        analyze_semantics(root);
     }
 
     fclose(input_file);
