@@ -1,6 +1,6 @@
 #include "semantic_analyzer.h"
-//#include "type_checker.h"
-//#include "expr_solver.h"
+#include "type_checker.h"
+#include "expr_solver.h"
 
 /*
   Dado un arbol como parametro, crea la tabla de simbolos
@@ -22,25 +22,54 @@ void semantic_analysis_recursive(node* root, tables_stack* stack, symbol_table* 
     if (!root) return;
 
     switch (root->type) {
-        case NODE_DECL_METH:
+        case NODE_DECL_METH: {
+            symbol s;
+            s.info = root->info;
+            printf("Se declara nuevo método: %s\n", s.info->METH_DECL.name);
+            insert_symbol(&(stack->top->data), s, root->type);
+            
+            // Nuevo scope del metodo
+            symbol_table* new_table = NULL;
+            push(stack, new_table);
+            printf(">>> Nuevo scope (METH %s)\n", root->info->METH_DECL.name);
+
+            // Se agregan los parametros al scope
+            if (root->info->METH_DECL.f_params != NULL) {
+                add_formal_params_to_scope(stack, root->info->METH_DECL.f_params);
+            }
+            semantic_analysis_recursive(root->left, stack, stack->top->data);
+            semantic_analysis_recursive(root->right, stack, stack->top->data);
+            
+            printf("Scope del método antes de cerrarlo:\n");
+            print_symbol_table(stack->top->data);
+
+            pop(stack);
+            printf("<<< Cierra scope (METH)\n");
+            break;
+        }
         case NODE_IF_ELSE:
         case NODE_WHILE: {
             // Nuevo scope
             symbol_table* new_table = NULL;
             push(stack, new_table);
-            printf("Nuevo scope\n");
+            printf(">>> Nuevo scope (WHILE/IF)\n");
 
             semantic_analysis_recursive(root->left, stack, stack->top->data);
             semantic_analysis_recursive(root->right, stack, stack->top->data);
 
+            printf("Contenido del scope antes de cerrarlo:\n");
+            print_symbol_table(stack->top->data);
+
             pop(stack);
-            printf("Cierra scope\n");
+            printf("<<< Cierra scope ((WHILE/IF))\n");
             break;
         }
 
         case NODE_DECL: {
+            // Declaracion en el mismo scope
             symbol s;
             s.info = root->info;
+            printf("Se declara nuevo simbolo: %s \n", s.info->ID.name);
             insert_symbol(&(stack->top->data), s, root->type); // Se declara una variable en la tabla del scope actual (tope de la pila)
             break;
         }
@@ -49,19 +78,29 @@ void semantic_analysis_recursive(node* root, tables_stack* stack, symbol_table* 
             // Se verifica la declaracion de un simbolo en toda la pila para ser usado
             union type* info = search_symbol(stack, root->info->ID.name); 
             if (!info) {
-                printf("Error: Variable '%s' no declarado\n", root->info->ID.name);
+                printf("Error: Variable '%s' no declarada\n", root->info->ID.name);
                 exit(EXIT_FAILURE);
             }
             root->info = info; // enlazo nodo con la info real
             break;
         }
 
-        case NODE_OP: { // Falta completar
-            semantic_analysis_recursive(root->left, stack, table);
-            semantic_analysis_recursive(root->right, stack, table);
+        case NODE_CALL_METH: {
+            union type* method = search_symbol(stack, root->info->METH_CALL.name);
+            if (!method) {
+                printf("Error: Método '%s' no declarado\n", root->info->METH_CALL.name);
+                exit(EXIT_FAILURE);
+            }
+            printf("Llamando método: %s\n", root->info->METH_CALL.name);
+            
+            if (root->info->METH_CALL.c_params != NULL) {
+                check_current_params(root->info->METH_CALL.c_params, stack, table);
+            }
+            
             break;
         }
 
+        case NODE_OP: 
         default:
             semantic_analysis_recursive(root->left, stack, table);
             semantic_analysis_recursive(root->right, stack, table);
@@ -69,15 +108,31 @@ void semantic_analysis_recursive(node* root, tables_stack* stack, symbol_table* 
     }
 }
 
-void insert_symbol(symbol_table **table, symbol s, NodeType nodeType) {
-    if (search_in_table(*table, s.info->ID.name) == NULL) {
+void insert_symbol(symbol_table **table, symbol s, NodeType node_type) {
+    char* name;
+    switch(node_type) {
+        case NODE_DECL:
+        case NODE_ID_USE:
+            // caso guardar decl var en scope
+            name = s.info->ID.name;
+            break;
+        case NODE_DECL_METH:
+            // caso guardar decl metodo en scope
+            name = s.info->METH_DECL.name;
+            break;
+        default:
+            printf("Error: tipo de nodo no soportado para inserción\n");
+            return;
+    }
+    
+    if (search_in_table(*table, name) == NULL) {
         symbol_table *aux = malloc(sizeof(symbol_table));
         aux->s.info = s.info;
-        aux->nodeType = nodeType;
+        aux->nodeType = node_type;
         aux->next = *table;
         *table = aux;
     } else {
-        printf("error, variable already exists\n");
+        printf("Error: '%s' ya declarado en este scope\n", name);
         exit(EXIT_FAILURE);
     }
 }
@@ -86,13 +141,25 @@ union type* search_symbol(tables_stack *stack, char* name) {
     for (node_s* scope = stack->top; scope != NULL; scope = scope->next) {
         symbol_table* cursor = scope->data;
         while (cursor != NULL) {
-            if (strcmp(cursor->s.info->ID.name, name) == 0) {
-                return cursor->s.info; // encontrado en este ambiente
+            char* symbol_name = NULL;
+            
+            switch(cursor->nodeType) {
+                case NODE_DECL:
+                case NODE_ID_USE:
+                    symbol_name = cursor->s.info->ID.name;
+                    break;
+                case NODE_DECL_METH:
+                    symbol_name = cursor->s.info->METH_DECL.name;
+                    break;
+            }
+            
+            if (strcmp(symbol_name, name) == 0) {
+                return cursor->s.info;
             }
             cursor = cursor->next;
         }
     }
-    return NULL; // no encontrado en ningún ambiente
+    return NULL;
 }
 
 union type* search_in_table(symbol_table* table, char* name) {
@@ -107,6 +174,75 @@ union type* search_in_table(symbol_table* table, char* name) {
         cursor = cursor->next;
     }
     return NULL;
+}
+
+void print_symbol_table(symbol_table *table) {
+    if (table == NULL) {
+        printf("(scope vacío)\n");
+        return;
+    }
+    
+    symbol_table *cursor = table;
+    printf("\n----- INICIO TABLA DE SIMBOLOS -----\n");
+    
+    while(cursor != NULL) {
+        switch(cursor->nodeType) {
+            case NODE_DECL:
+            case NODE_ID_USE:
+                printf("VARIABLE: %s\n", cursor->s.info->ID.name);
+                printf("TYPE: %s\n", cursor->s.info->ID.type == TYPE_INT ? "INT" : "BOOL");
+                break;
+                
+            case NODE_DECL_METH:
+                printf("METHOD: %s\n", cursor->s.info->METH_DECL.name);
+                printf("RETURN: %s\n", 
+                       cursor->s.info->METH_DECL.returnType == TYPE_INT ? "INT" : 
+                       cursor->s.info->METH_DECL.returnType == TYPE_BOOL ? "BOOL" : "VOID");
+                break;
+        }
+        
+        if (cursor->next != NULL) {
+            printf("-----\n");
+        }
+        cursor = cursor->next;
+    }
+    printf("\n----- FIN TABLA DE SIMBOLOS -----\n");
+}
+
+void add_formal_params_to_scope(tables_stack* stack, Formal_P_List* f_params) {
+    Formal_P_List* cursor = f_params;
+    while (cursor != NULL) {
+        union type* param_info = malloc(sizeof(union type));
+        param_info->ID.name = strdup(cursor->p.name); // se copia el nombre
+        param_info->ID.type = cursor->p.type;
+        param_info->ID.value.num = 0; 
+        
+        // se agrega al scope actual
+        symbol s;
+        s.info = param_info;
+        printf("Se declara parámetro formal: %s \n", cursor->p.name);
+        insert_symbol(&(stack->top->data), s, NODE_DECL);
+        // Busco el proximo parametro
+        cursor = cursor->next;
+    }
+}
+
+void check_current_params(Current_P_List* c_params, tables_stack* stack, symbol_table* table) {
+    Current_P_List* cursor = c_params;
+    printf("Checking actual parameters\n");
+    while (cursor != NULL) {
+        if (cursor->p->type == NODE_ID_USE) {
+            union type* param = search_symbol(stack, cursor->p->info->ID.name);
+            if (!param) {
+                printf("Error: Parámetro '%s' no declarado\n", cursor->p->info->ID.name);
+                exit(EXIT_FAILURE);
+            }
+            printf("Parámetro '%s' encontrado\n", cursor->p->info->ID.name);
+        } else {
+            semantic_analysis_recursive(cursor->p, stack, table);
+        }
+        cursor = cursor->next;
+    }
 }
 
 // Crear pila vacía

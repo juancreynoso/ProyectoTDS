@@ -1,11 +1,23 @@
 Program {
-    integer sum(integer x, integer y){
-        return x + y;
+    integer sum(integer a, integer b){
+        integer x = 1;
+        a = x;
+        b = 2;
+        return a + b;
     }
-    integer x = 1;
-
+    integer sum2(integer d, integer e){
+        integer x = 1;
+        d = x;
+        e = 2;
+        return d + e;
+    }
+    integer z = 2;
     void main() {
         integer y = 1;
+        integer w = 2;
+        sum(z, 3);
+        while (true) {
+            integer b = 1;
+        }
     }
-    
 }
