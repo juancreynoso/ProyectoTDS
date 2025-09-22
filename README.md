@@ -40,10 +40,19 @@ make
 ```
 
 ## Ejecución de tests
-Utilizar archivos del directorio test/ para probar el  funcionamiento mini compilador.
+Utilizar archivos del directorio test/ para probar el funcionamiento del mini compilador.
 ```
-./c-tds test/<archivo_fuente>
+./c-tds -target <etapa> test/<archivo_fuente>
 ```
+```
+Etapas: [lexer, parser]
+```
+
+### Tambien
+```
+./c-tds -target test/<archivo_fuente>
+```
+Ejecuta todas las etapas
 
 ## Limpiar archivos generados
 ```
