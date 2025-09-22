@@ -28,7 +28,12 @@ char* list_to_string(Formal_P_List* f_params) {
     char *result = malloc(1024);
     result[0] = '\0';
 
-    Formal_P_List* cursor = f_params;
+    if (f_params == NULL) {
+        strcat(result, "()");
+        return result;
+    }
+
+    Node_P_List* cursor = f_params->head;
     
     strcat(result, "(");
     while (cursor != NULL) {
@@ -139,7 +144,11 @@ void expr_to_str(node* root){
  * Imprime los argumentos que se pasan en la llamada de un metodo
  */
 void print_c_params(Current_P_List* c_params){
-    Current_P_List* cursor = c_params;
+    if (c_params == NULL) {
+        printf("()");
+        return;
+    }
+    Node_C_List* cursor = c_params->head;
 
     printf("(");
     while (cursor != NULL) {
@@ -177,35 +186,44 @@ Formal_P new_arg(char* name, VarType type, int value){
  */
 void insert_f_param(Formal_P_List** f_params, Formal_P a){
         Formal_P_List* new = malloc(sizeof(Formal_P_List));
-        new->p.name = a.name;
-        new->p.type = a.type;
-        new->next = NULL;
+        new->head = malloc(sizeof(Node_P_List));
+
+        new->head->p.name = a.name;
+        new->head->p.type = a.type;
+        new->head->next = NULL;
+
     if (*f_params == NULL) {
         *f_params = new;
+        (*f_params)->size = 1; 
     } else {
-        Formal_P_List* temp = *f_params;
+        Node_P_List* temp = (*f_params)->head;
         while(temp->next != NULL) {
             temp = temp->next;
         }
-        temp->next = new;
+        temp->next = new->head;
+        (*f_params)->size++; 
     }
 }
-   
+
 /**
  * Insertar un parametro en la lista de parametros reales
  */ 
 void insert_c_param(Current_P_List** c_params, node* expr){
     Current_P_List* new = malloc(sizeof(Current_P_List));
-    new->p = expr;
-    new->next = NULL;
+    new->head = malloc(sizeof(Node_P_List));
+    new->head->p = expr;
+    new->head->next = NULL;
+
     if (*c_params ==  NULL) {
         *c_params = new;
+        (*c_params)->size = 1; 
     } else {
-        Current_P_List* temp = *c_params;
+        Node_C_List* temp = (*c_params)->head;
         while(temp->next != NULL) {
             temp = temp->next;
         }
-        temp->next = new;
+        temp->next = new->head;
+        (*c_params)->size++; 
     }
 }
 
@@ -297,7 +315,6 @@ node* create_meth_call_node(char*name, Current_P_List* c_params){
     node* root = new_node(NODE_CALL_METH);
     root->info->METH_CALL.name = name;
     root->info->METH_CALL.c_params = c_params;
-
     return root;
 }
 
@@ -405,15 +422,12 @@ void print_node(node *root, int level) {
                     printf("%s", root->info->METH_DECL.name);
                     break;
             }
-            if (root->info->METH_DECL.f_params != NULL) {
-                printf("%s\n", list_to_string(root->info->METH_DECL.f_params));
-            } else {
-                printf("()\n");
-            }      
+            printf("%s size: %d \n ", list_to_string(root->info->METH_DECL.f_params), root->info->METH_DECL.f_params ? root->info->METH_DECL.f_params->size : 0 );      
             break;
         case NODE_CALL_METH:
             printf(" %s",root->info->METH_CALL.name);
             print_c_params(root->info->METH_CALL.c_params);
+            printf(" size: %d", root->info->METH_CALL.c_params ? root->info->METH_CALL.c_params->size : 0 );
             printf("\n");
             break;
         case NODE_IF_ELSE:
@@ -424,8 +438,8 @@ void print_node(node *root, int level) {
             break;
         case NODE_WHILE:
             printf("while \n");
-            print_node(root->info->WHILE.expr, level+1);
-            print_node(root->info->WHILE.block, level+1);
+            print_tree(root->info->WHILE.expr, level+1);
+            print_tree(root->info->WHILE.block, level+1);
             break;
         case NODE_PYC: printf("PYC"); break;
         case NODE_INFO:
