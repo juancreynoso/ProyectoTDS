@@ -17,6 +17,8 @@ Este proyecto implementa un mini compilador para un lenguaje de programación qu
 
 ##  Estructura del proyecto
 ### Directorios principales
+* `ast`
+    *   Contiene el codigo fuente que genera el arbol de sintaxis abstracto `ast`
 * `doc`
     *   Contiene la documentacion del proyecto en formato `html`
 * `lexer`
@@ -40,19 +42,20 @@ make
 ```
 
 ## Ejecución de tests
-Utilizar archivos del directorio test/ para probar el funcionamiento del mini compilador.
+Utilizar archivos del directorio `test/` para probar el funcionamiento del mini compilador.
 ```
 ./c-tds -target <etapa> test/<archivo_fuente>
 ```
-```
-Etapas: [lexer, parser]
-```
 
-### Tambien
+* `Etapas disponibles:`
+    * lexer → análisis léxico
+    * parser → análisis sintáctico
+
+### Ejecutar todas las etapas
+Sino se especifica una etapa, el compilador las ejecutara todas en orden
 ```
 ./c-tds -target test/<archivo_fuente>
 ```
-Ejecuta todas las etapas
 
 ## Limpiar archivos generados
 ```
