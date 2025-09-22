@@ -17,7 +17,8 @@ typedef enum{
     NODE_IF_ELSE,
     NODE_WHILE,
     NODE_PYC,
-    NODE_INFO
+    NODE_INFO,
+    NODE_BLOCK
 }NodeType;
 
 /* Tipos de operaciones */
@@ -117,6 +118,10 @@ typedef struct MethCall_Info{
     VarType returnType;
 }MethCall_Info;
 
+typedef struct BlockInfo {
+    char* name;
+} BlockInfo;
+
 typedef struct ReturnInfo{
     VarType type;
     union values value;
@@ -139,6 +144,7 @@ union type{
     MethCall_Info METH_CALL;
     ReturnInfo RETURN;
     NodeInfo NODE_INFO;
+    BlockInfo BLOCK_INFO;
 };
 
 
@@ -151,6 +157,7 @@ node* create_if_else_node(node* expr, node* if_block, node* else_block);
 node* create_while_node(node* expr, node* block);
 node* create_meth_decl_node(char* name, Formal_P_List* f_params, VarType returnType, int is_extern);
 node* create_meth_call_node(char*name, Current_P_List* c_params);
+node* create_block_node(char* name);
 node* create_return_node(VarType type);
 node* create_node(char* info, VarType type);
 node* new_node(NodeType type);

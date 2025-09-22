@@ -301,6 +301,13 @@ node* create_meth_call_node(char*name, Current_P_List* c_params){
     return root;
 }
 
+node* create_block_node(char* name) {
+    node* root = new_node(NODE_BLOCK);
+    root->info->BLOCK_INFO.name = name;
+    
+    return root;
+}
+
 /**
  * Crea un nodo correspondiente a una sentencia return
  */

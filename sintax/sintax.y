@@ -108,7 +108,7 @@ args_list: type ID {
          ;
 
 block: LLAVE_L var_decls statements LLAVE_R {
-        node* block = create_node("block", NONE);
+        node* block = create_block_node("block");
         $$ = create_tree(block, $2, $3);
      }
      ;
