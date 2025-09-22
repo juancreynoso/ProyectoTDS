@@ -211,7 +211,7 @@ expr: ID { $$ = create_id_node($1, NONE, NODE_ID_USE); }
     }
     ;
 
-meth_call: ID PAREN_L param_call_method  PAREN_R {
+meth_call: ID PAREN_L param_call_method PAREN_R {
             $$ = create_meth_call_node($1 , $3);
          }
          ;

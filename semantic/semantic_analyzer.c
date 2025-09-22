@@ -1,6 +1,6 @@
 #include "semantic_analyzer.h"
-#include "type_checker.h"
-#include "expr_solver.h"
+//#include "type_checker.h"
+//#include "expr_solver.h"
 
 /*
   Dado un arbol como parametro, crea la tabla de simbolos
@@ -238,37 +238,37 @@ void print_symbol_table(symbol_table *table) {
 
 void add_formal_params_to_scope(tables_stack* stack, Formal_P_List* f_params) {
     Formal_P_List* cursor = f_params;
-    while (cursor != NULL) {
+    while (cursor->head != NULL) {
         union type* param_info = malloc(sizeof(union type));
-        param_info->ID.name = strdup(cursor->p.name); // se copia el nombre
-        param_info->ID.type = cursor->p.type;
+        param_info->ID.name = strdup(cursor->head->p.name); // se copia el nombre
+        param_info->ID.type = cursor->head->p.type;
         param_info->ID.value.num = 0; 
         
         // se agrega al scope actual
         symbol s;
         s.info = param_info;
-        printf("Se declara parámetro formal: %s \n", cursor->p.name);
+        printf("Se declara parámetro formal: %s \n", cursor->head->p.name);
         insert_symbol(&(stack->top->data), s, NODE_DECL);
         // Busco el proximo parametro
-        cursor = cursor->next;
+        cursor->head = cursor->head->next;
     }
 }
 
 void check_current_params(Current_P_List* c_params, tables_stack* stack, symbol_table* table) {
     Current_P_List* cursor = c_params;
     printf("Checking actual parameters\n");
-    while (cursor != NULL) {
-        if (cursor->p->type == NODE_ID_USE) {
-            union type* param = search_symbol(stack, cursor->p->info->ID.name);
+    while (cursor->head != NULL) {
+        if (cursor->head->p->type == NODE_ID_USE) {
+            union type* param = search_symbol(stack, cursor->head->p->info->ID.name);
             if (!param) {
-                printf("Error: Parámetro '%s' no declarado\n", cursor->p->info->ID.name);
+                printf("Error: Parámetro '%s' no declarado\n", cursor->head->p->info->ID.name);
                 exit(EXIT_FAILURE);
             }
-            printf("Parámetro '%s' encontrado\n", cursor->p->info->ID.name);
+            printf("Parámetro '%s' encontrado\n", cursor->head->p->info->ID.name);
         } else {
-            semantic_analysis_recursive(cursor->p, stack, table);
+            semantic_analysis_recursive(cursor->head->p, stack, table);
         }
-        cursor = cursor->next;
+        cursor->head = cursor->head->next;
     }
 }
 

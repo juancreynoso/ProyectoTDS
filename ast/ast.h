@@ -57,16 +57,28 @@ typedef struct Formal_P{
     VarType type;
 }Formal_P;
 
+/* Nodo de la lista de parametros formales */
+typedef struct Node_P_List{
+    Formal_P p;
+    struct Node_P_List* next;
+}Node_P_List;
+
 /* Lista de parametros formales */
 typedef struct Formal_P_List{
-    Formal_P p;
-    struct Formal_P_List* next;
+    Node_P_List* head;
+    int size;
 }Formal_P_List;
+
+/* Nodo de la lista de parametros reales */
+typedef struct Node_C_List {
+    node* p;
+    struct Node_C_List* next;
+}Node_C_List;
 
 /* Lista de parametros reales */
 typedef struct Current_P_List{
-    node* p;
-    struct Current_P_List* next;
+    Node_C_List* head;
+    int size;
 }Current_P_List;
 
 /* ---- Estructuras correspondientes a los distintos tipos de nodo ---- */
