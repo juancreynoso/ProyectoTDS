@@ -47,21 +47,44 @@ void semantic_analysis_recursive(node* root, tables_stack* stack, symbol_table* 
             printf("<<< Cierra scope (METH)\n");
             break;
         }
-        case NODE_IF_ELSE:
+        case NODE_IF_ELSE: {
+            // Los bloques IF y ELSE estan al mismo nivel pero son diferentes y no se ven entre sí
+            if (root->info->IF_ELSE.if_block) {
+                symbol_table* new_table = NULL;
+                push(stack, new_table);
+                printf(">>> Nuevo scope (IF)\n");
+                semantic_analysis_recursive(root->info->IF_ELSE.if_block, stack, stack->top->data);
+                printf("Scope IF antes de cerrarlo:\n");
+                print_symbol_table(stack->top->data);
+                pop(stack);
+                printf("<<< Cierra scope (IF)\n");
+            }
+
+            if (root->info->IF_ELSE.else_block) {
+                symbol_table* new_table = NULL;
+                push(stack, new_table);
+                printf(">>> Nuevo scope (ELSE)\n");
+                semantic_analysis_recursive(root->info->IF_ELSE.else_block, stack, stack->top->data);
+                printf("Scope ELSE antes de cerrarlo:\n");
+                print_symbol_table(stack->top->data);
+                pop(stack);
+                printf("<<< Cierra scope (ELSE)\n");
+            }
+            break;
+        }
         case NODE_WHILE: {
             // Nuevo scope
             symbol_table* new_table = NULL;
             push(stack, new_table);
-            printf(">>> Nuevo scope (WHILE/IF)\n");
+            printf(">>> Nuevo scope (WHILE)\n");
 
-            semantic_analysis_recursive(root->left, stack, stack->top->data);
-            semantic_analysis_recursive(root->right, stack, stack->top->data);
+            semantic_analysis_recursive(root->info->WHILE.block, stack, stack->top->data);
 
-            printf("Contenido del scope antes de cerrarlo:\n");
+            printf("Scope WHILE antes de cerrarlo:\n");
             print_symbol_table(stack->top->data);
 
             pop(stack);
-            printf("<<< Cierra scope ((WHILE/IF))\n");
+            printf("<<< Cierra scope (WHILE)\n");
             break;
         }
 
@@ -151,6 +174,8 @@ union type* search_symbol(tables_stack *stack, char* name) {
                 case NODE_DECL_METH:
                     symbol_name = cursor->s.info->METH_DECL.name;
                     break;
+                default:
+                    break;
             }
             
             if (strcmp(symbol_name, name) == 0) {
@@ -199,6 +224,8 @@ void print_symbol_table(symbol_table *table) {
                        cursor->s.info->METH_DECL.returnType == TYPE_INT ? "INT" : 
                        cursor->s.info->METH_DECL.returnType == TYPE_BOOL ? "BOOL" : "VOID");
                 break;
+            default:
+                break;;
         }
         
         if (cursor->next != NULL) {
