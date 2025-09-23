@@ -38,7 +38,7 @@ typedef struct tables_stack {   // Stack
     node_s* top;             // apunta al tope de la pila (cabeza de la lista)
 } tables_stack;
 
-void semantic_analysis_recursive(node* root, tables_stack* stack, symbol_table* table);
+void semantic_analysis_recursive(node* root, tables_stack* stack, symbol_table* table, node* parent);
 tables_stack* analyze_semantics(node* root);
 void insert_symbol(symbol_table **table, symbol s, NodeType nodeType);
 union type* search_symbol(tables_stack *stack, char* name);
