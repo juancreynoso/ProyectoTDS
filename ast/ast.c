@@ -452,6 +452,9 @@ void print_node(node *root, int level) {
         case NODE_INFO:
              printf("%s\n", root->info->NODE_INFO.info ? root->info->NODE_INFO.info : "NULL");
             break;
+        case NODE_BLOCK: 
+            printf("block \n");
+            break;
         default:
             printf("UNKNOWN NODE\n");
             break;
