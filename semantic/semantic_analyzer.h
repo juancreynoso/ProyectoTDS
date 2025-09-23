@@ -45,7 +45,9 @@ union type* search_symbol(tables_stack *stack, char* name);
 union type* search_in_table(symbol_table* table, char* name);
 void print_symbol_table(symbol_table *table);
 void add_formal_params_to_scope(tables_stack* stack, Formal_P_List* f_params);
-void check_current_params(Current_P_List* c_params, tables_stack* stack, symbol_table* table);
+int verify_method_params(Formal_P_List* formal_params, Current_P_List* actual_params, tables_stack* stack, char* method_name);
+VarType get_expression_type(node* root, tables_stack* stack);
+char* type_to_string(int type);
 
 tables_stack* create_stack();
 void push(tables_stack* stack, symbol_table* table);

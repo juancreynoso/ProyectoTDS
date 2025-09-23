@@ -129,11 +129,18 @@ void semantic_analysis_recursive(node* root, tables_stack* stack, symbol_table* 
                 printf("Error: Método '%s' no declarado\n", root->info->METH_CALL.name);
                 exit(EXIT_FAILURE);
             }
-            printf("Call method: %s\n", root->info->METH_CALL.name);
             
+            // Verificación completa de signatura
             if (root->info->METH_CALL.c_params != NULL) {
-                check_current_params(root->info->METH_CALL.c_params, stack, table);
+                if (!verify_method_params(method->METH_DECL.f_params, root->info->METH_CALL.c_params, stack, root->info->METH_CALL.name)) {
+                    exit(EXIT_FAILURE);
+                }
+            } else if (method->METH_DECL.f_params->size > 0) {
+                printf("Error: método '%s' requiere parámetros\n", root->info->METH_CALL.name);
+                exit(EXIT_FAILURE);
             }
+            
+            printf("Call method: %s\n", root->info->METH_CALL.name);
             break;
         }
 
@@ -285,47 +292,153 @@ void print_symbol_table(symbol_table *table) {
  * @param f_params Lista de parámetros formales del método
  */
 void add_formal_params_to_scope(tables_stack* stack, Formal_P_List* f_params) {
-    Formal_P_List* cursor = f_params;
-    while (cursor->head != NULL) {
+    if (!f_params || !f_params->head) return;
+    
+    Node_P_List* cursor = f_params->head;
+    while (cursor != NULL) {
         union type* param_info = malloc(sizeof(union type));
-        param_info->ID.name = strdup(cursor->head->p.name); // se copia el nombre
-        param_info->ID.type = cursor->head->p.type;
+        param_info->ID.name = strdup(cursor->p.name);
+        param_info->ID.type = cursor->p.type;
         param_info->ID.value.num = 0; 
         
-        // se agrega al scope actual
         symbol s;
         s.info = param_info;
-        printf("Se declara parámetro formal: %s \n", cursor->head->p.name);
+        printf("Se declara parámetro formal: %s\n", cursor->p.name);
         insert_symbol(&(stack->top->data), s, NODE_DECL);
-        // Busco el proximo parametro
-        cursor->head = cursor->head->next;
+        
+        cursor = cursor->next;
     }
 }
+
 
 /**
  * Verifica que los parámetros actuales de una llamada a método estén declarados.
  * Recorre la lista de argumentos actuales y valida que cada variable utilizada exista.
  * Para expresiones complejas, delega el análisis a la función recursiva principal.
- * @param c_params Lista de parámetros actuales de la llamada
+ * @param actual_params Lista de parámetros actuales de la llamada
+ * @param formal_params Lista de parámetros formales del método
  * @param stack Pila de scopes para búsqueda de símbolos
  * @param table Tabla del scope actual
  */
-void check_current_params(Current_P_List* c_params, tables_stack* stack, symbol_table* table) {
-    Current_P_List* cursor = c_params;
-    printf("Checking current parameters...\n");
-    while (cursor->head != NULL) {
-        if (cursor->head->p->type == NODE_ID_USE) {
-            union type* param = search_symbol(stack, cursor->head->p->info->ID.name);
-            if (!param) {
-                printf("Error: Parámetro '%s' no declarado\n", cursor->head->p->info->ID.name);
-                exit(EXIT_FAILURE);
-            }
-            printf("Parámetro '%s' encontrado\n", cursor->head->p->info->ID.name);
-        } else {
-            semantic_analysis_recursive(cursor->head->p, stack, table, NULL);
-        }
-        cursor->head = cursor->head->next;
+int verify_method_params(Formal_P_List* formal_params, Current_P_List* actual_params, tables_stack* stack, char* method_name) {
+    if (!formal_params || !actual_params) {
+        printf("Error: parámetros NULL\n");
+        return 0;
     }
+    // Verificar cantidad
+    if (formal_params->size != actual_params->size) {
+        printf("Error: método '%s' espera %d parámetros, se pasaron %d\n", method_name, formal_params->size, actual_params->size);
+        return 0;
+    }
+    
+    // Verificar compatibilidad 1 a 1
+    Node_P_List* formal_cursor = formal_params->head;
+    Node_C_List* actual_cursor = actual_params->head;
+
+    for (int i = 0; i < formal_params->size; i++) {
+        VarType formal_p = formal_cursor->p.type;
+        VarType actual_p = get_expression_type(actual_cursor->p, stack);
+
+        if (formal_p != actual_p) {
+            printf("Error: tipos incompatibles, Esperado '%s', Recibido: '%s' \n", 
+                type_to_string(formal_p), type_to_string(actual_p));
+            exit(EXIT_FAILURE);
+        }
+        formal_cursor = formal_cursor->next;
+        actual_cursor = actual_cursor->next;
+    }
+    return 1;
+}
+
+VarType get_expression_type(node* root, tables_stack* stack) {
+    if (root == NULL) {
+        return NONE;
+    }
+
+    if (root->left == NULL && root->right == NULL) {
+        switch(root->type) {
+            case NODE_NUM:
+                return TYPE_INT;
+                break;
+            case NODE_BOOL:
+                return TYPE_BOOL;
+                break;
+            case NODE_ID_USE: {
+                union type* var_info = search_symbol(stack, root->info->ID.name);
+                if (!var_info) {
+                    printf("Error: variable '%s' no encontrada para verificación de tipos\n", root->info->ID.name);
+                    return NONE;
+                }
+                return var_info->ID.type;
+            }
+            case NODE_DECL:
+                return root->info->ID.type;
+                break;
+            default:
+                break;
+        }
+    }
+
+    if (root->left != NULL && root->right == NULL) {
+       return get_expression_type(root->left, stack);
+    }
+
+    if (root->left == NULL && root->right != NULL) {
+        return get_expression_type(root->right, stack);
+    }
+
+    if (root->left != NULL && root->right != NULL) {
+        VarType leftType = get_expression_type(root->left, stack);
+        VarType rightType = get_expression_type(root->right, stack);
+
+        switch (root->info->OP.name) {
+            case OP_PLUS:
+            case OP_SUB:
+            case OP_DIV:
+            case OP_MULT:
+                if(leftType != TYPE_INT || rightType != TYPE_INT) {
+                    printf("Error de tipos. Requiere tipo entero\n");
+                    exit(EXIT_FAILURE); 
+                }
+
+                root->info->OP.type = leftType;
+                return leftType;
+                break;
+
+            case OP_ASSIGN:
+                if(leftType != rightType) {
+                    printf("Error: tipos incompatibles, Esperado '%s', Recibido: '%s' \n", 
+                type_to_string(leftType), type_to_string(rightType));
+                    exit(EXIT_FAILURE); 
+                }
+                root->info->OP.type = leftType;
+                return leftType;
+                break;   
+            case OP_OR:
+            case OP_AND:
+
+                if(leftType != TYPE_BOOL || rightType!= TYPE_BOOL) {
+                    printf("Error de tipos. Requiere tipo booleano\n");
+                    exit(EXIT_FAILURE); 
+                }
+                root->info->OP.type = leftType;
+                return leftType;
+                break;
+            default:
+                printf("Operacion desconocida.\n");
+                return leftType;
+                break;
+        }
+        
+    }
+    printf("Error\n");
+    exit(EXIT_FAILURE); 
+}
+
+char* type_to_string(int type) {
+    if (type == 0) return "integer";
+    else if (type == 1) return "bool";
+    return "None";
 }
 
 /**
