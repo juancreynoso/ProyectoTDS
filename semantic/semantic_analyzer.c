@@ -144,6 +144,21 @@ void semantic_analysis_recursive(node* root, tables_stack* stack, symbol_table* 
             break;
         }
 
+        case NODE_OP: {
+            switch(root->info->OP.name) {
+                case OP_ASSIGN:{
+                    semantic_analysis_recursive(root->left, stack, table, NULL);
+                    semantic_analysis_recursive(root->right, stack, table, NULL);
+                    get_expression_type(root, stack);
+                    break; 
+                }
+                default: {
+                    break;
+                }
+            }
+            break;
+        }
+
         default:
             semantic_analysis_recursive(root->left, stack, table, NULL);
             semantic_analysis_recursive(root->right, stack, table, NULL);
@@ -380,7 +395,30 @@ VarType get_expression_type(node* root, tables_stack* stack) {
     }
 
     if (root->left != NULL && root->right == NULL) {
-       return get_expression_type(root->left, stack);
+        if (root->type == NODE_OP) {
+            VarType leftType = get_expression_type(root->left, stack);
+
+            switch (root->info->OP.name) {
+                case OP_NOT:
+                    if (leftType != TYPE_BOOL) {
+                            printf("Error de tipos. Requiere tipo booleano\n");
+                            exit(EXIT_FAILURE);
+                    }
+                    return root->info->OP.type = leftType;
+                    break;
+                case OP_MINUS:
+                    if (leftType != TYPE_INT) {
+                            printf("Error de tipos. Requiere tipo entero\n");
+                            exit(EXIT_FAILURE);
+                    }
+                    return root->info->OP.type = leftType;
+                    break;
+                default:
+                    break;
+            }
+        } else {
+            return get_expression_type(root->left, stack);
+        }
     }
 
     if (root->left == NULL && root->right != NULL) {
@@ -396,6 +434,7 @@ VarType get_expression_type(node* root, tables_stack* stack) {
             case OP_SUB:
             case OP_DIV:
             case OP_MULT:
+            case OP_REST:
                 if(leftType != TYPE_INT || rightType != TYPE_INT) {
                     printf("Error de tipos. Requiere tipo entero\n");
                     exit(EXIT_FAILURE); 
