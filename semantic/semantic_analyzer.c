@@ -34,6 +34,8 @@ void semantic_analysis_recursive(node* root, tables_stack* stack, symbol_table* 
         case NODE_DECL_METH: {
             symbol s;
             s.info = root->info;
+            printf("Ret type: %s\n", type_to_string(root->info->METH_DECL.returnType));
+            check_return_type(root, root->info->METH_DECL.returnType, stack);
             printf("Se declara nuevo método: %s\n", s.info->METH_DECL.name);
             insert_symbol(&(stack->top->data), s, root->type);
             
@@ -435,10 +437,32 @@ VarType get_expression_type(node* root, tables_stack* stack) {
     exit(EXIT_FAILURE); 
 }
 
+/*
+ * Realiza el chequeo de tipos entre el retorno y el perfil de la funcion
+ */
+void check_return_type(node* root, VarType f_returnType, tables_stack* stack) {
+    if (root == NULL ) {
+        return ;
+    }
+
+    if (root->type == NODE_RET) {
+        VarType retType = get_expression_type(root, stack);
+        if (retType !=  f_returnType) {
+            printf("ERROR - tipo de retorno incompatible\n");
+            printf("%s f \n", type_to_string(f_returnType));
+            printf("return expr: %s\n", type_to_string(retType));
+            exit(EXIT_FAILURE);
+        }
+    } else {
+        check_return_type(root->left, f_returnType, stack);
+        check_return_type(root->right, f_returnType, stack);
+    }
+}
+
 char* type_to_string(int type) {
     if (type == 0) return "integer";
     else if (type == 1) return "bool";
-    return "None";
+    return "void";
 }
 
 /**
