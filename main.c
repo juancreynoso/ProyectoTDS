@@ -100,6 +100,7 @@ int main(int argc, char *argv[]) {
                 printf("Parseado correctamente, sin errores sintactico.\n");
                 printf("\n--- AST ----\n");
                 print_tree(root, 0);
+                analyze_semantics(root);
             }
             fclose(input_file);    
         } else {
