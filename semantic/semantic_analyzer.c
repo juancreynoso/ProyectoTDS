@@ -62,6 +62,11 @@ void semantic_analysis_recursive(node* root, tables_stack* stack, symbol_table* 
         }
 
         case NODE_IF_ELSE: {
+            VarType cond_type = get_expression_type(root->info->IF_ELSE.expr, stack);
+            if (cond_type != TYPE_BOOL) {
+                printf("Error: la condición del IF debe ser bool\n");
+                exit(EXIT_FAILURE);
+            }
             semantic_analysis_recursive(root->info->IF_ELSE.expr, stack, table, NULL);
             
             if (root->info->IF_ELSE.if_block) {
@@ -74,6 +79,11 @@ void semantic_analysis_recursive(node* root, tables_stack* stack, symbol_table* 
         }
 
         case NODE_WHILE: {
+            VarType cond_type = get_expression_type(root->info->WHILE.expr, stack);
+            if (cond_type != TYPE_BOOL) {
+                printf("Error: la condición del WHILE debe ser bool\n");
+                exit(EXIT_FAILURE);
+            }
             semantic_analysis_recursive(root->info->WHILE.expr, stack, table, NULL);
             semantic_analysis_recursive(root->info->WHILE.block, stack, table, root);
             break;
@@ -461,7 +471,7 @@ VarType get_expression_type(node* root, tables_stack* stack) {
 
                 root->info->OP.type = leftType;
                 return leftType;
-                break;
+                break;         
 
             case OP_ASSIGN:
                 if(leftType != rightType) {
@@ -482,6 +492,10 @@ VarType get_expression_type(node* root, tables_stack* stack) {
                 root->info->OP.type = leftType;
                 return leftType;
                 break;
+            case OP_EQUALS:
+            case OP_GT:
+            case OP_LT:
+                return TYPE_BOOL;
             default:
                 printf("Operacion desconocida.\n");
                 return leftType;
