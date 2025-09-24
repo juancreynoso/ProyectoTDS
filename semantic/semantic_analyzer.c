@@ -1,6 +1,9 @@
 #include "semantic_analyzer.h"
+#include <string.h>
 //#include "type_checker.h"
 //#include "expr_solver.h"
+
+int exists_main = 0;
 
 /**
  * Función principal que inicia el análisis semántico del AST.
@@ -12,9 +15,16 @@ tables_stack* analyze_semantics(node* root) {
         tables_stack *stack = create_stack();
         symbol_table *table = NULL;
         push(stack, table);
+
         printf(">>> Se crea scope global\n");
         semantic_analysis_recursive(root, stack, table, NULL);
         printf("<<< Se cierra scope global\n");
+
+        if (exists_main == 0){
+            printf("Error. El programa debe incluir un metodo MAIN\n");
+            exit(EXIT_FAILURE);
+        }
+
         return stack;
 }
 
@@ -34,6 +44,15 @@ void semantic_analysis_recursive(node* root, tables_stack* stack, symbol_table* 
         case NODE_DECL_METH: {
             symbol s;
             s.info = root->info;
+
+            if (strcmp(s.info->METH_DECL.name, "main") == 0) {
+                if(exists_main == 1){
+                    printf("\nError. No se puede declarar mas de un metodo MAIN \n");
+                    exit(EXIT_FAILURE);
+                }
+                exists_main = 1;
+            }
+
             printf("Se declara nuevo método: %s\n", s.info->METH_DECL.name);
             insert_symbol(&(stack->top->data), s, root->type);
             
