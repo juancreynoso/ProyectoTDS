@@ -36,7 +36,7 @@
 %right NOT
 %right MINUS
 
-%type <nd> declarations declaration var_decl var_decls meth_decl expr block meth_call statement statements if_else
+%type <nd> declarations declaration var_decl var_decls meth_decl expr block meth_call statement statements if_else ret
 %type <f_params> meth_args args_list 
 %type <c_params> param_call_method param_list
 %type <vType> type
@@ -131,23 +131,32 @@ statement: ID ASSIGN expr PYC {
             node* id = create_id_node($1, NONE, NODE_ID_USE);
             node* op = create_op_node(OP_ASSIGN, NONE);
             $$ = create_tree(op, id, $3);
-         }
-         | meth_call PYC {
-            $$ = $1;
-         }
-         | IF PAREN_L expr PAREN_R THEN block if_else {
-            $$ = create_if_else_node($3, $6, $7);
-         }
-         | WHILE expr block {
-            $$ = create_while_node($2, $3);
-         }
-         | RETURN expr PYC {
-            node* ret = create_node("ret", NONE);
-            $$ = create_tree(ret, $2, NULL);
-         }
-         | PYC {$$ = new_node(NODE_PYC); }
-         | block { $$ = $1; }
-         ;
+            }
+            | meth_call PYC {
+                $$ = $1;
+            }
+            | IF PAREN_L expr PAREN_R THEN block if_else {
+                $$ = create_if_else_node($3, $6, $7);
+            }
+            | WHILE expr block {
+                $$ = create_while_node($2, $3);
+            }
+            | ret { $$ = $1; }
+            | PYC {$$ = new_node(NODE_PYC); }
+            | block { $$ = $1; }
+            ;
+
+
+ret: RETURN PYC {
+        node* ret = create_return_node(NONE);
+        $$ = create_tree(ret, NULL, NULL);
+    }
+    |
+    RETURN expr PYC {
+        node* ret = create_return_node(NONE);
+        $$ = create_tree(ret, $2, NULL);
+    }
+    ;
 
 if_else: { $$ = NULL; }
        | ELSE block {
