@@ -4,6 +4,7 @@
 //#include "expr_solver.h"
 
 int exists_main = 0;
+static VarType current_return_type = NONE;
 
 /**
  * Función principal que inicia el análisis semántico del AST.
@@ -56,8 +57,13 @@ void semantic_analysis_recursive(node* root, tables_stack* stack, symbol_table* 
             printf("Se declara nuevo método: %s\n", s.info->METH_DECL.name);
             insert_symbol(&(stack->top->data), s, root->type);
             
+            VarType previous_return_type = current_return_type;
+            current_return_type = root->info->METH_DECL.returnType;
+            
             semantic_analysis_recursive(root->left, stack, table, root);
             semantic_analysis_recursive(root->right, stack, table, root);
+            
+            current_return_type = previous_return_type;
             break;
         }
 
@@ -159,7 +165,6 @@ void semantic_analysis_recursive(node* root, tables_stack* stack, symbol_table* 
                 exit(EXIT_FAILURE);
             }
             
-            // Verificación completa de signatura
             if (root->info->METH_CALL.c_params != NULL) {
                 if (!verify_method_params(method->METH_DECL.f_params, root->info->METH_CALL.c_params, stack, root->info->METH_CALL.name)) {
                     exit(EXIT_FAILURE);
@@ -184,6 +189,17 @@ void semantic_analysis_recursive(node* root, tables_stack* stack, symbol_table* 
                 default: {
                     break;
                 }
+            }
+            break;
+        }
+
+        case NODE_RET: {
+            semantic_analysis_recursive(root->left, stack, table, NULL);
+            VarType return_type = get_expression_type(root->left, stack);
+            if (return_type != current_return_type) {
+                printf("Error: tipo de retorno incompatible. Esperado '%s', Recibido '%s'\n", 
+                    type_to_string(current_return_type), type_to_string(return_type));
+                exit(EXIT_FAILURE);
             }
             break;
         }
