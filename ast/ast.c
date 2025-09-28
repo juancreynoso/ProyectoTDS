@@ -3,24 +3,6 @@
 #include <string.h>
 #include "ast.h"
 
-/** 
- * Devuelve un string por cada valor del enumerado VariableType 
- * Utilizado para mostrar resultados mas claros 
- */
-char* var_type_to_string(VarType type){
-    switch(type){
-        case TYPE_INT:
-            return "int";
-            break;
-        case TYPE_BOOL:
-            return "bool";
-            break; 
-        case NONE:
-            return "void";
-            break;
-    }
-}
-
 /**
  * Construye una cadena que representa la lista de parametros
  */ 
@@ -39,7 +21,7 @@ char* list_to_string(Formal_P_List* f_params) {
     while (cursor != NULL) {
         char buffer[128];
 
-        sprintf(buffer, "%s %s", var_type_to_string(cursor->p.type), cursor->p.name);
+        sprintf(buffer, "%s %s", type_to_string(cursor->p.type), cursor->p.name);
         strcat(result, buffer);
         if (cursor->next != NULL) {
             strcat(result, ", ");
@@ -135,6 +117,7 @@ void expr_to_str(node* root){
                     printf(" OP? "); 
                     break;
             }
+            break;
         default: printf("NO es una expresion"); break;
     }
 

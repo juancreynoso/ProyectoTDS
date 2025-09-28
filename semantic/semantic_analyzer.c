@@ -59,6 +59,8 @@ void semantic_analysis_recursive(node* root, tables_stack* stack, symbol_table* 
             
             VarType previous_return_type = current_return_type;
             current_return_type = root->info->METH_DECL.returnType;
+
+            printf("tipo anterior: %s tipo actual %s \n", type_to_string(previous_return_type), type_to_string(current_return_type));
             
             semantic_analysis_recursive(root->left, stack, table, root);
             semantic_analysis_recursive(root->right, stack, table, root);
@@ -159,6 +161,7 @@ void semantic_analysis_recursive(node* root, tables_stack* stack, symbol_table* 
         }
 
         case NODE_CALL_METH: {
+            
             union type* method = search_symbol(stack, root->info->METH_CALL.name);
             if (!method) {
                 printf("Error: Método '%s' no declarado\n", root->info->METH_CALL.name);
@@ -168,13 +171,15 @@ void semantic_analysis_recursive(node* root, tables_stack* stack, symbol_table* 
             if (root->info->METH_CALL.c_params != NULL) {
                 if (!verify_method_params(method->METH_DECL.f_params, root->info->METH_CALL.c_params, stack, root->info->METH_CALL.name)) {
                     exit(EXIT_FAILURE);
+                }           
+            } else if(method->METH_DECL.f_params != NULL){
+                if (method->METH_DECL.f_params->size > 0) {
+                    printf("Error: método '%s' requiere %d  parámetro \n", root->info->METH_CALL.name, method->METH_DECL.f_params->size);
+                    exit(EXIT_FAILURE);
                 }
-            } else if (method->METH_DECL.f_params->size > 0) {
-                printf("Error: método '%s' requiere parámetros\n", root->info->METH_CALL.name);
-                exit(EXIT_FAILURE);
-            }
-            
-            printf("Call method: %s\n", root->info->METH_CALL.name);
+            } 
+            root->info->METH_CALL.returnType = method->METH_DECL.returnType;
+            printf("Call method: %s %s\n", root->info->METH_CALL.name, type_to_string(root->info->METH_CALL.returnType));
             break;
         }
 
@@ -381,8 +386,8 @@ void add_formal_params_to_scope(tables_stack* stack, Formal_P_List* f_params) {
  * @param table Tabla del scope actual
  */
 int verify_method_params(Formal_P_List* formal_params, Current_P_List* actual_params, tables_stack* stack, char* method_name) {
-    if (!formal_params || !actual_params) {
-        printf("Error: parámetros NULL\n");
+    if (!formal_params) {
+        printf("Error: %s no posee parametros en su definicion\n", method_name);
         return 0;
     }
     // Verificar cantidad
@@ -433,6 +438,9 @@ VarType get_expression_type(node* root, tables_stack* stack) {
             }
             case NODE_DECL:
                 return root->info->ID.type;
+                break;
+            case NODE_CALL_METH:
+                return root->info->METH_CALL.returnType;
                 break;
             default:
                 break;
@@ -543,12 +551,6 @@ void check_return_type(node* root, VarType f_returnType, tables_stack* stack) {
         check_return_type(root->left, f_returnType, stack);
         check_return_type(root->right, f_returnType, stack);
     }
-}
-
-char* type_to_string(int type) {
-    if (type == 0) return "integer";
-    else if (type == 1) return "bool";
-    return "void";
 }
 
 /**

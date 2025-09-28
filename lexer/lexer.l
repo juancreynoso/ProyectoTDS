@@ -73,7 +73,7 @@ val_bool true|false
 
 ";"         { printf("PYC\n"); return PYC; }
 
-.           { printf("Error léxico: caracter no reconocido '%s'\n", yytext);
+.           { printf("Error léxico: caracter no reconocido '%s' en linea %d \n", yytext, yylineno);
               exit(EXIT_FAILURE); }
 
 "//".*      { /* ignorar comentario de línea */ }

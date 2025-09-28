@@ -8,4 +8,6 @@ typedef enum {
     NONE
 } VarType;
 
+char* type_to_string(int type);
+
 #endif
