@@ -59,8 +59,6 @@ void semantic_analysis_recursive(node* root, tables_stack* stack, symbol_table* 
             
             VarType previous_return_type = current_return_type;
             current_return_type = root->info->METH_DECL.returnType;
-
-            printf("tipo anterior: %s tipo actual %s \n", type_to_string(previous_return_type), type_to_string(current_return_type));
             
             semantic_analysis_recursive(root->left, stack, table, root);
             semantic_analysis_recursive(root->right, stack, table, root);
@@ -151,7 +149,7 @@ void semantic_analysis_recursive(node* root, tables_stack* stack, symbol_table* 
         }
 
         case NODE_ID_USE: {
-            union type* info = search_symbol(stack, root->info->ID.name); 
+            union type* info = search_symbol(stack, root->info->ID.name, NODE_DECL); 
             if (!info) {
                 printf("Error: Variable '%s' no declarada\n", root->info->ID.name);
                 exit(EXIT_FAILURE);
@@ -162,7 +160,7 @@ void semantic_analysis_recursive(node* root, tables_stack* stack, symbol_table* 
 
         case NODE_CALL_METH: {
             
-            union type* method = search_symbol(stack, root->info->METH_CALL.name);
+            union type* method = search_symbol(stack, root->info->METH_CALL.name, NODE_DECL_METH);
             if (!method) {
                 printf("Error: Método '%s' no declarado\n", root->info->METH_CALL.name);
                 exit(EXIT_FAILURE);
@@ -174,12 +172,12 @@ void semantic_analysis_recursive(node* root, tables_stack* stack, symbol_table* 
                 }           
             } else if(method->METH_DECL.f_params != NULL){
                 if (method->METH_DECL.f_params->size > 0) {
-                    printf("Error: método '%s' requiere %d  parámetro \n", root->info->METH_CALL.name, method->METH_DECL.f_params->size);
+                    printf("Error: método '%s' requiere %d parámetro/s \n", root->info->METH_CALL.name, method->METH_DECL.f_params->size);
                     exit(EXIT_FAILURE);
                 }
             } 
             root->info->METH_CALL.returnType = method->METH_DECL.returnType;
-            printf("Call method: %s %s\n", root->info->METH_CALL.name, type_to_string(root->info->METH_CALL.returnType));
+            printf("Call method: %s %s\n", type_to_string(root->info->METH_CALL.returnType),  root->info->METH_CALL.name);
             break;
         }
 
@@ -261,7 +259,7 @@ void insert_symbol(symbol_table **table, symbol s, NodeType node_type) {
  * @param name Nombre del símbolo a buscar
  * @return Puntero a la información del símbolo encontrado, NULL si no existe
  */
-union type* search_symbol(tables_stack *stack, char* name) {
+union type* search_symbol(tables_stack *stack, char* name, NodeType type) {
     for (node_s* scope = stack->top; scope != NULL; scope = scope->next) {
         symbol_table* cursor = scope->data;
         while (cursor != NULL) {
@@ -279,7 +277,7 @@ union type* search_symbol(tables_stack *stack, char* name) {
                     break;
             }
             
-            if (strcmp(symbol_name, name) == 0) {
+            if (strcmp(symbol_name, name) == 0 && cursor->nodeType == type) {
                 return cursor->s.info;
             }
             cursor = cursor->next;
@@ -405,7 +403,7 @@ int verify_method_params(Formal_P_List* formal_params, Current_P_List* actual_pa
         VarType actual_p = get_expression_type(actual_cursor->p, stack);
 
         if (formal_p != actual_p) {
-            printf("Error: tipos incompatibles, Esperado '%s', Recibido: '%s' \n", 
+            printf("Error en %s: tipos de parametros incompatibles, Esperado '%s', Recibido: '%s' \n", method_name,
                 type_to_string(formal_p), type_to_string(actual_p));
             exit(EXIT_FAILURE);
         }
@@ -429,10 +427,10 @@ VarType get_expression_type(node* root, tables_stack* stack) {
                 return TYPE_BOOL;
                 break;
             case NODE_ID_USE: {
-                union type* var_info = search_symbol(stack, root->info->ID.name);
+                union type* var_info = search_symbol(stack, root->info->ID.name, NODE_DECL);
                 if (!var_info) {
                     printf("Error: variable '%s' no encontrada para verificación de tipos\n", root->info->ID.name);
-                    return NONE;
+                    exit(EXIT_FAILURE);
                 }
                 return var_info->ID.type;
             }

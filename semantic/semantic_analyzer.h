@@ -8,7 +8,7 @@
 #include "ast.h"
 
 /*
-    Estructura de los simbolos que se guardan en la tabla
+ Estructura de los simbolos que se guardan en la tabla
 */
 typedef struct symbol {
     union type *info;
@@ -41,7 +41,7 @@ typedef struct tables_stack {   // Stack
 void semantic_analysis_recursive(node* root, tables_stack* stack, symbol_table* table, node* parent);
 tables_stack* analyze_semantics(node* root);
 void insert_symbol(symbol_table **table, symbol s, NodeType nodeType);
-union type* search_symbol(tables_stack *stack, char* name);
+union type* search_symbol(tables_stack *stack, char* name, NodeType type);
 union type* search_in_table(symbol_table* table, char* name);
 void print_symbol_table(symbol_table *table);
 void add_formal_params_to_scope(tables_stack* stack, Formal_P_List* f_params);

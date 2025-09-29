@@ -7,7 +7,20 @@
 </head>
 <body>
   <header>
-    <h1>Análisis Semantico</h1>
+    <header>
+      <h1>Análisis Sintáctico</h1>
+      <nav>
+        <ul>
+          <li><a href="index.html">Inicio</a></li>
+          <li><a href="01_analisis_lexico.html">Análisis Léxico</a></li>
+          <li><a href="02_analisis_sintactico.html">Análisis Sintáctico</a></li>
+          <li><a href="03_analisis_semantico.html">Análisis Semántico</a></li>
+          <li><a href="04_codigo_intermedio.html">Generación de Código Intermedio</a></li>
+          <li><a href="05_codigo_objeto.html">Generación de Código Objeto</a></li>
+          <li><a href="06_optimizacion.html">Optimización</a></li>
+        </ul>
+      </nav>
+    </header>
   </header>
   
   <main>
@@ -26,6 +39,7 @@
     Esta variable permite transferir el valor semántico asociado a cada token. Por ejemplo, cuando el analizador léxico reconoce una cadena que 
     representa un número entero, retorna el token correspondiente y, mediante yylval, también pasa el valor numérico. De esta manera,
     el analizador sintáctico puede utilizar esa información en las acciones semánticas para construir los nodos del AST.
+    <h3>Un ejemplo de construccion de un nodo</h3>
     <p>En el analizador lexico:</p>
     <pre>
     ...
@@ -54,9 +68,43 @@
       tambien permite determinar a que tipos de datos estan asociados los simbolos terminales y no terminales de la gramatica el
       cual nos favorece para armar el ast. Esto nos permite hacer uso de la notacion <i>$$ y $1, $2, ... $n</i> para poder armar el arbol. 
     </p>
-    
-    <h1>Generacion de la tabla de simbolos</h1>
-    <h1>Chequeo de tipos</h1>
+
+    <h2>Generación de la Tabla de Símbolos y Chequeo de Tipos</h2>
+    <p>
+      La construcción del <b>AST</b> facilita la creación de la <b>tabla de símbolos</b>, 
+      una estructura que permite almacenar información sobre los diferentes identificadores declarados en el programa, 
+      como funciones y variables. Gracias a esta tabla es posible realizar distintos tipos de chequeos, 
+      entre ellos la verificación de declaraciones de variables, la coherencia de los tipos de retorno, 
+      la compatibilidad de tipos en expresiones y operaciones, así como el correcto uso de los identificadores. Es importante destacar que 
+      a diferencia de la tabla de simbolos implementada en el pre proyecto, esta puede manejar multiples scopes
+    </p>
+
+    <p>
+      El proceso se realiza de manera <b>recursiva</b>, recorriendo el árbol desde la raíz y visitando cada nodo. 
+      Durante este recorrido se va <b>construyendo la tabla de símbolos</b> e incorporando nuevos identificadores a medida 
+      que se detectan declaraciones, al mismo tiempo que se ejecutan los <b>chequeos semánticos</b> necesarios para garantizar 
+      la validez del programa.
+    </p>
+
+    <p>
+      Algunos de los chequeos que se realizan son:
+      <ul>
+        <li><b>Declaraciones:</b> Verificar que una variable esté declarada antes de ser utilizada.</li>
+        <li><b>Duplicación:</b> Evitar que un mismo identificador sea declarado más de una vez en el mismo ámbito.</li>
+        <li><b>Tipos de retorno:</b> Confirmar que las funciones devuelvan un valor acorde a su tipo declarado.</li>
+        <li><b>Operaciones:</b> Comprobar la compatibilidad de tipos en expresiones aritméticas y lógicas 
+            (por ejemplo, impedir la suma entre un <i>booleano</i> y un <i>entero</i>).</li>
+        <li><b>Llamadas a funciones:</b> Validar la cantidad y tipo de parámetros pasados en cada llamada.</li>
+      </ul>
+    </p>
+
+    <h2>Division del Trabajo</h2>
+    <p>
+      Debido a la complejidad de las tareas, se realizó una división del trabajo entre los dos integrantes del grupo. 
+      Uno de ellos se encargó de la implementación del Árbol de Sintaxis Abstracta (AST), mientras que el otro desarrolló 
+      la tabla de símbolos. Finalmente, el chequeo de tipos fue abordado de manera conjunta por ambos integrantes.
+    </p>
+
   </main>
   
 
