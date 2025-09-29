@@ -267,7 +267,7 @@ void print_node(node *root, int level) {
             print_tree(root->info->WHILE.expr, level+1);
             print_tree(root->info->WHILE.block, level+1);
             break;
-        case NODE_PYC: printf("PYC"); break;
+        case NODE_PYC: printf("PYC\n"); break;
         case NODE_INFO:
              printf("%s\n", root->info->NODE_INFO.info ? root->info->NODE_INFO.info : "NULL");
             break;

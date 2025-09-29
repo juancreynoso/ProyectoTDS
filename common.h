@@ -9,5 +9,6 @@ typedef enum {
 } VarType;
 
 char* type_to_string(int type);
+char* op_name(int type);
 
 #endif

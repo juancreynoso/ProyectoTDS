@@ -452,14 +452,14 @@ VarType get_expression_type(node* root, tables_stack* stack) {
             switch (root->info->OP.name) {
                 case OP_NOT:
                     if (leftType != TYPE_BOOL) {
-                            printf("Error de tipos. Requiere tipo booleano\n");
+                            printf("Error de tipos. Operacion %s  requiere tipo booleano\n", op_name(root->info->OP.name));
                             exit(EXIT_FAILURE);
                     }
                     return root->info->OP.type = leftType;
                     break;
                 case OP_MINUS:
                     if (leftType != TYPE_INT) {
-                            printf("Error de tipos. Requiere tipo entero\n");
+                            printf("Error de tipos. Operacion %s  requiere tipo entero\n", op_name(root->info->OP.name));
                             exit(EXIT_FAILURE);
                     }
                     return root->info->OP.type = leftType;
@@ -487,7 +487,7 @@ VarType get_expression_type(node* root, tables_stack* stack) {
             case OP_MULT:
             case OP_REST:
                 if(leftType != TYPE_INT || rightType != TYPE_INT) {
-                    printf("Error de tipos. Requiere tipo entero\n");
+                    printf("Error de tipos. Operacion:'%s' requiere tipo entero\n", op_name(root->info->OP.name));
                     exit(EXIT_FAILURE); 
                 }
 
@@ -497,7 +497,7 @@ VarType get_expression_type(node* root, tables_stack* stack) {
 
             case OP_ASSIGN:
                 if(leftType != rightType) {
-                    printf("Error: tipos incompatibles, Esperado '%s', Recibido: '%s' \n", 
+                    printf("Error: tipos incompatibles en asignacion, Esperado '%s', Recibido: '%s' \n", 
                 type_to_string(leftType), type_to_string(rightType));
                     exit(EXIT_FAILURE); 
                 }
@@ -508,15 +508,24 @@ VarType get_expression_type(node* root, tables_stack* stack) {
             case OP_AND:
 
                 if(leftType != TYPE_BOOL || rightType!= TYPE_BOOL) {
-                    printf("Error de tipos. Requiere tipo booleano\n");
+                    printf("Error de tipos. Operacion '%s' requiere tipo booleano\n", op_name(root->info->OP.name));
                     exit(EXIT_FAILURE); 
                 }
                 root->info->OP.type = leftType;
                 return leftType;
                 break;
             case OP_EQUALS:
+                root->info->OP.type = TYPE_BOOL;
+                return TYPE_BOOL;
+                break;
             case OP_GT:
             case OP_LT:
+
+                if(leftType != TYPE_INT || rightType != TYPE_INT) {
+                    printf("Error de tipos. Operacion:'%s' requiere tipo entero\n", op_name(root->info->OP.name));
+                    exit(EXIT_FAILURE); 
+                }
+
                 return TYPE_BOOL;
             default:
                 printf("Operacion desconocida.\n");
