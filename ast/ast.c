@@ -4,7 +4,9 @@
 #include "ast.h"
 
 /**
- * Construye una cadena que representa la lista de parametros
+ * Funcion que construye una cadena que representa la lista de parametros
+ * @param f_params Lista de parametros formales a convertir
+ * @return Cadena que representa la lista de parametros
  */ 
 char* list_to_string(Formal_P_List* f_params) {
     char *result = malloc(1024);
@@ -33,7 +35,8 @@ char* list_to_string(Formal_P_List* f_params) {
 }
 
 /**
- * Imprime un arbol que representa una expresion
+ * Funcion que imprime un arbol que representa una expresion
+ * @param root Nodo raiz del sub arbol a imprimir 
  */
 void expr_to_str(node* root){
     if (root == NULL) {
@@ -124,7 +127,8 @@ void expr_to_str(node* root){
 }
 
 /**
- * Imprime los argumentos que se pasan en la llamada de un metodo
+ * Funcion que imprime los argumentos que se pasan en la llamada de un metodo
+ * @param c_params
  */
 void print_c_params(Current_P_List* c_params){
     if (c_params == NULL) {
@@ -146,8 +150,12 @@ void print_c_params(Current_P_List* c_params){
 }
 
 /**
- *  Crear un parametro formal
- */
+ * Funcion que crea un parametro formal.
+ * @param name Lista de parametros formales.
+ * @param type Tipo de dato asociado al parametro.
+ * @param value Valor asociado al parametro.
+ * @return Nuevo parametro.
+ */ 
 Formal_P new_arg(char* name, VarType type, int value){
     Formal_P a;
     a.name = name;
@@ -165,8 +173,10 @@ Formal_P new_arg(char* name, VarType type, int value){
 }
 
 /**
- * Insertar un parametro en la lista de parametros formales
- */
+ * Funcion que inserta un parametro en la lista de parametros formales.
+ * @param f_params Lista de parametros formales.
+ * @param a Parametro a insertar.
+ */ 
 void insert_f_param(Formal_P_List** f_params, Formal_P a){
         Formal_P_List* new = malloc(sizeof(Formal_P_List));
         new->head = malloc(sizeof(Node_P_List));
@@ -189,7 +199,9 @@ void insert_f_param(Formal_P_List** f_params, Formal_P a){
 }
 
 /**
- * Insertar un parametro en la lista de parametros reales
+ * Funcion que inserta un parametro en la lista de parametros reales.
+ * @param c_params Lista de parametros reales.
+ * @param expr Parametro a insertar.
  */ 
 void insert_c_param(Current_P_List** c_params, node* expr){
     Current_P_List* new = malloc(sizeof(Current_P_List));
@@ -213,7 +225,9 @@ void insert_c_param(Current_P_List** c_params, node* expr){
 /* -----  Constructores de nodos ----- */
 
 /**
- * Crea un nodo correspondiente a una constante entera
+ * Funcion que crea un nodo correspondiente a una constante entera.
+ * @param value Valor de la constante entera.
+ * @return Nuevo nodo creado.
  */
 node* create_int_node(int value){
     node* root = new_node(NODE_NUM);
@@ -224,7 +238,9 @@ node* create_int_node(int value){
 }
 
 /**
- * Crea un nodo correspondiente a valor booleano
+ * Funcion que crea un nodo correspondiente a un valor booleano.
+ * @param value Valor entero que representa el valor booleano.
+ * @return Nuevo nodo creado.
  */
 node* create_bool_node(int value){
     node* root = new_node(NODE_BOOL);
@@ -235,7 +251,10 @@ node* create_bool_node(int value){
 }
 
 /**
- * Crea un nodo correspondiente a una operacion
+ * Funcion que crea un nodo correspondiente a una operacion.
+ * @param name Tipo de operacion.
+ * @param type Tipo de dato asociado a esa operacion.
+ * @return Nuevo nodo creado
  */
 node* create_op_node(OpType name, VarType type){
     node* root = new_node(NODE_OP);
@@ -246,7 +265,11 @@ node* create_op_node(OpType name, VarType type){
 }
 
 /**
- * Crea un nodo correspondiente a la ocurrencia de un ID (declaracion o expresion)
+ * Funcion que crea un nodo correspondiente a la ocurrencia de un ID (declaracion o expresion).
+ * @param name Nombre del ID.
+ * @param typeVar Tipo de dato asociado al ID.
+ * @param type Tipo de nodo (ID_USE, DECL).
+ * @return Nuevo nodo creado.
  */
 node* create_id_node(char* name, VarType typeVar, NodeType type){
     node* root = new_node(type);
@@ -255,8 +278,13 @@ node* create_id_node(char* name, VarType typeVar, NodeType type){
 
     return root;
 }
+
 /**
- * Crea un nodo correspondiente a una sentencia if then else
+ * Funcion que crea un nodo correspondiente a una sentencia IF THEN / IF THEN ELSE.
+ * @param expr Sub arbol que representa la expresion de condicion del IF.
+ * @param if_block Sub arbol que representa el bloque de sentencias contenidas en IF THEN
+ * @param else_block Sub arbol que representa el bloque de sentencias contenidas en el bloque ELSE
+ * @return Nuevo nodo creado.
  */
 node* create_if_else_node(node* expr, node* if_block, node* else_block){
     node* root = new_node(NODE_IF_ELSE);
@@ -268,7 +296,10 @@ node* create_if_else_node(node* expr, node* if_block, node* else_block){
 }
 
 /**
- * Crea un nodo correspondiente a una sentencia while
+ * Funcion que crea un nodo correspondiente a una sentencia WHILE.
+ * @param expr Sub arbol que representa la expresion de condicion del ciclo.
+ * @param block Sub arbol que representan el conjunto de sentencias contenidas en el bloque del ciclo.
+ * @return Nuevo nodo creado.
  */
 node* create_while_node(node* expr, node* block){
     node* root = new_node(NODE_WHILE);
@@ -279,7 +310,12 @@ node* create_while_node(node* expr, node* block){
 }
 
 /**
- * Crea un nodo correspondiente a la declaracion de un metodo
+ * Funcion que crea un nodo correspondiente a la declaracion de un metodo.
+ * @param name Nombre del metodo.
+ * @param f_params Lista de parametros formales.
+ * @param returnType Tipo de retorno del metodo.
+ * @param is_extern Valor que indica si el metodo es externo (1) o no (0)
+ * @return Nuevo nodo creado.
  */
 node* create_meth_decl_node(char* name, Formal_P_List* f_params, VarType returnType, int is_extern){
     node* root = new_node(NODE_DECL_METH);
@@ -292,7 +328,10 @@ node* create_meth_decl_node(char* name, Formal_P_List* f_params, VarType returnT
 }
 
 /**
- * Crea un nodo correspondiente a la llamada de un metodo
+ * Funcion que crea un nodo correspondiente a la llamada de un metodo.
+ * @param name Nombre del metodo.
+ * @param c_params Lista de parametros reales.
+ * @return Nuevo nodo creado.
  */
 node* create_meth_call_node(char*name, Current_P_List* c_params){
     node* root = new_node(NODE_CALL_METH);
@@ -301,15 +340,20 @@ node* create_meth_call_node(char*name, Current_P_List* c_params){
     return root;
 }
 
-node* create_block_node(char* name) {
+/**
+ * Funcion que crea un nodo correspondiente un bloque de sentencias.
+ * @return Nuevo nodo creado.
+ */
+node* create_block_node() {
     node* root = new_node(NODE_BLOCK);
-    root->info->BLOCK_INFO.name = name;
     
     return root;
 }
 
 /**
- * Crea un nodo correspondiente a una sentencia return
+ * Funcion que crea un nodo correspondiente una sentencia return.
+ * @param type Tipo de retorno.
+ * @return Nuevo nodo creado.
  */
 node* create_return_node(VarType type){
     node* root = new_node(NODE_RET);
@@ -319,7 +363,10 @@ node* create_return_node(VarType type){
 }
 
 /**
- * Crea un nodo que se utiliza para llevar informacion sobre el ast
+ * Funcion que crea un nodo que se utiliza para llevar informacion sobre el AST.
+ * @param info cadena que lleva informacion del nodo.
+ * @param type tipo de dato que llevara el nodo.
+ * @return Nuevo nodo creado.
  */
 node* create_node(char* info, VarType type){
     node* root = new_node(NODE_INFO);
@@ -330,8 +377,9 @@ node* create_node(char* info, VarType type){
 }
 
 /**
- * Recibe un tipo de nodo y lo crea
- * Esta funcion se utiliza para crear nodos de un tipo en especifico
+ * Funcion que crea un nodo de un tipo en particular.
+ * @param type Tipo de nodo.
+ * @return Nuevo nodo creado.
  */
 node* new_node(NodeType type){
     node* root = malloc(sizeof(node));
@@ -339,12 +387,17 @@ node* new_node(NodeType type){
     root->type = type;
     root->left = NULL;
     root->right = NULL;
+
     return root;
 }
 
 /**
- * Crea un arbol a partir de un nodo raiz y dos sub arboles
-*/
+ * Funcion que crea un arbol a partir de un nodo raiz y dos sub arboles.
+ * @param root Nodo raiz.
+ * @param left Nodo izquierdo.
+ * @param right Nodo derecho.
+ * @return Nuevo nodo creado.
+ */
 node* create_tree(node* root, node* left, node* right){
     root->left = left;
     root->right = right;
@@ -352,7 +405,9 @@ node* create_tree(node* root, node* left, node* right){
 }
 
 /**
- * Imprime los distintos nodo del arbols
+ * Funcion que imprime los distintos nodos del arbol.
+ * @param root Nodo raiz.
+ * @param level Indica el indice del espaciado para imprimir correctamente.
  */
 void print_node(node *root, int level) {
     if (!root)
@@ -445,7 +500,9 @@ void print_node(node *root, int level) {
 }
 
 /**
- * Funcion de entrada que se encarga de imprimir el arbol
+ * Funcion de entrada que se encarga de imprimir el arbol.
+ * @param root Tipo de nodo.
+ * @param level Indica el indice del espaciado para imprimir correctamente.
  */
 void print_tree(node *root, int level) {
     if (root == NULL)
