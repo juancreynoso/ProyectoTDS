@@ -7,7 +7,7 @@ BISON = bison -v -d
 FLEX = flex
 
 SRC_DIRS = sintax lexer ast semantic compile
-OBJS = sintax/sintax.tab.o lexer/lex.yy.o ast/ast.o main.o semantic/semantic_analyzer.o semantic/type_check.o semantic/symbol_table.o common.o
+OBJS = sintax/sintax.tab.o lexer/lex.yy.o ast/ast.o main.o semantic/semantic_analyzer.o common.o
 TARGET = c-tds
 
 # Regla principal
@@ -34,6 +34,9 @@ sintax/sintax.tab.o: sintax/sintax.tab.c
 	${CC} ${CFLAGS} -c -o $@ $<
 
 lexer/lex.yy.o: lexer/lex.yy.c
+	${CC} ${CFLAGS} -c -o $@ $<
+
+param_list.o: ast/param_list.c ast/param_list.h
 	${CC} ${CFLAGS} -c -o $@ $<
 
 ast/ast.o: ast/ast.c ast/ast.h

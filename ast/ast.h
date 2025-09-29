@@ -3,6 +3,7 @@
 #define AST_H
 
 #include "../common.h"
+#include "param_list.h"
 
 /* Tipos de nodos del ast */
 typedef enum{
@@ -50,36 +51,6 @@ typedef struct node{
     struct node* left;
     struct node* right;
 }node;
-
-/* Estructura para los parametros formales */
-typedef struct Formal_P{
-    char* name;
-    VarType type;
-}Formal_P;
-
-/* Nodo de la lista de parametros formales */
-typedef struct Node_P_List{
-    Formal_P p;
-    struct Node_P_List* next;
-}Node_P_List;
-
-/* Lista de parametros formales */
-typedef struct Formal_P_List{
-    Node_P_List* head;
-    int size;
-}Formal_P_List;
-
-/* Nodo de la lista de parametros reales */
-typedef struct Node_C_List {
-    node* p;
-    struct Node_C_List* next;
-}Node_C_List;
-
-/* Lista de parametros reales */
-typedef struct Current_P_List{
-    Node_C_List* head;
-    int size;
-}Current_P_List;
 
 /* ---- Estructuras correspondientes a los distintos tipos de nodo ---- */
 
@@ -175,18 +146,8 @@ node* create_node(char* info, VarType type);
 node* new_node(NodeType type);
 node* create_tree(node* root, node* left, node* right);
 
-/* -- Funciones para manipular la lista de parametros formales -- */
-Formal_P new_arg(char* name, VarType type, int value);
-void insert_f_param(Formal_P_List** f_params, Formal_P a);
-
-/* -- Funcion para manipular la lista de parametros actuales -- */
-void insert_c_param(Current_P_List** c_params, node* expr);
-
 /* -- Funciones para imprimir el arbol -- */
 void print_node(node* root, int level);
 void print_tree(node* root, int level); 
-char* list_to_string(Formal_P_List* f_params);
-void print_c_params(Current_P_List* c_params);
-void expr_to_str(node* expr);
 
 #endif
