@@ -6,51 +6,17 @@
 #include <string.h>
 #include "common.h"
 #include "ast.h"
+#include "symbol_table.h"
+#include "type_check.h"
 
-/*
- Estructura de los simbolos que se guardan en la tabla
-*/
-typedef struct symbol {
-    union type *info;
-} symbol;
+typedef struct tables_stack tables_stack;
+typedef struct symbol_table symbol_table;
 
-/*
-    Lista enlazada que implementa los ambitos del programa
-*/
-typedef struct symbol_table {
-    NodeType nodeType;
-    symbol s;
-    struct symbol_table *next;
-} symbol_table;
-
-/*
-    Nodos del stack de tablas
-*/
-typedef struct node_s {
-    symbol_table* data;
-    struct node_s* next;
-} node_s;
-
-/*
-    Stack que implementa la tabla de simbolos
-*/
-typedef struct tables_stack {   // Stack
-    node_s* top;             // apunta al tope de la pila (cabeza de la lista)
-} tables_stack;
+extern int exists_main;
 
 void semantic_analysis_recursive(node* root, tables_stack* stack, symbol_table* table, node* parent);
 tables_stack* analyze_semantics(node* root);
-void insert_symbol(symbol_table **table, symbol s, NodeType nodeType);
-union type* search_symbol(tables_stack *stack, char* name, NodeType type);
-union type* search_in_table(symbol_table* table, char* name);
-void print_symbol_table(symbol_table *table);
 void add_formal_params_to_scope(tables_stack* stack, Formal_P_List* f_params);
 int verify_method_params(Formal_P_List* formal_params, Current_P_List* actual_params, tables_stack* stack, char* method_name);
-VarType get_expression_type(node* root, tables_stack* stack);
-void check_return_type(node* root, VarType f_returnType, tables_stack* stack);
-
-tables_stack* create_stack();
-void push(tables_stack* stack, symbol_table* table);
-symbol_table* pop(tables_stack* stack);
 
 #endif
