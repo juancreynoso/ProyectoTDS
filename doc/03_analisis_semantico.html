@@ -7,33 +7,33 @@
 </head>
 <body>
   <header>
-    <header>
-      <h1>Análisis Sintáctico</h1>
-      <nav>
-        <ul>
-          <li><a href="index.html">Inicio</a></li>
-          <li><a href="01_analisis_lexico.html">Análisis Léxico</a></li>
-          <li><a href="02_analisis_sintactico.html">Análisis Sintáctico</a></li>
-          <li><a href="03_analisis_semantico.html">Análisis Semántico</a></li>
-          <li><a href="04_codigo_intermedio.html">Generación de Código Intermedio</a></li>
-          <li><a href="05_codigo_objeto.html">Generación de Código Objeto</a></li>
-          <li><a href="06_optimizacion.html">Optimización</a></li>
-        </ul>
-      </nav>
-    </header>
+    <h1>Análisis Semántico</h1>
+    <nav>
+      <ul>
+        <li><a href="index.html">Inicio</a></li>
+        <li><a href="01_analisis_lexico.html">Análisis Léxico</a></li>
+        <li><a href="02_analisis_sintactico.html">Análisis Sintáctico</a></li>
+        <li><a href="03_analisis_semantico.html">Análisis Semántico</a></li>
+        <li><a href="04_codigo_intermedio.html">Generación de Código Intermedio</a></li>
+        <li><a href="05_codigo_objeto.html">Generación de Código Objeto</a></li>
+        <li><a href="06_optimizacion.html">Optimización</a></li>
+      </ul>
+    </nav>
   </header>
-  
   <main>
     <h2>Descripción</h2>
-
-
-    <p>Para poder llevar a cabo el analisis semantico, el cual en este caso se basa en hacer un chequeo de declaraciones y de tipos,
-      es necesario hacer uso de dos estructuras, las cuales son el <b>Arbol de sintaxis abstracto (ast)</b> y la <b>tabla de simbolos(st)</b>.</p>
-      <br>
+    <p>
+    El <b>análisis semántico</b> tiene objetivo principal verificar la validez lógica de un programa,
+    comprobando que las variables y métodos estén correctamente <i>declarados</i>, y que los <i>tipos de datos sean compatibles</i>.
+    Es por ello que, es necesario apoyarse en dos estructuras fundamentales: 
+    el <b>Árbol de Sintaxis Abstracta (AST)</b>, que representa la jerarquía y relaciones sintácticas del programa, 
+    y la <b>Tabla de Símbolos (ST)</b>, que organiza y almacena información sobre los identificadores y sus ámbitos. 
+    La interacción entre estas dos estructuras permite realizar chequeos semánticos de manera precisa y consistente durante el recorrido del AST.
+    </p>
 
     <h2>Generacion del AST</h2>
 
-    <p>El <b>ast</b> se genera a partir de la gramática definida en el archivo <i>sintax.y</i> de bison. Se define la estructura del ast y las funcionalidades a partir de los
+    <p>El <b>AST</b> se genera a partir de la gramática definida en el archivo <i>sintax.y</i> de bison. Se define la estructura del ast y las funcionalidades a partir de los
     archivos <i>ast.h</i> y <i>ast.c</i>.
     Para la comunicación entre el analizador léxico (Flex) y el analizador sintáctico (Bison), se utiliza la variable global <b><i>yylval</i></b>. 
     Esta variable permite transferir el valor semántico asociado a cada token. Por ejemplo, cuando el analizador léxico reconoce una cadena que 
@@ -98,10 +98,79 @@
       </ul>
     </p>
 
+    <h2>Implementación de la Tabla de Símbolos</h2>
+    <p>
+    La <b>tabla de símbolos</b> se diseñó para manejar múltiples <i>scopes</i> o ámbitos de manera anidada. 
+    Cada ámbito corresponde a un bloque del programa (funciones, condicionales, bucles, etc.), y se implementó utilizando 
+    una <b>pila de tablas</b>. Esto permite que al entrar en un nuevo bloque se cree un nuevo scope (push), y al salir se elimine (pop), 
+    siguiendo un modelo de alcance léxico similar al de lenguajes de programación modernos.
+    </p>
+
+    <p>
+    Cada scope contiene una <i>lista enlazada de símbolos</i>, donde cada símbolo representa una variable o un método. 
+    Un símbolo guarda información como el nombre, tipo de dato, y en caso de métodos también su tipo de retorno y parámetros.
+    </p>
+
+    <h3>Estructuras principales</h3>
+    <pre>
+    /*
+    Estructura de los símbolos que se guardan en la tabla
+    */
+    typedef struct symbol {
+        union type *info;   // Información del identificador
+    } symbol;
+
+    /*
+    Lista enlazada que implementa los ámbitos del programa
+    */
+    typedef struct symbol_table {
+        NodeType nodeType;         // Tipo de nodo (variable, método, etc.)
+        symbol s;                  // Información del símbolo
+        struct symbol_table *next; // Siguiente símbolo en el mismo scope
+    } symbol_table;
+
+    /*
+    Nodos del stack de tablas
+    */
+    typedef struct node_s {
+        symbol_table* data; // Tabla de símbolos de un scope
+        struct node_s* next;
+    } node_s;
+
+    /*
+    Stack que implementa la tabla de símbolos
+    */
+    typedef struct tables_stack {
+        node_s* top; // Scope más interno
+    } tables_stack;
+    </code></pre>
+
+    <p>
+    Gracias a esta estructura es posible:
+    </p>
+    <ul>
+      <li>Insertar símbolos en el scope actual verificando duplicados.</li>
+      <li>Buscar un símbolo recorriendo la pila desde el ámbito más interno hacia el global.</li>
+      <li>Manejar correctamente la vida de las variables en bloques anidados (push y pop).</li>
+    </ul>
+
+    <h3>Ejemplo de funcionamiento</h3>
+    <p>
+    Al analizar un programa que contiene una función con variables locales y un bucle, 
+    el stack de tablas de símbolos se comporta de la siguiente manera:
+    </p>
+    <ol>
+      <li>Se crea el scope global (tabla global).</li>
+      <li>Al declarar un método, se inserta en la tabla global y se crea un nuevo scope para sus parámetros y variables locales.</li>
+      <li>Al entrar en un <code>while</code> o un <code>if</code>, se hace <b>push</b> de un nuevo scope temporal.</li>
+      <li>Al salir del bloque, se hace <b>pop</b> y las variables de ese ámbito dejan de estar disponibles.</li>
+    </ol>
+
+
     <h2>Division del Trabajo</h2>
     <p>
       Debido a la complejidad de las tareas, se realizó una división del trabajo entre los dos integrantes del grupo. 
-      Uno de ellos se encargó de la implementación del Árbol de Sintaxis Abstracta (AST), mientras que el otro desarrolló 
+      Uno encargado de la implementación del Árbol de Sintaxis Abstracta (AST), mientras el otro llevó a cabo el desarrollo de 
       la tabla de símbolos. Finalmente, el chequeo de tipos fue abordado de manera conjunta por ambos integrantes.
     </p>
 
