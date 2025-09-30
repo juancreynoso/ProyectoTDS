@@ -50,7 +50,9 @@ typedef struct node{
     union type *info;
     struct node* left;
     struct node* right;
-}node;
+    int line;
+    int column;
+} node;
 
 /* ---- Estructuras correspondientes a los distintos tipos de nodo ---- */
 
@@ -132,18 +134,18 @@ union type{
 
 
 /* ---- Constructores de nodos ---- */
-node* create_int_node(int value);
-node* create_bool_node(int value);
-node* create_op_node(OpType name, VarType type);
-node* create_id_node(char* name, VarType typeVar, NodeType type);
-node* create_if_else_node(node* expr, node* if_block, node* else_block);
-node* create_while_node(node* expr, node* block);
-node* create_meth_decl_node(char* name, Formal_P_List* f_params, VarType returnType, int is_extern);
-node* create_meth_call_node(char*name, Current_P_List* c_params);
-node* create_block_node(char* name);
-node* create_return_node(VarType type);
-node* create_node(char* info, VarType type);
-node* new_node(NodeType type);
+node* create_int_node(int value, int line, int column);
+node* create_bool_node(int value, int line, int column);
+node* create_op_node(OpType name, VarType type, int line, int column);
+node* create_id_node(char* name, VarType typeVar, NodeType type, int line, int column);
+node* create_if_else_node(node* expr, node* if_block, node* else_block, int line, int column);
+node* create_while_node(node* expr, node* block, int line, int column);
+node* create_meth_decl_node(char* name, Formal_P_List* f_params, VarType returnType, int is_extern, int line, int column);
+node* create_meth_call_node(char*name, Current_P_List* c_params, int line, int column);
+node* create_block_node(char* name, int line, int column);
+node* create_return_node(VarType type, int line, int column);
+node* create_node(char* info, VarType type, int line, int column);
+node* new_node(NodeType type, int line, int column);
 node* create_tree(node* root, node* left, node* right);
 
 /* -- Funciones para imprimir el arbol -- */

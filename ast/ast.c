@@ -10,8 +10,8 @@
  * @param value Valor de la constante entera.
  * @return Nuevo nodo creado.
  */
-node* create_int_node(int value){
-    node* root = new_node(NODE_NUM);
+node* create_int_node(int value, int line, int column){
+    node* root = new_node(NODE_NUM, line, column);
     root->info->INT.type = TYPE_INT;
     root->info->INT.value = value;
 
@@ -23,8 +23,8 @@ node* create_int_node(int value){
  * @param value Valor entero que representa el valor booleano.
  * @return Nuevo nodo creado.
  */
-node* create_bool_node(int value){
-    node* root = new_node(NODE_BOOL);
+node* create_bool_node(int value, int line, int column){
+    node* root = new_node(NODE_BOOL, line, column);
     root->info->INT.type = TYPE_BOOL;
     root->info->INT.value = value;
 
@@ -37,8 +37,8 @@ node* create_bool_node(int value){
  * @param type Tipo de dato asociado a esa operacion.
  * @return Nuevo nodo creado
  */
-node* create_op_node(OpType name, VarType type){
-    node* root = new_node(NODE_OP);
+node* create_op_node(OpType name, VarType type, int line, int column){
+    node* root = new_node(NODE_OP, line, column);
     root->info->OP.name = name;
     root->info->ID.type = type;
 
@@ -52,8 +52,8 @@ node* create_op_node(OpType name, VarType type){
  * @param type Tipo de nodo (ID_USE, DECL).
  * @return Nuevo nodo creado.
  */
-node* create_id_node(char* name, VarType typeVar, NodeType type){
-    node* root = new_node(type);
+node* create_id_node(char* name, VarType typeVar, NodeType type, int line, int column){
+    node* root = new_node(type, line, column);
     root->info->ID.name = name;
     root->info->ID.type = typeVar;
 
@@ -67,8 +67,8 @@ node* create_id_node(char* name, VarType typeVar, NodeType type){
  * @param else_block Sub arbol que representa el bloque de sentencias contenidas en el bloque ELSE
  * @return Nuevo nodo creado.
  */
-node* create_if_else_node(node* expr, node* if_block, node* else_block){
-    node* root = new_node(NODE_IF_ELSE);
+node* create_if_else_node(node* expr, node* if_block, node* else_block, int line, int column){
+    node* root = new_node(NODE_IF_ELSE, line, column);
     root->info->IF_ELSE.expr = expr;
     root->info->IF_ELSE.if_block = if_block;
     root->info->IF_ELSE.else_block = else_block;
@@ -82,8 +82,8 @@ node* create_if_else_node(node* expr, node* if_block, node* else_block){
  * @param block Sub arbol que representan el conjunto de sentencias contenidas en el bloque del ciclo.
  * @return Nuevo nodo creado.
  */
-node* create_while_node(node* expr, node* block){
-    node* root = new_node(NODE_WHILE);
+node* create_while_node(node* expr, node* block, int line, int column){
+    node* root = new_node(NODE_WHILE, line, column);
     root->info->WHILE.expr = expr;
     root->info->WHILE.block = block;
     
@@ -98,8 +98,8 @@ node* create_while_node(node* expr, node* block){
  * @param is_extern Valor que indica si el metodo es externo (1) o no (0)
  * @return Nuevo nodo creado.
  */
-node* create_meth_decl_node(char* name, Formal_P_List* f_params, VarType returnType, int is_extern){
-    node* root = new_node(NODE_DECL_METH);
+node* create_meth_decl_node(char* name, Formal_P_List* f_params, VarType returnType, int is_extern, int line, int column){
+    node* root = new_node(NODE_DECL_METH, line, column);
     root->info->METH_DECL.name = name;
     root->info->METH_DECL.f_params = f_params;
     root->info->METH_DECL.returnType = returnType;
@@ -114,8 +114,8 @@ node* create_meth_decl_node(char* name, Formal_P_List* f_params, VarType returnT
  * @param c_params Lista de parametros reales.
  * @return Nuevo nodo creado.
  */
-node* create_meth_call_node(char*name, Current_P_List* c_params){
-    node* root = new_node(NODE_CALL_METH);
+node* create_meth_call_node(char*name, Current_P_List* c_params, int line, int column){
+    node* root = new_node(NODE_CALL_METH, line, column);
     root->info->METH_CALL.name = name;
     root->info->METH_CALL.c_params = c_params;
     return root;
@@ -125,8 +125,8 @@ node* create_meth_call_node(char*name, Current_P_List* c_params){
  * Funcion que crea un nodo correspondiente un bloque de sentencias.
  * @return Nuevo nodo creado.
  */
-node* create_block_node(char* name) {
-    node* root = new_node(NODE_BLOCK);
+node* create_block_node(char* name, int line, int column) {
+    node* root = new_node(NODE_BLOCK, line, column);
     root->info->BLOCK_INFO.name = name;
     return root;
 }
@@ -136,8 +136,8 @@ node* create_block_node(char* name) {
  * @param type Tipo de retorno.
  * @return Nuevo nodo creado.
  */
-node* create_return_node(VarType type){
-    node* root = new_node(NODE_RET);
+node* create_return_node(VarType type, int line, int column){
+    node* root = new_node(NODE_RET, line, column);
     root->info->RETURN.type = type;
 
     return root;
@@ -149,8 +149,8 @@ node* create_return_node(VarType type){
  * @param type tipo de dato que llevara el nodo.
  * @return Nuevo nodo creado.
  */
-node* create_node(char* info, VarType type){
-    node* root = new_node(NODE_INFO);
+node* create_node(char* info, VarType type, int line, int column){
+    node* root = new_node(NODE_INFO, line, column);
     root->info->NODE_INFO.type = type;
     root->info->NODE_INFO.info = info;
 
@@ -162,12 +162,14 @@ node* create_node(char* info, VarType type){
  * @param type Tipo de nodo.
  * @return Nuevo nodo creado.
  */
-node* new_node(NodeType type){
+node* new_node(NodeType type, int line, int column){
     node* root = malloc(sizeof(node));
     root->info = malloc(sizeof(union type));
     root->type = type;
     root->left = NULL;
     root->right = NULL;
+    root->line = line;
+    root->column = column;
 
     return root;
 }
