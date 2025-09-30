@@ -166,6 +166,44 @@
       <li>Al salir del bloque, se hace <b>pop</b> y las variables de ese ámbito dejan de estar disponibles.</li>
     </ol>
 
+    <h2>Control de errores semánticos</h2>
+    <p>
+      Para que el análisis semántico pueda informar errores de manera precisa, como errores de tipos o variables no declaradas, 
+      cada token generado por el analizador léxico lleva información de su <b>línea y columna</b>. 
+      Esta información se utiliza en la construcción de los nodos del AST para que cada nodo conozca su ubicación exacta en el código fuente.
+    </p>
+
+    <p>
+      En el lexer (Flex) se mantiene una variable global <b>yylineno</b> que indica la línea actual, y otra variable <b>yycolumn</b> que indica la columna. 
+      Cada vez que se reconoce un token, se actualizan estas posiciones según los caracteres que contiene el token, incluyendo los saltos de línea dentro de comentarios o literales.
+    </p>
+
+    <pre>
+    void update_pos(const char* text, int length) {
+        int col = yycolumn; // columna de inicio del token
+        for (int i = 0; i &lt; length; i++) {
+            if (text[i] == '\n') {
+                yylineno++;
+                col = 1;  // reinicia la columna
+            } else {
+                col++;
+            }
+        }
+        yycolumn = col;
+    }
+    </pre>
+
+    <p>
+      Cada token también guarda esta información en la estructura <i>YYLTYPE</i>, permitiendo al parser acceder 
+      a <b>@n.first_line</b> y <b>@n.first_column</b> en las acciones semánticas. 
+      Esto permite, por ejemplo, que una operación inválida como <code>true && 10</code> genere un error indicando 
+      la posición exacta del operador <code>&amp;&amp;</code> en el código fuente.
+    </p>
+
+    <p>
+      De esta forma, cualquier mensaje de error semántico puede mostrar la línea y columna correctas, incluso si existen comentarios multilínea, espacios o saltos de línea dentro del código.
+    </p>
+
 
     <h2>Division del Trabajo</h2>
     <p>
