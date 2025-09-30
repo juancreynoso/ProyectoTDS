@@ -10,6 +10,12 @@ extern FILE* yyin;
 extern int yylineno;
 int yylex(void);
 
+/**
+ * Funcion que devuelve una cadena con indicaciones para el usuario segun un valor entero.
+ * @param cod_msg Valor entero que indica el codigo del mensaje a retornar.
+ * @return Cadena con indicaciones para el usuario.
+ */
+ 
 char* invalidCommandMessage(int cod_msg){
     char *msg = NULL;
     switch(cod_msg){
@@ -32,6 +38,48 @@ char* invalidCommandMessage(int cod_msg){
     }
     return msg;
 }
+
+/**
+ * Funcion que chequea el tipo de extension del archivo, asi tambien como su caracter inicial.
+ * @param filename
+ * @param ext Extension del archivo.
+ * @return 1 si los chequeos son validos; 0 si los chequeos fallan.
+ */
+
+void check_filename(char *filename, char *ext){
+    // Se chequea el simbolo inicial del archivo
+    char* name = strrchr(filename, '/');
+
+    if (name) {
+        name++;
+    } else {
+        name = filename;
+    }
+
+    if (name[0] == '-') {
+        printf("Error. El simbolo inicial del archivo es '-' es invalido \n");
+        exit(EXIT_FAILURE);
+        return;
+    }
+
+    const char *dot = strrchr(name, '.');
+    if (!dot) {
+        exit(EXIT_FAILURE);
+        return;
+    }
+
+    // Se chequea la extension del archivo
+    if (strcmp(dot + 1, ext) == 0) {
+        return;
+    }
+    printf("Error. La extension del archivo debe ser '.ctds' \n");
+    exit(EXIT_FAILURE);
+    return;
+}
+
+/**
+ * Funcion principal que ejecuta el compilador
+ */
 
 int main(int argc, char *argv[]) {
     
@@ -58,6 +106,8 @@ int main(int argc, char *argv[]) {
                 perror("No se pudo abrir el archivo");
                 return 1;
             }
+
+            check_filename(argv[3], "ctds");
 
             yyin = input_file;
             yylineno = 1;
@@ -92,6 +142,8 @@ int main(int argc, char *argv[]) {
                 perror("No se pudo abrir el archivo");
                 return 1;
             }      
+
+            check_filename(argv[2], "ctds");
 
             yyin = input_file;
             yylineno = 1;

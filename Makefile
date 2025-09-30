@@ -10,8 +10,15 @@ SRC_DIRS = sintax lexer ast semantic compile
 OBJS = sintax/sintax.tab.o lexer/lex.yy.o ast/ast.o main.o semantic/semantic_analyzer.o semantic/type_check.o semantic/symbol_table.o common.o ast/param_list.o
 TARGET = c-tds
 
+# Carpeta de archivos de salida
+OUTDIR = outputs
+
 # Regla principal
-all: $(TARGET)
+all: $(OUTDIR) $(TARGET) 
+
+# Crear 
+$(OUTDIR): 
+	mkdir -p $(OUTDIR)
 
 # Ejecutable final
 $(TARGET): $(OBJS)
@@ -60,3 +67,4 @@ main.o: main.c
 # Limpiar archivos generados
 clean:
 	rm -f $(OBJS) $(TARGET) sintax/sintax.tab.* lexer/lex.yy.c sintax/sintax.output
+	rm -rf $(OUTDIR)
