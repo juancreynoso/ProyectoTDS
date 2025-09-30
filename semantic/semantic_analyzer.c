@@ -44,7 +44,7 @@ void semantic_analysis_recursive(node* root, tables_stack* stack, symbol_table* 
         case NODE_IF_ELSE: {
             VarType cond_type = get_expression_type(root->info->IF_ELSE.expr, stack);
             if (cond_type != TYPE_BOOL) {
-                printf("Error: la condición del IF debe ser bool\n");
+                printf("Error [línea %d, columna %d]: la condición del IF debe ser bool\n", root->line, root->column);
                 exit(EXIT_FAILURE);
             }
             semantic_analysis_recursive(root->info->IF_ELSE.expr, stack, table, NULL);
@@ -61,7 +61,7 @@ void semantic_analysis_recursive(node* root, tables_stack* stack, symbol_table* 
         case NODE_WHILE: {
             VarType cond_type = get_expression_type(root->info->WHILE.expr, stack);
             if (cond_type != TYPE_BOOL) {
-                printf("Error: la condición del WHILE debe ser bool\n");
+                printf("Error [línea %d, columna %d]: la condición del WHILE debe ser bool\n", root->line, root->column);
                 exit(EXIT_FAILURE);
             }
             semantic_analysis_recursive(root->info->WHILE.expr, stack, table, NULL);
@@ -125,7 +125,8 @@ void semantic_analysis_recursive(node* root, tables_stack* stack, symbol_table* 
         case NODE_ID_USE: {
             union type* info = search_symbol(stack, root->info->ID.name, NODE_DECL); 
             if (!info) {
-                printf("Error: Variable '%s' no declarada\n", root->info->ID.name);
+                printf("Error [línea %d, columna %d]: Variable '%s' no declarada\n", 
+               root->line, root->column, root->info->ID.name);
                 exit(EXIT_FAILURE);
             }
             root->info = info;
@@ -136,7 +137,7 @@ void semantic_analysis_recursive(node* root, tables_stack* stack, symbol_table* 
             
             union type* method = search_symbol(stack, root->info->METH_CALL.name, NODE_DECL_METH);
             if (!method) {
-                printf("Error: Método '%s' no declarado\n", root->info->METH_CALL.name);
+                printf("Error [línea %d, columna %d]: Método '%s' no declarado\n", root->line, root->column, root->info->METH_CALL.name);
                 exit(EXIT_FAILURE);
             }
             
@@ -146,7 +147,8 @@ void semantic_analysis_recursive(node* root, tables_stack* stack, symbol_table* 
                 }           
             } else if(method->METH_DECL.f_params != NULL){
                 if (method->METH_DECL.f_params->size > 0) {
-                    printf("Error: método '%s' requiere %d parámetro/s \n", root->info->METH_CALL.name, method->METH_DECL.f_params->size);
+                    printf("Error [línea %d, columna %d]: método '%s' requiere %d parámetro/s \n", 
+                        root->line, root->column, root->info->METH_CALL.name, method->METH_DECL.f_params->size);
                     exit(EXIT_FAILURE);
                 }
             } 
@@ -174,8 +176,8 @@ void semantic_analysis_recursive(node* root, tables_stack* stack, symbol_table* 
             semantic_analysis_recursive(root->left, stack, table, NULL);
             VarType return_type = get_expression_type(root->left, stack);
             if (return_type != current_return_type) {
-                printf("Error: tipo de retorno incompatible. Esperado '%s', Recibido '%s'\n", 
-                    type_to_string(current_return_type), type_to_string(return_type));
+                printf("Error de tipo [línea %d, columna %d]: tipo de retorno incompatible. Esperado '%s', Recibido '%s'\n", 
+                    root->line, root->column, type_to_string(current_return_type), type_to_string(return_type));
                 exit(EXIT_FAILURE);
             }
             break;

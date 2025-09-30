@@ -55,14 +55,16 @@ VarType get_expression_type(node* root, tables_stack* stack) {
             switch (root->info->OP.name) {
                 case OP_NOT:
                     if (leftType != TYPE_BOOL) {
-                            printf("Error de tipos. Operación: '%s' requiere tipo booleano\n", op_name(root->info->OP.name));
+                            printf("Error de tipo [línea %d, columna %d]: Operación '%s' requiere tipo booleano\n", 
+                                root->line, root->column, op_name(root->info->OP.name));
                             exit(EXIT_FAILURE);
                     }
                     return root->info->OP.type = leftType;
 
                 case OP_MINUS:
                     if (leftType != TYPE_INT) {
-                            printf("Error de tipos. Operación: '%s' requiere tipo entero\n", op_name(root->info->OP.name));
+                            printf("Error de tipo [línea %d, columna %d]: Operación '%s' requiere tipo entero\n", 
+                                root->line, root->column, op_name(root->info->OP.name));
                             exit(EXIT_FAILURE);
                     }
                     return root->info->OP.type = leftType;
@@ -90,7 +92,8 @@ VarType get_expression_type(node* root, tables_stack* stack) {
             case OP_MULT:
             case OP_REST:
                 if(leftType != TYPE_INT || rightType != TYPE_INT) {
-                    printf("Error de tipos. Operación: '%s' requiere tipo entero\n", op_name(root->info->OP.name));
+                    printf("Error de tipo [línea %d, columna %d]: Operación '%s' requiere tipo entero\n", 
+                                root->line, root->column, op_name(root->info->OP.name));
                     exit(EXIT_FAILURE); 
                 }
 
@@ -99,8 +102,8 @@ VarType get_expression_type(node* root, tables_stack* stack) {
 
             case OP_ASSIGN:
                 if(leftType != rightType) {
-                    printf("Error: tipos incompatibles en asignación, Esperado '%s', Recibido: '%s' \n", 
-                type_to_string(leftType), type_to_string(rightType));
+                    printf("Error de tipo [línea %d, columna %d]: tipos incompatibles en asignación, Esperado '%s', Recibido: '%s' \n", 
+                        root->line, root->column, type_to_string(leftType), type_to_string(rightType));
                     exit(EXIT_FAILURE); 
                 }
                 root->info->OP.type = leftType;
@@ -110,7 +113,8 @@ VarType get_expression_type(node* root, tables_stack* stack) {
             case OP_AND:
 
                 if(leftType != TYPE_BOOL || rightType!= TYPE_BOOL) {
-                    printf("Error de tipos. Operación: '%s' requiere tipo booleano\n", op_name(root->info->OP.name));
+                    printf("Error de tipo [línea %d, columna %d]: Operación '%s' requiere tipo booleano\n", 
+                        root->line, root->column, op_name(root->info->OP.name));
                     exit(EXIT_FAILURE); 
                 }
                 root->info->OP.type = leftType;
@@ -118,7 +122,8 @@ VarType get_expression_type(node* root, tables_stack* stack) {
 
             case OP_EQUALS:
                 if (!((leftType == TYPE_BOOL && rightType == TYPE_BOOL) || (leftType == TYPE_INT && rightType == TYPE_INT))) {
-                    printf("Error de tipos. Operación: '%s' requiere operandos del mismo tipo\n", op_name(root->info->OP.name));
+                    printf("Error de tipo [línea %d, columna %d]: Operación '%s' requiere operandos del mismo tipo\n", 
+                        root->line, root->column, op_name(root->info->OP.name));
                     exit(EXIT_FAILURE); 
                 }
                 root->info->OP.type = TYPE_BOOL;
@@ -127,7 +132,8 @@ VarType get_expression_type(node* root, tables_stack* stack) {
             case OP_GT:
             case OP_LT:
                 if(leftType != TYPE_INT || rightType != TYPE_INT) {
-                    printf("Error de tipos. Operación: '%s' requiere tipo entero\n", op_name(root->info->OP.name));
+                    printf("Error de tipo [línea %d, columna %d]: Operación '%s' requiere tipo entero\n", 
+                        root->line, root->column, op_name(root->info->OP.name));
                     exit(EXIT_FAILURE); 
                 }
                 root->info->OP.type = TYPE_BOOL;
@@ -163,9 +169,7 @@ void check_return_type(node* root, VarType f_returnType, tables_stack* stack) {
     if (root->type == NODE_RET) {
         VarType retType = get_expression_type(root, stack);
         if (retType !=  f_returnType) {
-            printf("ERROR - tipo de retorno incompatible\n");
-            printf("%s f \n", type_to_string(f_returnType));
-            printf("return expr: %s\n", type_to_string(retType));
+            printf("Error de tipo [línea %d, columna %d]: tipo de retorno incompatible\n", root->line, root->column);
             exit(EXIT_FAILURE);
         }
     } else {
