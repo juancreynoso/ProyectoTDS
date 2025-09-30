@@ -5,6 +5,7 @@
 #include "semantic_analyzer.h"
 
 int yyparse(void);
+void set_file(FILE *out);
 extern node* root;
 extern FILE* yyin;
 extern int yylineno;
@@ -115,20 +116,30 @@ int main(int argc, char *argv[]) {
             char *stage = argv[2];
 
             if (strcmp(stage, "lexer") == 0) {
-                printf(">> Ejecutando Analizador Sintactico...\n");
-
+                printf(">> Ejecutando Analizador Lexico...\n");
+                FILE *lex_out = fopen("outputs/output.lex", "w");
+                
+                set_file(lex_out);
                 while (yylex() != 0) {
                     yylex();
                 }
+                fclose(lex_out);
                 printf(">> Analisis correcto, sin errores lexicos\n");
 
             } else if (strcmp(stage, "parser") == 0) {
                 printf(">> Ejecutando Parser...\n");
+                FILE *lex_out = fopen("outputs/output.lex", "w");
+                //FILE *parser_out = fopen("outputs/output.sint", "w");
+
+                set_file(lex_out);
+                
                 if (yyparse() == 0) {
-                    printf("Parseado correctamente, sin errores sintactico.\n");
+                    printf("Parseado correctamente, sin errores sintacticos.\n");
                     printf("\n--- AST ----\n");
                     print_tree(root, 0);
-                }     
+                }   
+                fclose(lex_out);
+                //fclose(parser_out);  
             }else{
                     fprintf(stderr, "%s", invalidCommandMessage(1));
                     exit(EXIT_FAILURE);
@@ -145,6 +156,9 @@ int main(int argc, char *argv[]) {
 
             check_filename(argv[2], "ctds");
 
+            FILE *lex_out = fopen("outputs/output.lex", "w");        
+            set_file(lex_out);
+
             yyin = input_file;
             yylineno = 1;
 
@@ -154,6 +168,7 @@ int main(int argc, char *argv[]) {
                 print_tree(root, 0);
                 analyze_semantics(root);
             }
+            fclose(lex_out);
             fclose(input_file);    
         } else {
             fprintf(stderr, "%s", invalidCommandMessage(0));
