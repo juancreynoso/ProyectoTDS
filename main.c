@@ -3,6 +3,7 @@
 #include <string.h>
 #include "ast.h"
 #include "semantic_analyzer.h"
+#include "tac_generator.h"
 
 int yyparse(void);
 void set_file(FILE *out);
@@ -161,6 +162,7 @@ int main(int argc, char *argv[]) {
         
                 FILE *lex_out = fopen("outputs/output.lex", "w");
                 FILE *parser_out = fopen("outputs/output.sint", "w");
+                FILE *tac_out = fopen("outputs/tac.ci", "w");
 
                 set_file(lex_out);
                 
@@ -169,9 +171,11 @@ int main(int argc, char *argv[]) {
                     save_ast(root, 0, parser_out);
                     printf("Realizando analisis semantico...\n");
                     analyze_semantics(root);
+                    tac_code(root, tac_out);
                 }  
                 fclose(lex_out);
                 fclose(parser_out);
+                fclose(tac_out);
             }else{
                     fprintf(stderr, "%s", invalidCommandMessage(1));
                     exit(EXIT_FAILURE);

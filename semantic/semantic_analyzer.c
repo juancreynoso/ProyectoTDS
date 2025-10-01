@@ -179,6 +179,9 @@ void semantic_analysis_recursive(node* root, tables_stack* stack, symbol_table* 
                     root->line, root->column, type_to_string(current_return_type), type_to_string(return_type));
                 exit(EXIT_FAILURE);
             }
+
+            root->info->RETURN.type = return_type;
+
             break;
         }
 
