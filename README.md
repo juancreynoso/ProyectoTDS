@@ -30,6 +30,8 @@ Este proyecto implementa un mini compilador para un lenguaje de programación qu
     *   Contiene el codigo que se encarga de definir la gramatica del lenguaje y generar el parser
 *   `st`
     *   Contiene el codigo fuente que genera la tabla de simbolos.
+* `tac`
+    *  Contiene el codigo fuente que genera el codigo de tres direcciones.
 *   `test`: Archivos con código de prueba.
 *   `README.md`: Este archivo.
 

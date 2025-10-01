@@ -1,6 +1,6 @@
 # Compilador
 CC = gcc
-CFLAGS = -Wall -g -I. -Iast -Ist -Isintax -Ilexer -Isemantic -Icompile
+CFLAGS = -Wall -g -I. -Iast -Ist -Isintax -Ilexer -Isemantic -Itac -Icompile
 
 # Archivos y carpetas
 BISON = bison -v -d

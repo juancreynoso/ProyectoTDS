@@ -157,6 +157,21 @@ int main(int argc, char *argv[]) {
                 }  
                 fclose(lex_out);
                 fclose(parser_out); 
+            } else if (strcmp(stage, "cod-inter") == 0) {
+        
+                FILE *lex_out = fopen("outputs/output.lex", "w");
+                FILE *parser_out = fopen("outputs/output.sint", "w");
+
+                set_file(lex_out);
+                
+                if (yyparse() == 0) {
+                    printf("Parseado correctamente, sin errores sintactico.\n");
+                    save_ast(root, 0, parser_out);
+                    printf("Realizando analisis semantico...\n");
+                    analyze_semantics(root);
+                }  
+                fclose(lex_out);
+                fclose(parser_out);
             }else{
                     fprintf(stderr, "%s", invalidCommandMessage(1));
                     exit(EXIT_FAILURE);
