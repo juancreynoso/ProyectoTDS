@@ -1,0 +1,9 @@
+//Error: retorno de tipo incorrecto
+
+Program {
+    bool esPositivo(integer n) {
+        return n + 1;  // debería retornar un bool, retorna un int
+    }
+
+    void main() { }
+}

@@ -1,0 +1,19 @@
+Program {
+    integer sum(integer a, integer b) {
+        return a+b;
+    }
+
+    integer x = 0;
+    integer y = 2;
+    bool i = true;
+    void main() {
+        if(i) then {
+            integer x = false;
+        }
+        while (true) {
+            integer i = 2;
+        }
+
+        return;
+    }
+}

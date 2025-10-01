@@ -1,0 +1,8 @@
+//Error: variable "x" redeclarada en el mismo bloque
+
+Program {
+    void main() {
+        integer x = 5;
+        bool x = true;  // redeclaración en mismo scope
+    }
+}

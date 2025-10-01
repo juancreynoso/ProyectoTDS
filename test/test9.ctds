@@ -1,0 +1,11 @@
+//Error: llamada a método con cantidad incorrecta de parámetros
+
+Program {
+    integer cuadrado(integer x) {
+        return x * x;
+    }
+
+    void main() {
+        integer y = cuadrado(); // falta argumento
+    }
+}
