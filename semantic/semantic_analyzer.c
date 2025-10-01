@@ -44,7 +44,7 @@ void semantic_analysis_recursive(node* root, tables_stack* stack, symbol_table* 
         case NODE_IF_ELSE: {
             VarType cond_type = get_expression_type(root->info->IF_ELSE.expr, stack);
             if (cond_type != TYPE_BOOL) {
-                printf("Error [línea %d, columna %d]: la condición del IF debe ser bool\n", root->line, root->column);
+                printf("Error de tipo [línea %d, columna %d]: la condición del IF debe ser bool\n", root->line, root->column);
                 exit(EXIT_FAILURE);
             }
             semantic_analysis_recursive(root->info->IF_ELSE.expr, stack, table, NULL);
@@ -61,7 +61,7 @@ void semantic_analysis_recursive(node* root, tables_stack* stack, symbol_table* 
         case NODE_WHILE: {
             VarType cond_type = get_expression_type(root->info->WHILE.expr, stack);
             if (cond_type != TYPE_BOOL) {
-                printf("Error [línea %d, columna %d]: la condición del WHILE debe ser bool\n", root->line, root->column);
+                printf("Error de tipo [línea %d, columna %d]: la condición del WHILE debe ser bool\n", root->line, root->column);
                 exit(EXIT_FAILURE);
             }
             semantic_analysis_recursive(root->info->WHILE.expr, stack, table, NULL);
@@ -125,7 +125,7 @@ void semantic_analysis_recursive(node* root, tables_stack* stack, symbol_table* 
         case NODE_ID_USE: {
             union type* info = search_symbol(stack, root->info->ID.name, NODE_DECL); 
             if (!info) {
-                printf("Error [línea %d, columna %d]: Variable '%s' no declarada\n", 
+                printf("Error de declaración [línea %d, columna %d]: Variable '%s' no declarada\n", 
                root->line, root->column, root->info->ID.name);
                 exit(EXIT_FAILURE);
             }
@@ -134,10 +134,9 @@ void semantic_analysis_recursive(node* root, tables_stack* stack, symbol_table* 
         }
 
         case NODE_CALL_METH: {
-            
             union type* method = search_symbol(stack, root->info->METH_CALL.name, NODE_DECL_METH);
             if (!method) {
-                printf("Error [línea %d, columna %d]: Método '%s' no declarado\n", root->line, root->column, root->info->METH_CALL.name);
+                printf("Error de declaración [línea %d, columna %d]: Método '%s' no declarado\n", root->line, root->column, root->info->METH_CALL.name);
                 exit(EXIT_FAILURE);
             }
             
