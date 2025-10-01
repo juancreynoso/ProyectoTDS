@@ -39,86 +39,86 @@ char* list_to_string(Formal_P_List* f_params) {
  * Funcion que imprime un arbol que representa una expresion
  * @param root Nodo raiz del sub arbol a imprimir 
  */
-void print_expr(node* root){
+void print_expr(node* root, FILE* parser_out){
     if (root == NULL) {
         return;
     }
     switch(root->type){
         case NODE_NUM:
-            printf("%d", root->info->INT.value);
+            fprintf(parser_out, "%d", root->info->INT.value);
             break;
         case NODE_BOOL:
-            printf("%s", root->info->BOOL.value ? "true" : "false");
+            fprintf(parser_out, "%s", root->info->BOOL.value ? "true" : "false");
             break;
         case NODE_ID_USE:
-            printf("%s", root->info->ID.name);
+            fprintf(parser_out, "%s", root->info->ID.name);
             break;
         case NODE_CALL_METH:
-            printf("%s", root->info->METH_CALL.name);
-            print_c_params(root->info->METH_CALL.c_params);
+            fprintf(parser_out, "%s", root->info->METH_CALL.name);
+            print_c_params(root->info->METH_CALL.c_params, parser_out);
             break;
         case NODE_OP:
             switch (root->info->OP.name) {
                 case OP_GT:
-                    print_expr(root->left);
-                    printf(" > ");
-                    print_expr(root->right);
+                    print_expr(root->left, parser_out);
+                    fprintf(parser_out, " > ");
+                    print_expr(root->right, parser_out);
                     break;
                 case OP_LT:
-                    print_expr(root->left);
-                    printf(" < "); 
-                    print_expr(root->right); 
+                    print_expr(root->left, parser_out);
+                    fprintf(parser_out, " < "); 
+                    print_expr(root->right, parser_out); 
                     break;                               
                 case OP_PLUS: 
-                    print_expr(root->left);
-                    printf(" + "); 
-                    print_expr(root->right);
+                    print_expr(root->left, parser_out);
+                    fprintf(parser_out, " + "); 
+                    print_expr(root->right, parser_out);
                     break;
                 case OP_SUB: 
-                    print_expr(root->left);
-                    printf(" - "); 
-                    print_expr(root->right);
+                    print_expr(root->left, parser_out);
+                    fprintf(parser_out, " - "); 
+                    print_expr(root->right, parser_out);
                     break;
                 case OP_MULT: 
-                    print_expr(root->left);
-                    printf(" * "); 
-                    print_expr(root->right);
+                    print_expr(root->left, parser_out);
+                    fprintf(parser_out, " * "); 
+                    print_expr(root->right, parser_out);
                     break;
                 case OP_DIV: 
-                    print_expr(root->left);
-                    printf(" / "); 
-                    print_expr(root->right);
+                    print_expr(root->left, parser_out);
+                    fprintf(parser_out, " / "); 
+                    print_expr(root->right, parser_out);
                     break;
                 case OP_REST: 
-                    print_expr(root->left);
-                    printf("%%\n"); 
-                    print_expr(root->right);
+                    print_expr(root->left, parser_out);
+                    fprintf(parser_out, "%%\n"); 
+                    print_expr(root->right, parser_out);
                     break;
                 case OP_MINUS: 
-                    printf(" - "); 
-                    print_expr(root->left);
+                    fprintf(parser_out, " - "); 
+                    print_expr(root->left, parser_out);
                     break;                 
                 case OP_EQUALS: 
-                    print_expr(root->left);
-                    printf(" == ");
-                    print_expr(root->right);  
+                    print_expr(root->left, parser_out);
+                    fprintf(parser_out, " == ");
+                    print_expr(root->right, parser_out);  
                     break;                           
                 case OP_NOT: 
-                    printf("!"); 
-                    print_expr(root->left); 
+                    fprintf(parser_out, "!"); 
+                    print_expr(root->left, parser_out); 
                     break;                
                 case OP_OR:
-                    print_expr(root->left); 
-                    printf(" || "); 
-                    print_expr(root->right); 
+                    print_expr(root->left, parser_out); 
+                    fprintf(parser_out, " || "); 
+                    print_expr(root->right, parser_out); 
                     break;
                 case OP_AND: 
-                    print_expr(root->left);
-                    printf(" && "); 
-                    print_expr(root->right);
+                    print_expr(root->left, parser_out);
+                    fprintf(parser_out, " && "); 
+                    print_expr(root->right, parser_out);
                     break;
                 default: 
-                    printf(" OP? "); 
+                    fprintf(parser_out, " OP? "); 
                     break;
             }
             break;
@@ -131,23 +131,23 @@ void print_expr(node* root){
  * Funcion que imprime una lista de parametros reales
  * @param c_params
  */
-void print_c_params(Current_P_List* c_params){
+void print_c_params(Current_P_List* c_params, FILE* parser_out){
     if (c_params == NULL) {
-        printf("()");
+        fprintf(parser_out, "()");
         return;
     }
     Node_C_List* cursor = c_params->head;
 
-    printf("(");
+    fprintf(parser_out, "(");
     while (cursor != NULL) {
-        print_expr(cursor->p);
+        print_expr(cursor->p, parser_out);
         if (cursor->next != NULL) {
-            printf(", ");
+            fprintf(parser_out, ", ");
         }
         cursor = cursor->next;
     }
 
-    printf(")");
+    fprintf(parser_out, ")");
 }
 
 /**

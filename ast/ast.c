@@ -192,92 +192,92 @@ node* create_tree(node* root, node* left, node* right){
  * @param root Nodo raiz.
  * @param level Indica el indice del espaciado para imprimir correctamente.
  */
-void print_node(node *root, int level) {
+void print_node(node *root, int level, FILE* parser_out) {
     if (!root)
         return;
     switch (root->type) {
         case NODE_NUM:
-            printf("%d\n", root->info->INT.value);
+            fprintf(parser_out, "%d\n", root->info->INT.value);
             break;
         case NODE_BOOL:
-            printf("%s\n", root->info->BOOL.value ? "true" : "false");
+            fprintf(parser_out, "%s\n", root->info->BOOL.value ? "true" : "false");
             break;
         case NODE_OP:
             switch (root->info->OP.name) {
-            case OP_GT: printf(">\n"); break;
-            case OP_LT: printf("<\n"); break;                                
-            case OP_PLUS: printf("+\n"); break;
-            case OP_SUB: printf("-\n"); break;
-            case OP_MULT: printf("*\n"); break;
-            case OP_DIV: printf("/\n"); break;
-            case OP_REST: printf("%%\n"); break;
-            case OP_MINUS: printf("-\n"); break;                
-            case OP_ASSIGN: printf("=\n"); break; 
-            case OP_EQUALS: printf("==\n"); break;                           
-            case OP_NOT: printf("!\n"); break;                
-            case OP_OR: printf("||\n"); break;
-            case OP_AND: printf("&&\n"); break;
-            default: printf("OP?\n"); break;
+            case OP_GT: fprintf(parser_out, ">\n"); break;
+            case OP_LT: fprintf(parser_out, "<\n"); break;                                
+            case OP_PLUS: fprintf(parser_out, "+\n"); break;
+            case OP_SUB: fprintf(parser_out, "-\n"); break;
+            case OP_MULT: fprintf(parser_out, "*\n"); break;
+            case OP_DIV: fprintf(parser_out, "/\n"); break;
+            case OP_REST: fprintf(parser_out, "%%\n"); break;
+            case OP_MINUS: fprintf(parser_out, "-\n"); break;                
+            case OP_ASSIGN: fprintf(parser_out, "=\n"); break; 
+            case OP_EQUALS: fprintf(parser_out, "==\n"); break;                           
+            case OP_NOT: fprintf(parser_out, "!\n"); break;                
+            case OP_OR: fprintf(parser_out, "||\n"); break;
+            case OP_AND: fprintf(parser_out, "&&\n"); break;
+            default: fprintf(parser_out, "OP?\n"); break;
             }
             break;
-        case NODE_RET: printf("ret \n"); break;
+        case NODE_RET: fprintf(parser_out, "ret \n"); break;
         case NODE_DECL:
             switch(root->info->ID.type){
-                case TYPE_INT: printf("int "); break;
-                case TYPE_BOOL: printf("bool "); break;
-                case NONE: printf("none "); break;
+                case TYPE_INT: fprintf(parser_out, "int "); break;
+                case TYPE_BOOL: fprintf(parser_out, "bool "); break;
+                case NONE: fprintf(parser_out, "none "); break;
             }
-            printf("%s\n", root->info->ID.name ? root->info->ID.name : "NULL");
+            fprintf(parser_out, "%s\n", root->info->ID.name ? root->info->ID.name : "NULL");
             break;
         case NODE_ID_USE:
-            printf("%s\n", root->info->ID.name ? root->info->ID.name : "NULL");
+            fprintf(parser_out, "%s\n", root->info->ID.name ? root->info->ID.name : "NULL");
             break;
         case NODE_DECL_METH:
             if (root->info->METH_DECL.is_extern  == 1) {
-                printf("extern ");
+                fprintf(parser_out, "extern ");
             }
             switch(root->info->METH_DECL.returnType) {
                 case TYPE_INT:
-                    printf("int ");
-                    printf("%s", root->info->METH_DECL.name);
+                    fprintf(parser_out, "int ");
+                    fprintf(parser_out, "%s", root->info->METH_DECL.name);
                     break;
                 case TYPE_BOOL:
-                    printf("bool ");
-                    printf("%s", root->info->METH_DECL.name);
+                    fprintf(parser_out, "bool ");
+                    fprintf(parser_out, "%s", root->info->METH_DECL.name);
                     break; 
                 case NONE:
-                    printf("void ");
-                    printf("%s", root->info->METH_DECL.name);
+                    fprintf(parser_out, "void ");
+                    fprintf(parser_out, "%s", root->info->METH_DECL.name);
                     break;
             }
-            printf("%s size: %d \n ", list_to_string(root->info->METH_DECL.f_params), root->info->METH_DECL.f_params ? root->info->METH_DECL.f_params->size : 0 );      
+            fprintf(parser_out, "%s size: %d \n ", list_to_string(root->info->METH_DECL.f_params), root->info->METH_DECL.f_params ? root->info->METH_DECL.f_params->size : 0 );      
             break;
         case NODE_CALL_METH:
-            printf(" %s",root->info->METH_CALL.name);
-            print_c_params(root->info->METH_CALL.c_params);
-            printf(" size: %d", root->info->METH_CALL.c_params ? root->info->METH_CALL.c_params->size : 0 );
-            printf("\n");
+            fprintf(parser_out, " %s",root->info->METH_CALL.name);
+            print_c_params(root->info->METH_CALL.c_params, parser_out);
+            fprintf(parser_out, " size: %d", root->info->METH_CALL.c_params ? root->info->METH_CALL.c_params->size : 0 );
+            fprintf(parser_out, "\n");
             break;
         case NODE_IF_ELSE:
-            printf("if \n");
-            print_tree(root->info->IF_ELSE.expr, level + 1);
-            print_tree(root->info->IF_ELSE.if_block, level+1);
-            print_tree(root->info->IF_ELSE.else_block, level+1);
+            fprintf(parser_out, "if \n");
+            save_ast(root->info->IF_ELSE.expr, level + 1, parser_out);
+            save_ast(root->info->IF_ELSE.if_block, level+1, parser_out);
+            save_ast(root->info->IF_ELSE.else_block, level+1, parser_out);
             break;
         case NODE_WHILE:
-            printf("while \n");
-            print_tree(root->info->WHILE.expr, level+1);
-            print_tree(root->info->WHILE.block, level+1);
+            fprintf(parser_out, "while \n");
+            save_ast(root->info->WHILE.expr, level+1, parser_out);
+            save_ast(root->info->WHILE.block, level+1, parser_out);
             break;
         case NODE_PYC: printf("PYC\n"); break;
         case NODE_INFO:
-             printf("%s\n", root->info->NODE_INFO.info ? root->info->NODE_INFO.info : "NULL");
+            fprintf(parser_out, "%s\n", root->info->NODE_INFO.info ? root->info->NODE_INFO.info : "NULL");
             break;
         case NODE_BLOCK: 
-            printf("block \n");
+            fprintf(parser_out, "block \n");
             break;
         default:
-            printf("UNKNOWN NODE\n");
+            fprintf(parser_out, "UNKNOWN NODE\n");
             break;
         }
 }
@@ -287,17 +287,17 @@ void print_node(node *root, int level) {
  * @param root Tipo de nodo.
  * @param level Indica el indice del espaciado para imprimir correctamente.
  */
-void print_tree(node *root, int level) {
+void save_ast(node *root, int level, FILE* parser_out) {
     if (root == NULL)
         return;
 
     for (int i = 0; i < level; i++){
-        printf("   ");
+        fprintf(parser_out,"   ");
     }
 
-    print_node(root, level);
-    print_tree(root->left, level + 1);
-    print_tree(root->right, level + 1);
+    print_node(root, level, parser_out);
+    save_ast(root->left, level + 1, parser_out);
+    save_ast(root->right, level + 1, parser_out);
 }
 
 

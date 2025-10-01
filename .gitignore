@@ -9,6 +9,8 @@ sintax.tab.h
 sintax.output
 lex.yy.c
 
+outputs/
+
 .vscode
 script
 prueba.txt

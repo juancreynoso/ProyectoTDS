@@ -2,6 +2,7 @@
 #ifndef AST_H
 #define AST_H
 
+#include <stdio.h>  
 #include "../common.h"
 #include "param_list.h"
 
@@ -148,8 +149,8 @@ node* create_node(char* info, VarType type, int line, int column);
 node* new_node(NodeType type, int line, int column);
 node* create_tree(node* root, node* left, node* right);
 
-/* -- Funciones para imprimir el arbol -- */
-void print_node(node* root, int level);
-void print_tree(node* root, int level); 
+/* -- Funciones para almacenar el arbol en un archivo de salida -- */
+void print_node(node* root, int level, FILE* parser_out);
+void save_ast(node* root, int level, FILE* parser_out); 
 
 #endif

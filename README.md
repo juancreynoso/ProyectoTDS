@@ -7,6 +7,9 @@ Este proyecto implementa un mini compilador para un lenguaje de programación qu
 - **Primera entrega**  
   Rama: `scanner-parser`
 
+- **Segunda entrega**  
+  Rama: `semantic`
+
 ## Características
 
 * Tipos de datos soportados: int y bool
@@ -50,6 +53,15 @@ Utilizar archivos del directorio `test/` para probar el funcionamiento del mini 
 * `Etapas disponibles:`
     * lexer → análisis léxico
     * parser → análisis sintáctico
+    * semantic → análisis semantico
+
+Al ejecutar un `test`, cada etapa generará su propio archivo dentro de la carpeta outputs. Por ejemplo:
+
+* La etapa lexer produce `output.lex` con la información correspondiente al análisis léxico.
+
+* La etapa parser produce `output.pars` con la información correspondiente al análisis sintáctico.
+
+Cada etapa guarda sus resultados de forma independiente, permitiendo revisar fácilmente el output de cada fase del compilador.
 
 ### Ejecutar todas las etapas
 Sino se especifica una etapa, el compilador las ejecutara todas en orden

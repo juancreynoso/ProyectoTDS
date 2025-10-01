@@ -1,4 +1,5 @@
 // param_list
+#include <stdio.h>  
 
 #ifndef PARAM_LIST
 #define PARAM_LIST
@@ -44,9 +45,9 @@ void insert_f_param(Formal_P_List** f_params, Formal_P a);
 void insert_c_param(Current_P_List** c_params, node* expr);
 char* list_to_string(Formal_P_List* f_params);
 
-void print_c_params(Current_P_List* c_params);
+void print_c_params(Current_P_List* c_params, FILE* parser_out);
 
 // Funcion para imprimir una expresion
-void print_expr(node* expr);
+void print_expr(node* expr, FILE* parser_out);
 
 #endif

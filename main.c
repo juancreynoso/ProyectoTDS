@@ -117,6 +117,7 @@ int main(int argc, char *argv[]) {
 
             if (strcmp(stage, "lexer") == 0) {
                 printf(">> Ejecutando Analizador Lexico...\n");
+                
                 FILE *lex_out = fopen("outputs/output.lex", "w");
                 
                 set_file(lex_out);
@@ -127,19 +128,35 @@ int main(int argc, char *argv[]) {
                 printf(">> Analisis correcto, sin errores lexicos\n");
 
             } else if (strcmp(stage, "parser") == 0) {
+                printf(">> Ejecutando Analizador Lexico...\n");
                 printf(">> Ejecutando Parser...\n");
+                
                 FILE *lex_out = fopen("outputs/output.lex", "w");
-                //FILE *parser_out = fopen("outputs/output.sint", "w");
+                FILE *parser_out = fopen("outputs/output.sint", "w");
 
                 set_file(lex_out);
                 
                 if (yyparse() == 0) {
                     printf("Parseado correctamente, sin errores sintacticos.\n");
-                    printf("\n--- AST ----\n");
-                    print_tree(root, 0);
+                    save_ast(root, 0, parser_out);
                 }   
                 fclose(lex_out);
-                //fclose(parser_out);  
+                fclose(parser_out); 
+            } else if (strcmp(stage, "semantic") == 0) {
+                
+                FILE *lex_out = fopen("outputs/output.lex", "w");
+                FILE *parser_out = fopen("outputs/output.sint", "w");
+
+                set_file(lex_out);
+                
+                if (yyparse() == 0) {
+                    printf("Parseado correctamente, sin errores sintactico.\n");
+                    save_ast(root, 0, parser_out);
+                    printf("Realizando analisis semantico...\n");
+                    analyze_semantics(root);
+                }  
+                fclose(lex_out);
+                fclose(parser_out); 
             }else{
                     fprintf(stderr, "%s", invalidCommandMessage(1));
                     exit(EXIT_FAILURE);
@@ -156,7 +173,8 @@ int main(int argc, char *argv[]) {
 
             check_filename(argv[2], "ctds");
 
-            FILE *lex_out = fopen("outputs/output.lex", "w");        
+            FILE *lex_out = fopen("outputs/output.lex", "w");
+            FILE *parser_out = fopen("outputs/output.sint", "w");        
             set_file(lex_out);
 
             yyin = input_file;
@@ -164,11 +182,11 @@ int main(int argc, char *argv[]) {
 
             if (yyparse() == 0) {
                 printf("Parseado correctamente, sin errores sintactico.\n");
-                printf("\n--- AST ----\n");
-                print_tree(root, 0);
+                save_ast(root, 0, parser_out);
                 analyze_semantics(root);
             }
             fclose(lex_out);
+            fclose(parser_out); 
             fclose(input_file);    
         } else {
             fprintf(stderr, "%s", invalidCommandMessage(0));
