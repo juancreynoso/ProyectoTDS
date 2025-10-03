@@ -6,23 +6,37 @@
 void tac_code(node* root, FILE* tac_out){
     instruction_list* list = NULL;
 
-    gen_tac_code(root, list, tac_out);
+    gen_tac_code(root, list);
     save_instruction_list(list, tac_out);
 }
 
-union type* gen_tac_code(node* root, instruction_list *list){
+operand gen_tac_code(node* root, instruction_list *list){
     if (root == NULL) {
-        return;
+        exit(EXIT_FAILURE);
     }
 
     switch(root->type){
+        operand op;
         case NODE_NUM:
+            op.class = OP_NUM;
+            op.info = root->info;
+            return op;
+
+            break;
         case NODE_BOOL:
+            op.class = OP_BOOL;
+            op.info = root->info;
+            return op;
+
+            break;
         case NODE_ID_USE:
-            return root->info;
+            op.class = OP_BOOL;
+            op.info = root->info;
+            return op;
+
             break;    
         case NODE_RET:
-            union type* t1  = gen_tac_code(root->left, list);
+            operand t1 = gen_tac_code(root->left, list);
             instruction i;
             i.type = RET;
             i.op1 = t1;
@@ -31,24 +45,24 @@ union type* gen_tac_code(node* root, instruction_list *list){
         case NODE_OP:
             switch(root->info->OP.name) {
                 case OP_ASSIGN:
-                    union type* right = gen_tac_code(root->right, list);
-                    union type* left = gen_tac_code(root->left, list);
-                    union type* t1;
+                    // union type* t1 = gen_tac_code(root->right, list);
 
-                    instruction i;
-                    i.type = SAVE;
-                    i.op1 = left; 
-                    i.op2 = right;
-                    i.result = t1;
-                    insert_instruction(&list, i);
+                    // instruction i;
+                    // i.type = SAVE;
+                    // i.op1 = left; 
+                    // i.op2 = NULL;
+                    // i.result = NULL;
+                    // insert_instruction(&list, i);
 
-                    return NULL;
+                    // return NULL;
                     break;
                 case OP_PLUS:
-                    union type* left = gen_tac_code(root->left, list);
-                    union type* right = gen_tac_code(root->right, list);
-                    union type* t1;
-
+                    operand left = gen_tac_code(root->left, list);
+                    operand right = gen_tac_code(root->right, list);
+                    operand t1;
+                    t1.class = OP_TEMP;
+                    t1.info = root->info;
+                    
                     instruction i;
                     i.type = PLUS;
                     i.op1 = left; 
@@ -56,7 +70,7 @@ union type* gen_tac_code(node* root, instruction_list *list){
                     i.result = t1;
                     insert_instruction(&list, i);
 
-                    return NULL;
+                    return t1;
                     break;
                 default:
                     break;
@@ -67,6 +81,7 @@ union type* gen_tac_code(node* root, instruction_list *list){
             gen_tac_code(root->right, list);
             break;
     }
+    
  }
 
 /**
@@ -104,19 +119,23 @@ void save_instruction_list(instruction_list* list,  FILE* tac_out) {
     while(cursor != NULL){
         instruction i = cursor->i;
         char* i_str = instruction_representation(i);
-        fprinf(tac_out, i);
+        fprintf(tac_out, "%s", i_str);
         cursor = cursor->next;
     }
 
 }
 
 char* instruction_representation(instruction i){
-    switch(i.type){
-        case SAVE:
-            break;
-        case PLUS:
-            break;
-        default:
-            break;
-    }
+    // switch(i.class){
+    //     case OP_VAR:
+    //         return i.info->ID.name;
+    //         break;
+    //     case OP_NUM:
+    //         return ()
+    //         break;
+    //     case OP_BOOL:
+    //         break;
+    //     default:
+    //         break;
+    // }
 }
