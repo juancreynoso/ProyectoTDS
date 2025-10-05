@@ -10,15 +10,25 @@
 typedef enum{
     FC,
     FFC,
-    SAVE,
+    ASSIGN,
     RET,
     PLUS,
+    SUB,
+    MULT,
+    DIV,
+    REST,
+    MINUS,
+    GT,
+    LT,
+    EQUALS,
+    AND,
+    OR,
+    NOT
 }instruction_type;
 
 typedef enum{
     OP_TEMP,
-    OP_VAR_USE,
-    OP_VAR_DECL,
+    OP_VAR,
     OP_NUM,
     OP_BOOL
 }op_class;
@@ -47,12 +57,19 @@ typedef struct instruction_list{
     int size;
 }instruction_list;
 
+char* new_temp();
+
 void tac_code(node* root, FILE* tac_out);
-operand gen_tac_code(node* root, instruction_list *list);
+operand gen_tac_code(node* root, instruction_list **list);
+
+void traverse_ast_for_tac(node* root, instruction_list **list); 
 
 char* instruction_representation(instruction i);
+char* operand_to_str(operand op);
 
 void insert_instruction(instruction_list** list, instruction i);
 void save_instruction_list(instruction_list* list, FILE* tac_out);
+
+char* op_to_tr(instruction_type type);
 
 #endif

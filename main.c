@@ -193,7 +193,8 @@ int main(int argc, char *argv[]) {
             check_filename(argv[2], "ctds");
 
             FILE *lex_out = fopen("outputs/output.lex", "w");
-            FILE *parser_out = fopen("outputs/output.sint", "w");        
+            FILE *parser_out = fopen("outputs/output.sint", "w"); 
+            FILE *tac_out = fopen("outputs/tac.ci", "w");       
             set_file(lex_out);
 
             yyin = input_file;
@@ -203,9 +204,11 @@ int main(int argc, char *argv[]) {
                 printf("Parseado correctamente, sin errores sintactico.\n");
                 save_ast(root, 0, parser_out);
                 analyze_semantics(root);
+                tac_code(root, tac_out);
             }
             fclose(lex_out);
             fclose(parser_out); 
+            fclose(tac_out);
             fclose(input_file);    
         } else {
             fprintf(stderr, "%s", invalidCommandMessage(0));
