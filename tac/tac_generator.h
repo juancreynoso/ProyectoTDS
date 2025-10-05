@@ -8,10 +8,12 @@
 
 // Tipos de instrucciones
 typedef enum{
+    PRG,
+    END_PRG,
     FC,
     FFC,
-    ASSIGN,
     RET,
+    ASSIGN,
     PLUS,
     SUB,
     MULT,
@@ -26,11 +28,13 @@ typedef enum{
     NOT
 }instruction_type;
 
+// Tipos de operandos
 typedef enum{
-    OP_TEMP,
-    OP_VAR,
-    OP_NUM,
-    OP_BOOL
+    OPE_TEMP,
+    OPE_VAR,
+    OPE_NUM,
+    OPE_BOOL
+    // Llamadas a metodos ??
 }op_class;
 
 typedef struct operand{
@@ -67,9 +71,13 @@ void traverse_ast_for_tac(node* root, instruction_list **list);
 char* instruction_representation(instruction i);
 char* operand_to_str(operand op);
 
+instruction_list* init_instruction_list();
 void insert_instruction(instruction_list** list, instruction i);
 void save_instruction_list(instruction_list* list, FILE* tac_out);
 
 char* op_to_tr(instruction_type type);
+instruction_type op_name_to_inst_type(OpType type);
+
+
 
 #endif

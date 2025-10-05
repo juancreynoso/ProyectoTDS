@@ -12,7 +12,7 @@ char* new_temp() {
 }
 
 void tac_code(node* root, FILE* tac_out){
-    instruction_list* list = NULL;
+    instruction_list* list = init_instruction_list();
 
     traverse_ast_for_tac(root, &list);
     save_instruction_list(list, tac_out);
@@ -32,7 +32,7 @@ void traverse_ast_for_tac(node* root, instruction_list **list) {
                     operand id = gen_tac_code(root->left, list);
 
                     instruction i;
-                    i.type = ASSIGN;
+                    i.type = op_name_to_inst_type(root->info->OP.name);
                     i.op1 = id; 
                     i.op2 = t1;
 
@@ -69,7 +69,7 @@ operand gen_tac_code(node* root, instruction_list **list){
         
         case NODE_NUM: {
             operand op;
-            op.class = OP_NUM;
+            op.class = OPE_NUM;
             op.info = root->info;
             return op;
 
@@ -78,7 +78,7 @@ operand gen_tac_code(node* root, instruction_list **list){
 
         case NODE_BOOL: {
             operand op;            
-            op.class = OP_BOOL;
+            op.class = OPE_BOOL;
             op.info = root->info;
             return op;
 
@@ -89,7 +89,7 @@ operand gen_tac_code(node* root, instruction_list **list){
         case NODE_ID_USE: {
             operand op;
             printf(" Este es el nombre: %s \n", root->info->ID.name);
-            op.class = OP_VAR;
+            op.class = OPE_VAR;
             op.info = root->info;
             return op;
             break;    
@@ -97,88 +97,55 @@ operand gen_tac_code(node* root, instruction_list **list){
             
         case NODE_OP: {
             switch(root->info->OP.name) {
-            case OP_PLUS : {
-                operand left = gen_tac_code(root->left, list);
-                operand right = gen_tac_code(root->right, list);
-                operand t1;
-                t1.class = OP_TEMP;
-                t1.info = malloc(sizeof(union type));
-                t1.info->ID.name = new_temp();
-                t1.info->ID.type = root->info->OP.type;
+                case OP_PLUS: 
+                case OP_SUB:
+                case OP_MULT:
+                case OP_DIV: 
+                case OP_REST:
+                case OP_GT:
+                case OP_LT:
+                case OP_EQUALS:
+                case OP_AND:
+                case OP_OR:{
+                    operand left = gen_tac_code(root->left, list);
+                    operand right = gen_tac_code(root->right, list);
+                    operand t1;
+                    t1.class = OPE_TEMP;
+                    t1.info = malloc(sizeof(union type));
+                    t1.info->ID.name = new_temp();
+                    t1.info->ID.type = root->info->OP.type;
 
-                instruction i;
-                i.type = PLUS;
-                i.op1 = left; 
-                i.op2 = right;
-                i.result = t1;
-                insert_instruction(list, i);
+                    instruction i;
+                    i.type = op_name_to_inst_type(root->info->OP.name);
+                    i.op1 = left; 
+                    i.op2 = right;
+                    i.result = t1;
+                    insert_instruction(list, i);
 
-                return t1;
-                break;
-            }
+                    return t1;
+                    break;
+                }
+                case OP_NOT:
+                case OP_MINUS: {
+                    operand left = gen_tac_code(root->left, list);
+                    operand t1;
+                    t1.class = OPE_TEMP;
+                    t1.info = malloc(sizeof(union type));
+                    t1.info->ID.name = new_temp();
+                    t1.info->ID.type = root->info->OP.type;
 
-            case OP_SUB : {
-                operand left = gen_tac_code(root->left, list);
-                operand right = gen_tac_code(root->right, list);
-                operand t1;
-                t1.class = OP_TEMP;
-                t1.info = malloc(sizeof(union type));
-                t1.info->ID.name = new_temp();
-                t1.info->ID.type = root->info->OP.type;
+                    instruction i;
+                    i.type = op_name_to_inst_type(root->info->OP.name);
+                    i.op1 = left; 
+                    i.result = t1;
+                    insert_instruction(list, i);
 
-                instruction i;
-                i.type = SUB;
-                i.op1 = left; 
-                i.op2 = right;
-                i.result = t1;
-                insert_instruction(list, i);
-
-                return t1;
-                break;
-            }
-                
-            case OP_MULT : {
-                operand left = gen_tac_code(root->left, list);
-                operand right = gen_tac_code(root->right, list);
-                operand t1;
-                t1.class = OP_TEMP;
-                t1.info = malloc(sizeof(union type));
-                t1.info->ID.name = new_temp();
-                t1.info->ID.type = root->info->OP.type;
-
-                instruction i;
-                i.type = MULT;
-                i.op1 = left; 
-                i.op2 = right;
-                i.result = t1;
-                insert_instruction(list, i);
-
-                return t1;
-                break;
-            }      
-
-            case OP_DIV : {
-                operand left = gen_tac_code(root->left, list);
-                operand right = gen_tac_code(root->right, list);
-                operand t1;
-                t1.class = OP_TEMP;
-                t1.info = malloc(sizeof(union type));
-                t1.info->ID.name = new_temp();
-                t1.info->ID.type = root->info->OP.type;
-
-                instruction i;
-                i.type = DIV;
-                i.op1 = left; 
-                i.op2 = right;
-                i.result = t1;
-                insert_instruction(list, i);
-
-                return t1;
-                break;
-            }                  
-
-            default:
-                break;
+                    return t1;
+                    break;
+                    break;
+                }
+                default:
+                    break;
             }
             break;
         }
@@ -195,25 +162,51 @@ operand gen_tac_code(node* root, instruction_list **list){
  * @param list Lista de instrucciones.
  * @param i Nueva instruccion.
  */
-void insert_instruction(instruction_list** list, instruction i){
-    
+void insert_instruction(instruction_list** list, instruction i) {
+
     instruction_node* new_it = malloc(sizeof(instruction_node));
     new_it->i = i;
     new_it->next = NULL;
 
-    if (*list == NULL) {
-        *list = malloc(sizeof(instruction_list));
-        (*list)->head = new_it;
-        (*list)->size = 1;
-    } else {
-        instruction_node* temp = (*list)->head;
-        while(temp->next != NULL) {
-            temp = temp->next;
-        }
-        temp->next = new_it;
-        (*list)->size++;
+    instruction_node* temp = (*list)->head;
+
+    while (temp->next->i.type != END_PRG) {
+        temp = temp->next;
     }
+
+    new_it->next = temp->next;
+    temp->next = new_it;
+
+    (*list)->size++;
 }
+
+
+instruction_list* init_instruction_list() {
+    instruction_list* list = malloc(sizeof(instruction_list));
+    list->head = NULL;
+    list->size = 0;
+
+    // Crear las instrucciones PROGRAM y END
+    instruction i_begin;
+    instruction i_end;
+    i_begin.type = PRG;
+    i_end.type = END_PRG;
+
+    // Crear nodos
+    instruction_node* n_begin = malloc(sizeof(instruction_node));
+    instruction_node* n_end = malloc(sizeof(instruction_node));
+
+    n_begin->i = i_begin;
+    n_end->i = i_end;
+    n_begin->next = n_end;
+    n_end->next = NULL;
+
+    list->head = n_begin;
+    list->size = 2;
+
+    return list;
+}
+
 
 
 void save_instruction_list(instruction_list* list,  FILE* tac_out) {
@@ -223,7 +216,6 @@ void save_instruction_list(instruction_list* list,  FILE* tac_out) {
 
     instruction_node* cursor = list->head;
 
-    printf("Llego acaaa\n");
     while(cursor != NULL){
         instruction i = cursor->i;
         char* i_str = instruction_representation(i);
@@ -238,14 +230,14 @@ char* operand_to_str(operand op) {
 
     char* buffer = malloc(64);
     switch(op.class) {
-        case OP_NUM:
+        case OPE_NUM:
             snprintf(buffer, 64, "%d", op.info->INT.value);
             break;
-        case OP_BOOL:
+        case OPE_BOOL:
             snprintf(buffer, 64, "%s", op.info->BOOL.value ? "true" : "false");
             break;
-        case OP_VAR:
-        case OP_TEMP:
+        case OPE_VAR:
+        case OPE_TEMP:
             snprintf(buffer, 64, "%s", op.info->ID.name);
             break;
         default:
@@ -265,6 +257,14 @@ char* instruction_representation(instruction i) {
     printf("Representacion \n");
 
     switch(i.type) {
+        case PRG:
+            printf("INIT\n");
+            snprintf(buffer, 128, "PROGRAM\n");
+            break;
+        case END_PRG:
+            printf("END\n");
+            snprintf(buffer, 128, "END\n");
+            break;     
         case RET: {
             printf("RET\n");
             op1_str = operand_to_str(i.op1);
@@ -294,18 +294,17 @@ char* instruction_representation(instruction i) {
             free(op2_str);
             free(result_str);
             break;
-        // case MINUS:
-        //     op1_str = operand_to_str(i.op1);
-        //     result_str = operand_to_str(i.result);
-        //     snprintf(buffer, 128, "%s := %s %s\n",
-        //             result_str,
-        //             op1_str,
-        //             op_name(i.type);
-        //             op2_str);
-        //     free(op1_str);
-        //     free(op2_str);
-        //     free(result_str);
-        // case NOT:
+        case MINUS:
+        case NOT:
+            op1_str = operand_to_str(i.op1);
+            result_str = operand_to_str(i.result);
+            snprintf(buffer, 128, "%s := %s %s\n",
+                    result_str,
+                    op_to_tr(i.type),
+                    op1_str);
+            free(op1_str);
+            free(result_str);
+            break;
         case ASSIGN:
             printf("SAVE\n");
             op1_str = operand_to_str(i.op1);
@@ -318,6 +317,7 @@ char* instruction_representation(instruction i) {
             break;
         default:
             snprintf(buffer, 128, "UNKNOWN\n");
+            break;
     }
 
     return buffer;
@@ -351,6 +351,50 @@ char* instruction_representation(instruction i) {
             return "NOT";
         default:
             return "?";
+            break;
+    }
+ }
+
+ instruction_type op_name_to_inst_type(OpType type) {
+    switch(type){
+        case OP_ASSIGN:
+            return ASSIGN;
+            break;
+        case OP_PLUS:
+            return PLUS;
+            break;
+        case OP_SUB:
+            return SUB;
+            break;
+        case OP_MULT:
+            return MULT;
+            break;
+        case OP_DIV:
+            return DIV;
+            break;
+        case OP_REST:
+            return REST;
+            break;
+        case OP_MINUS:
+            return MINUS;
+            break;
+        case OP_GT:
+            return GT;
+            break;
+        case OP_LT:
+            return LT;
+            break;
+        case OP_EQUALS:
+            return EQUALS;
+            break;
+        case OP_AND:
+            return AND;
+            break;
+        case OP_OR:
+            return OR;
+            break;
+        case OP_NOT:
+            return NOT;
             break;
     }
  }
