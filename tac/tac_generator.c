@@ -32,27 +32,26 @@ void traverse_ast_for_tac(node* root, instruction_list **list) {
     }
 
     switch(root->type){
-        // case NODE_DECL_METH: {
-        //      instruction i_begin;
+        case NODE_DECL_METH: {
 
-        //      operand op1;
-        //      op1.info = root->info;
-        //      op1.class = OPE_DECL_METH;
+            operand op1;
+            op1.info = root->info;
+            op1.class = OPE_DECL_METH;
+            op1.name = root->info->METH_DECL.name;
 
-        //      i.type = FC;
-        //      i.op1 = op1;
+            instruction start_func;
+            start_func.type = FUNC;
+            start_func.op1 = op1;
+            insert_instruction(list, start_func);
 
-        //     insert_instruction(list, i_begin);
+            traverse_ast_for_tac(root->left, list); // Entro al bloque
 
-        //     //traverse_ast_for_tac(root->left, list);
+            instruction end_func;
+            end_func.type = FFUNC;           
+            insert_instruction(list, end_func);
 
-        //     instruction i_end;
-        //     i.type = FFC;            
-
-        //     insert_instruction(list, i_end);
-
-        //     break;
-        // }
+            break;
+        }
 
         case NODE_OP:
             switch(root->info->OP.name){
@@ -252,7 +251,6 @@ void save_instruction_list(instruction_list* list,  FILE* tac_out) {
 
 
 char* operand_to_str(operand op) {
-
     char* buffer = malloc(64);
     switch(op.class) {
         case OPE_NUM:
@@ -266,6 +264,9 @@ char* operand_to_str(operand op) {
             break;
         case OPE_VAR:
             snprintf(buffer, 64, "%s", op.info->ID.name);
+            break;
+        case OPE_DECL_METH:
+            snprintf(buffer, 64, "%s", op.name);
             break;
         default:
             snprintf(buffer, 64, "???");
@@ -342,6 +343,14 @@ char* instruction_representation(instruction i) {
                      op2_str);
             free(op1_str);
             free(op2_str);
+            break;
+        case FUNC:
+            op1_str = operand_to_str(i.op1);
+            snprintf(buffer, 128, "FUNC %s \n", op1_str);
+            free(op1_str);
+            break;
+        case FFUNC:
+            snprintf(buffer, 128, "FFUNC\n");
             break;
         default:
             snprintf(buffer, 128, "UNKNOWN\n");

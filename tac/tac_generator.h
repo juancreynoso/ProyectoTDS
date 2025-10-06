@@ -10,7 +10,8 @@
 typedef enum{
     PRG,
     END_PRG,
-    FC,
+    FUNC,
+    FFUNC,
     RET,
     ASSIGN,
     PLUS,
