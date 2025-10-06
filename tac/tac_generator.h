@@ -39,6 +39,7 @@ typedef enum{
 
 typedef struct operand{
     op_class class;
+    char* name;
     union type *info;
 }operand;
 

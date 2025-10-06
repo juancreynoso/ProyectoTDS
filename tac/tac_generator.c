@@ -4,6 +4,7 @@
 
 
 static int temp_count = 0;
+static int label_count = 0;
 
 char* new_temp() {
     char* name = malloc(10);
@@ -12,7 +13,9 @@ char* new_temp() {
 }
 
 char* new_label() {
-    //
+    char* name = malloc(10);
+    sprintf(name, "L%d", label_count++);
+    return name;
 }
 
 void tac_code(node* root, FILE* tac_out){
@@ -30,23 +33,23 @@ void traverse_ast_for_tac(node* root, instruction_list **list) {
 
     switch(root->type){
         // case NODE_DECL_METH: {
-        //     instruction i;
+        //      instruction i_begin;
 
-        //     operand op1;
-        //     op1.info = root->info;
-        //     op1.class = OPE_DECL_METH;
+        //      operand op1;
+        //      op1.info = root->info;
+        //      op1.class = OPE_DECL_METH;
 
-        //     i.type = FC;
-        //     i.op1 = op1;
+        //      i.type = FC;
+        //      i.op1 = op1;
 
-        //     insert_instruction(list, i);
+        //     insert_instruction(list, i_begin);
 
         //     //traverse_ast_for_tac(root->left, list);
 
-        //     instruction i;
+        //     instruction i_end;
         //     i.type = FFC;            
 
-        //     insert_instruction(list, i);
+        //     insert_instruction(list, i_end);
 
         //     break;
         // }
@@ -137,6 +140,7 @@ operand gen_tac_code(node* root, instruction_list **list){
                     operand right = gen_tac_code(root->right, list);
                     operand t1;
                     t1.class = OPE_TEMP;
+                    t1.name = new_temp();
                     t1.info = root->info;
 
                     instruction i;
@@ -154,6 +158,7 @@ operand gen_tac_code(node* root, instruction_list **list){
                     operand left = gen_tac_code(root->left, list);
                     operand t1;
                     t1.class = OPE_TEMP;
+                    t1.name = new_temp();
                     t1.info = root->info;
 
                     instruction i;
@@ -163,7 +168,6 @@ operand gen_tac_code(node* root, instruction_list **list){
                     insert_instruction(list, i);
 
                     return t1;
-                    break;
                     break;
                 }
                 default:
@@ -258,7 +262,7 @@ char* operand_to_str(operand op) {
             snprintf(buffer, 64, "%s", op.info->BOOL.value ? "true" : "false");
             break;
         case OPE_TEMP:
-            snprintf(buffer, 64, "%s", new_temp());
+            snprintf(buffer, 64, "%s", op.name);
             break;
         case OPE_VAR:
             snprintf(buffer, 64, "%s", op.info->ID.name);
@@ -305,6 +309,7 @@ char* instruction_representation(instruction i) {
         case EQUALS:
         case AND:
         case OR:
+            printf("llego \n");
             op1_str = operand_to_str(i.op1);
             op2_str = operand_to_str(i.op2);
             result_str = operand_to_str(i.result);
