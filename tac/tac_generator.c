@@ -11,6 +11,10 @@ char* new_temp() {
     return name;
 }
 
+char* new_label() {
+    //
+}
+
 void tac_code(node* root, FILE* tac_out){
     instruction_list* list = init_instruction_list();
 
@@ -18,13 +22,35 @@ void tac_code(node* root, FILE* tac_out){
     save_instruction_list(list, tac_out);
 }
 
-// Recorre solamente 
+// Recorre 
 void traverse_ast_for_tac(node* root, instruction_list **list) {
     if (root == NULL) {
         return;
     }
 
     switch(root->type){
+        // case NODE_DECL_METH: {
+        //     instruction i;
+
+        //     operand op1;
+        //     op1.info = root->info;
+        //     op1.class = OPE_DECL_METH;
+
+        //     i.type = FC;
+        //     i.op1 = op1;
+
+        //     insert_instruction(list, i);
+
+        //     //traverse_ast_for_tac(root->left, list);
+
+        //     instruction i;
+        //     i.type = FFC;            
+
+        //     insert_instruction(list, i);
+
+        //     break;
+        // }
+
         case NODE_OP:
             switch(root->info->OP.name){
                 case OP_ASSIGN: {
@@ -111,9 +137,7 @@ operand gen_tac_code(node* root, instruction_list **list){
                     operand right = gen_tac_code(root->right, list);
                     operand t1;
                     t1.class = OPE_TEMP;
-                    t1.info = malloc(sizeof(union type));
-                    t1.info->ID.name = new_temp();
-                    t1.info->ID.type = root->info->OP.type;
+                    t1.info = root->info;
 
                     instruction i;
                     i.type = op_name_to_inst_type(root->info->OP.name);
@@ -130,9 +154,7 @@ operand gen_tac_code(node* root, instruction_list **list){
                     operand left = gen_tac_code(root->left, list);
                     operand t1;
                     t1.class = OPE_TEMP;
-                    t1.info = malloc(sizeof(union type));
-                    t1.info->ID.name = new_temp();
-                    t1.info->ID.type = root->info->OP.type;
+                    t1.info = root->info;
 
                     instruction i;
                     i.type = op_name_to_inst_type(root->info->OP.name);
@@ -186,13 +208,11 @@ instruction_list* init_instruction_list() {
     list->head = NULL;
     list->size = 0;
 
-    // Crear las instrucciones PROGRAM y END
     instruction i_begin;
     instruction i_end;
     i_begin.type = PRG;
     i_end.type = END_PRG;
 
-    // Crear nodos
     instruction_node* n_begin = malloc(sizeof(instruction_node));
     instruction_node* n_end = malloc(sizeof(instruction_node));
 
@@ -226,6 +246,7 @@ void save_instruction_list(instruction_list* list,  FILE* tac_out) {
 
 }
 
+
 char* operand_to_str(operand op) {
 
     char* buffer = malloc(64);
@@ -236,8 +257,10 @@ char* operand_to_str(operand op) {
         case OPE_BOOL:
             snprintf(buffer, 64, "%s", op.info->BOOL.value ? "true" : "false");
             break;
-        case OPE_VAR:
         case OPE_TEMP:
+            snprintf(buffer, 64, "%s", new_temp());
+            break;
+        case OPE_VAR:
             snprintf(buffer, 64, "%s", op.info->ID.name);
             break;
         default:

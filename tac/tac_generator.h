@@ -11,7 +11,6 @@ typedef enum{
     PRG,
     END_PRG,
     FC,
-    FFC,
     RET,
     ASSIGN,
     PLUS,
@@ -30,6 +29,7 @@ typedef enum{
 
 // Tipos de operandos
 typedef enum{
+    OPE_DECL_METH,
     OPE_TEMP,
     OPE_VAR,
     OPE_NUM,
