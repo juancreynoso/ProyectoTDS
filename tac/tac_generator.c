@@ -52,6 +52,101 @@ void traverse_ast_for_tac(node* root, instruction_list **list) {
             break;
         }   
 
+        case NODE_IF_ELSE: {
+
+            instruction i_cond;
+            i_cond.type = IF_COND;
+
+            operand cond = gen_tac_code(root->info->IF_ELSE.expr, list);
+            operand lbl;
+            lbl.name = new_label();
+            lbl.class = OPE_LABEL;
+
+            i_cond.op1 = cond;
+            i_cond.op2 = lbl;
+
+            insert_instruction(list, i_cond);
+
+
+            // Verifico si es if then o if then else
+
+            if (root->info->IF_ELSE.else_block == NULL) {
+
+                // GOTO END
+                instruction end_gt;
+                operand end_lbl;
+                end_lbl.class = OPE_LABEL;
+                end_lbl.name = new_label();
+                end_gt.type = GOTO;
+                end_gt.op1 = end_lbl;
+
+                insert_instruction(list, end_gt);
+                
+                // Bloque IF_THEN 
+                instruction if_label;
+                if_label.type  = LABEL;
+                if_label.op1 = lbl;
+
+                insert_instruction(list, if_label);
+
+                traverse_ast_for_tac(root->info->IF_ELSE.if_block, list);
+
+                instruction end_label;
+                end_label.type  = LABEL;
+                end_label.op1 = end_lbl;
+
+                insert_instruction(list, end_label);
+
+            } else {
+                // GOTO ELSE
+                instruction else_gt;
+                operand else_lbl;
+                else_lbl.class = OPE_LABEL;
+                else_lbl.name = new_label();
+                else_gt.type = GOTO;
+                else_gt.op1 = else_lbl;
+
+                insert_instruction(list, else_gt);
+                
+                // Bloque IF_THEN 
+                instruction if_label;
+                if_label.type  = LABEL;
+                if_label.op1 = lbl;
+
+                insert_instruction(list, if_label);
+
+                traverse_ast_for_tac(root->info->IF_ELSE.if_block, list);
+
+                // GOTO END
+                instruction end_gt;
+                operand end_lbl;
+                end_lbl.class = OPE_LABEL;
+                end_lbl.name = new_label();
+                end_gt.type = GOTO;
+                end_gt.op1 = end_lbl;
+
+                insert_instruction(list, end_gt);
+
+                // Bloque ELSE
+                instruction else_label;
+                else_label.type = LABEL;
+                else_label.op1 = else_lbl;
+
+                insert_instruction(list, else_label);
+
+                traverse_ast_for_tac(root->info->IF_ELSE.else_block, list);
+
+                instruction end_label;
+                end_label.type = LABEL;
+                end_label.op1 = end_lbl;
+
+                insert_instruction(list, end_label);
+                
+            }
+
+            break;
+        } 
+
         case NODE_WHILE: {
             operand start_label;
             start_label.class = OPE_LABEL;
@@ -106,6 +201,37 @@ void traverse_ast_for_tac(node* root, instruction_list **list) {
                     break;
             }
             break;
+        
+        // case NODE_CALL_METH: {
+        //     if (root->info->METH_CALL.c_params != NULL) {
+        //         Node_C_List* param_cursor = root->info->METH_CALL.c_params->head;
+        //         while (param_cursor != NULL) {
+        //             operand param_value = gen_tac_code(param_cursor->p, list);
+                    
+        //             instruction i_param;
+        //             i_param.type = PARAM;
+        //             i_param.op1 = param_value;
+        //             insert_instruction(list, i_param);
+                    
+        //             param_cursor = param_cursor->next;
+        //         }
+        //     }
+        //     operand temp; // Temp para el resultado del metodo
+        //     temp.class = OPE_TEMP;
+        //     temp.name = new_temp();
+            
+        //     operand op_call;
+        //     op_call.class = OPE_CALL_METH;
+        //     op_call.name = root->info->METH_CALL.name;
+            
+        //     instruction i_call;
+        //     i_call.type = CALL;
+        //     i_call.op1 = op_call;
+        //     i_call.result = temp;
+        //     insert_instruction(list, i_call);
+            
+        //     break;
+        // }
             
         case NODE_RET: {
             operand t1 = gen_tac_code(root->left, list);
@@ -402,6 +528,15 @@ char* instruction_representation(instruction i) {
             break;
         case FFUNC:
             snprintf(buffer, 128, "FFUNC\n");
+            break;
+        case IF_COND:
+            op1_str = operand_to_str(i.op1);
+            op2_str = operand_to_str(i.op2);
+
+            snprintf(buffer, 128, "IF %s GOTO %s\n",
+                 op1_str,
+                 op2_str);
+
             break;
         case IF_FALSE_GOTO:
             op1_str = operand_to_str(i.op1); // condición

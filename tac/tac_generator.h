@@ -12,6 +12,7 @@ typedef enum{
     END_PRG,
     FUNC,
     FFUNC,
+    IF_COND,
     RET,
     ASSIGN,
     PLUS,
