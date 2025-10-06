@@ -25,16 +25,23 @@ typedef enum{
     EQUALS,
     AND,
     OR,
+    LABEL,
+    GOTO,
+    IF_FALSE_GOTO,
+    CALL,
+    PARAM,
     NOT
 }instruction_type;
 
 // Tipos de operandos
 typedef enum{
     OPE_DECL_METH,
+    OPE_CALL_METH,
     OPE_TEMP,
     OPE_VAR,
     OPE_NUM,
-    OPE_BOOL
+    OPE_BOOL,
+    OPE_LABEL
     // Llamadas a metodos ??
 }op_class;
 

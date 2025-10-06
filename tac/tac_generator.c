@@ -18,7 +18,7 @@ char* new_label() {
     return name;
 }
 
-void tac_code(node* root, FILE* tac_out){
+void tac_code(node* root, FILE* tac_out) {
     instruction_list* list = init_instruction_list();
 
     traverse_ast_for_tac(root, &list);
@@ -33,7 +33,6 @@ void traverse_ast_for_tac(node* root, instruction_list **list) {
 
     switch(root->type){
         case NODE_DECL_METH: {
-
             operand op1;
             op1.info = root->info;
             op1.class = OPE_DECL_METH;
@@ -51,6 +50,41 @@ void traverse_ast_for_tac(node* root, instruction_list **list) {
             insert_instruction(list, end_func);
 
             break;
+        }   
+
+        case NODE_WHILE: {
+            operand start_label;
+            start_label.class = OPE_LABEL;
+            start_label.name = new_label();
+            
+            instruction i_start;
+            i_start.type = LABEL; // label inicio while
+            i_start.op1 = start_label;
+            insert_instruction(list, i_start);
+            
+            operand cond = gen_tac_code(root->info->WHILE.expr, list);
+            
+            operand end_label;
+            end_label.class = OPE_LABEL;
+            end_label.name = new_label();
+            
+            instruction i_cond;
+            i_cond.type = IF_FALSE_GOTO; // ifFalse cond GOTO L1
+            i_cond.op1 = cond;
+            i_cond.op2 = end_label;
+            insert_instruction(list, i_cond);
+            
+            traverse_ast_for_tac(root->info->WHILE.block, list);
+            
+            instruction i_goto;
+            i_goto.type = GOTO; // GOTO L0
+            i_goto.op1 = start_label;
+            insert_instruction(list, i_goto);
+            
+            instruction i_end;
+            i_end.type = LABEL; // Label fin while
+            i_end.op1 = end_label;
+            insert_instruction(list, i_end);
         }
 
         case NODE_OP:
@@ -69,10 +103,10 @@ void traverse_ast_for_tac(node* root, instruction_list **list) {
                     break;                    
                 }
                 default:
-                    printf("Entre por otra operacion \n");
                     break;
             }
             break;
+            
         case NODE_RET: {
             operand t1 = gen_tac_code(root->left, list);
             instruction i;
@@ -91,17 +125,13 @@ void traverse_ast_for_tac(node* root, instruction_list **list) {
 
 }
 
-operand gen_tac_code(node* root, instruction_list **list){
-
+operand gen_tac_code(node* root, instruction_list **list) {
     switch(root->type){
-        
         case NODE_NUM: {
             operand op;
             op.class = OPE_NUM;
             op.info = root->info;
             return op;
-
-            break;
         }
 
         case NODE_BOOL: {
@@ -109,18 +139,14 @@ operand gen_tac_code(node* root, instruction_list **list){
             op.class = OPE_BOOL;
             op.info = root->info;
             return op;
-
-            break;
         } 
 
         case NODE_DECL:
         case NODE_ID_USE: {
             operand op;
-            printf(" Este es el nombre: %s \n", root->info->ID.name);
             op.class = OPE_VAR;
             op.info = root->info;
-            return op;
-            break;    
+            return op; 
         }
             
         case NODE_OP: {
@@ -150,7 +176,6 @@ operand gen_tac_code(node* root, instruction_list **list){
                     insert_instruction(list, i);
 
                     return t1;
-                    break;
                 }
                 case OP_NOT:
                 case OP_MINUS: {
@@ -167,12 +192,42 @@ operand gen_tac_code(node* root, instruction_list **list){
                     insert_instruction(list, i);
 
                     return t1;
-                    break;
                 }
                 default:
                     break;
             }
             break;
+        }
+
+        case NODE_CALL_METH: {
+            if (root->info->METH_CALL.c_params != NULL) {
+                Node_C_List* param_cursor = root->info->METH_CALL.c_params->head;
+                while (param_cursor != NULL) {
+                    operand param_value = gen_tac_code(param_cursor->p, list);
+                    
+                    instruction i_param;
+                    i_param.type = PARAM;
+                    i_param.op1 = param_value;
+                    insert_instruction(list, i_param);
+                    
+                    param_cursor = param_cursor->next;
+                }
+            }
+            operand temp; // Temp para el resultado del metodo
+            temp.class = OPE_TEMP;
+            temp.name = new_temp();
+            
+            operand op_call;
+            op_call.class = OPE_CALL_METH;
+            op_call.name = root->info->METH_CALL.name;
+            
+            instruction i_call;
+            i_call.type = CALL;
+            i_call.op1 = op_call;
+            i_call.result = temp;
+            insert_instruction(list, i_call);
+            
+            return temp;
         }
         default:
             gen_tac_code(root->left, list);
@@ -188,7 +243,6 @@ operand gen_tac_code(node* root, instruction_list **list){
  * @param i Nueva instruccion.
  */
 void insert_instruction(instruction_list** list, instruction i) {
-
     instruction_node* new_it = malloc(sizeof(instruction_node));
     new_it->i = i;
     new_it->next = NULL;
@@ -238,7 +292,6 @@ void save_instruction_list(instruction_list* list,  FILE* tac_out) {
     }
 
     instruction_node* cursor = list->head;
-
     while(cursor != NULL){
         instruction i = cursor->i;
         char* i_str = instruction_representation(i);
@@ -246,7 +299,6 @@ void save_instruction_list(instruction_list* list,  FILE* tac_out) {
         free(i_str);
         cursor = cursor->next;
     }
-
 }
 
 
@@ -268,6 +320,12 @@ char* operand_to_str(operand op) {
         case OPE_DECL_METH:
             snprintf(buffer, 64, "%s", op.name);
             break;
+        case OPE_CALL_METH:
+            snprintf(buffer, 64, "%s", op.name);
+            break;
+        case OPE_LABEL:
+            snprintf(buffer, 64, "%s", op.name);
+            break;
         default:
             snprintf(buffer, 64, "???");
             break;
@@ -282,19 +340,14 @@ char* instruction_representation(instruction i) {
     char* op2_str;
     char* result_str;
 
-    printf("Representacion \n");
-
     switch(i.type) {
         case PRG:
-            printf("INIT\n");
             snprintf(buffer, 128, "PROGRAM\n");
             break;
         case END_PRG:
-            printf("END\n");
             snprintf(buffer, 128, "END\n");
             break;     
         case RET: {
-            printf("RET\n");
             op1_str = operand_to_str(i.op1);
             snprintf(buffer, 128, "RET %s\n", op1_str);
             free(op1_str);
@@ -310,7 +363,6 @@ char* instruction_representation(instruction i) {
         case EQUALS:
         case AND:
         case OR:
-            printf("llego \n");
             op1_str = operand_to_str(i.op1);
             op2_str = operand_to_str(i.op2);
             result_str = operand_to_str(i.result);
@@ -335,7 +387,6 @@ char* instruction_representation(instruction i) {
             free(result_str);
             break;
         case ASSIGN:
-            printf("SAVE\n");
             op1_str = operand_to_str(i.op1);
             op2_str = operand_to_str(i.op2);
              snprintf(buffer, 128, "%s := %s\n",
@@ -352,6 +403,39 @@ char* instruction_representation(instruction i) {
         case FFUNC:
             snprintf(buffer, 128, "FFUNC\n");
             break;
+        case IF_FALSE_GOTO:
+            op1_str = operand_to_str(i.op1); // condición
+            op2_str = operand_to_str(i.op2); // etiqueta destino
+            snprintf(buffer, 128, "ifFalse %s GOTO %s\n", op1_str, op2_str);
+            free(op1_str);
+            free(op2_str);
+            break;
+        case LABEL:
+            op1_str = operand_to_str(i.op1);
+            snprintf(buffer, 128, "%s\n", op1_str);
+            free(op1_str);
+            break;
+        case GOTO:
+            op1_str = operand_to_str(i.op1);
+            snprintf(buffer, 128, "GOTO %s\n", op1_str);
+            free(op1_str);
+            break;
+        case CALL: {
+            op1_str = operand_to_str(i.op1);
+            if (i.result.class == OPE_TEMP) {
+                result_str = operand_to_str(i.result);
+                snprintf(buffer, 128, "%s := CALL %s\n", result_str, op1_str);
+                free(result_str);
+            } else {
+                snprintf(buffer, 128, "CALL %s\n", op1_str);
+            }
+            free(op1_str);
+            break;
+        }
+        case PARAM:
+            op1_str = operand_to_str(i.op1);
+            snprintf(buffer, 128, "PARAM %s\n", op1_str);
+            break;
         default:
             snprintf(buffer, 128, "UNKNOWN\n");
             break;
@@ -360,7 +444,7 @@ char* instruction_representation(instruction i) {
     return buffer;
 }
 
- char* op_to_tr(instruction_type type) {
+char* op_to_tr(instruction_type type) {
     switch(type){
         case PLUS:
             return "PLUS";
@@ -388,50 +472,36 @@ char* instruction_representation(instruction i) {
             return "NOT";
         default:
             return "?";
-            break;
     }
- }
+}
 
- instruction_type op_name_to_inst_type(OpType type) {
-    switch(type){
+instruction_type op_name_to_inst_type(OpType type) {
+    switch(type) {
         case OP_ASSIGN:
             return ASSIGN;
-            break;
         case OP_PLUS:
             return PLUS;
-            break;
         case OP_SUB:
             return SUB;
-            break;
         case OP_MULT:
             return MULT;
-            break;
         case OP_DIV:
             return DIV;
-            break;
         case OP_REST:
             return REST;
-            break;
         case OP_MINUS:
             return MINUS;
-            break;
         case OP_GT:
             return GT;
-            break;
         case OP_LT:
             return LT;
-            break;
         case OP_EQUALS:
             return EQUALS;
-            break;
         case OP_AND:
             return AND;
-            break;
         case OP_OR:
             return OR;
-            break;
         case OP_NOT:
             return NOT;
-            break;
     }
- }
+}
