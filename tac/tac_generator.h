@@ -43,16 +43,16 @@ typedef enum{
     OPE_NUM,
     OPE_BOOL,
     OPE_LABEL
-    // Llamadas a metodos ??
 }op_class;
 
+/* Estructura de un operando */
 typedef struct operand{
     op_class class;
     char* name;
     union type *info;
 }operand;
 
-// Estructura para cada instruccion
+/* Estructura de una instruccion */
 typedef struct instruction{
     instruction_type type;
     operand op1;             
@@ -60,34 +60,36 @@ typedef struct instruction{
     operand result; 
 }instruction;
 
-// Nodo de la lista de instrucciones
+/* Nodo de la lista de instrucciones */
 typedef struct instruction_node{
     instruction i;
     struct instruction_node* next;
 }instruction_node;
 
+/* Lista de instrucciones */
 typedef struct instruction_list{
     instruction_node* head;
     int size;
 }instruction_list;
 
+/* Funciones necesarias para crear nuevos temporales y labels */
 char* new_temp();
+char* new_label();
 
+/* Funciones principales para generar el codigo tres direcciones*/
 void tac_code(node* root, FILE* tac_out);
+void traverse_ast_for_tac(node* root, instruction_list **list); 
 operand gen_tac_code(node* root, instruction_list **list);
 
-void traverse_ast_for_tac(node* root, instruction_list **list); 
-
-char* instruction_representation(instruction i);
-char* operand_to_str(operand op);
-
+/* Funciones para manipular la lista de instrucciones */
 instruction_list* init_instruction_list();
 void insert_instruction(instruction_list** list, instruction i);
-void save_instruction_list(instruction_list* list, FILE* tac_out);
 
+/* Funciones para mostrar y guardar las instrucciones en un formato mas legible */
+void save_instruction_list(instruction_list* list, FILE* tac_out);
+char* instruction_representation(instruction i);
+char* operand_to_str(operand op);
 char* op_to_tr(instruction_type type);
 instruction_type op_name_to_inst_type(OpType type);
-
-
 
 #endif

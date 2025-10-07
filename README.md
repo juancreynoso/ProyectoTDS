@@ -5,10 +5,13 @@ Este proyecto implementa un mini compilador para un lenguaje de programación qu
 ## Entregas
 
 - **Primera entrega**  
-  Rama: `scanner-parser`
+    Rama: `scanner-parser`
 
 - **Segunda entrega**  
-  Rama: `semantic`
+    Rama: `semantic`
+
+- **Tercer entrega**  
+    Rama: `cod-inter`
 
 ## Características
 
@@ -26,9 +29,9 @@ Este proyecto implementa un mini compilador para un lenguaje de programación qu
     *   Contiene la documentacion del proyecto en formato `html`
 * `lexer`
     *   Contiene el analizador sintactico generado con `Flex`
-*   `sintax/`
+*  `sintax/`
     *   Contiene el codigo que se encarga de definir la gramatica del lenguaje y generar el parser
-*   `st`
+*  `st`
     *   Contiene el codigo fuente que genera la tabla de simbolos.
 * `tac`
     *  Contiene el codigo fuente que genera el codigo de tres direcciones.
@@ -56,8 +59,9 @@ Utilizar archivos del directorio `test/` para probar el funcionamiento del mini 
     * lexer → análisis léxico
     * parser → análisis sintáctico
     * semantic → análisis semantico
+    * tac → generacion de código de tres direcciones
 
-Al ejecutar un `test`, cada etapa generará su propio archivo dentro de la carpeta outputs. Por ejemplo:
+Al ejecutar un `test`, cada etapa generará su propio archivo dentro de la carpeta `outputs`. Por ejemplo:
 
 * La etapa lexer produce `output.lex` con la información correspondiente al análisis léxico.
 

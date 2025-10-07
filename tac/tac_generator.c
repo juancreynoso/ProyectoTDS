@@ -2,22 +2,37 @@
 #include <stdlib.h>
 #include "tac_generator.h"
 
-
+/* Contadores de temporales y labels */
 static int temp_count = 0;
 static int label_count = 0;
 
+
+/**
+ * Genera un nuevo temporal.
+ * @return Nuevo temporal.
+ */
 char* new_temp() {
     char* name = malloc(10);
     sprintf(name, "t%d", temp_count++);
     return name;
 }
 
+/**
+ * Genera una nueva etiqueta.
+ * @return Nueva etiqueta.
+ */
 char* new_label() {
     char* name = malloc(10);
     sprintf(name, "L%d", label_count++);
     return name;
 }
 
+/**
+ * Genera el código intermedio en forma de lista de instrucciones TAC
+ * a partir del AST y lo guarda en un archivo.
+ * @param root Nodo raíz del AST del programa.
+ * @param tac_out Archivo de salida donde se escribirá el código TAC.
+ */
 void tac_code(node* root, FILE* tac_out) {
     instruction_list* list = init_instruction_list();
 
@@ -25,7 +40,11 @@ void tac_code(node* root, FILE* tac_out) {
     save_instruction_list(list, tac_out);
 }
 
-// Recorre 
+/**
+ * Recorre los nodos del ast, va generando el codigo de tres direcciones y almacenandolo en la lista de instrucciones.
+ * @param root Nodo actual del AST a procesar 
+ * @param list Lista donde se almacenan las instruccioens.
+ */
 void traverse_ast_for_tac(node* root, instruction_list **list) {
     if (root == NULL) {
         return;
@@ -66,7 +85,6 @@ void traverse_ast_for_tac(node* root, instruction_list **list) {
             i_cond.op2 = lbl;
 
             insert_instruction(list, i_cond);
-
 
             // Verifico si es if then o if then else
 
@@ -224,7 +242,13 @@ void traverse_ast_for_tac(node* root, instruction_list **list) {
     }
 
 }
-
+ 
+/**
+ * Funcion auxiliar que genera codigo intermedio de expresiones
+ * @param root Nodo actual del AST a procesar.
+ * @param list Lista donde se almacenan las instrucciones.
+ * @return Operando.
+ */
 operand gen_tac_code(node* root, instruction_list **list) {
     switch(root->type){
         case NODE_NUM: {
@@ -359,7 +383,10 @@ void insert_instruction(instruction_list** list, instruction i) {
     (*list)->size++;
 }
 
-
+/**
+ * Devuelve una lista de instrucciones inicializada.
+ * @return Lista de instrucciones.
+ */
 instruction_list* init_instruction_list() {
     instruction_list* list = malloc(sizeof(instruction_list));
     list->head = NULL;
@@ -384,8 +411,11 @@ instruction_list* init_instruction_list() {
     return list;
 }
 
-
-
+/**
+ * Almacena la lista de instrucciones en un archivo.
+ * @param list Lista de instrucciones que se almacenara.
+ * @param tac_out Archivo en donde se almacenara la lista.
+ */
 void save_instruction_list(instruction_list* list,  FILE* tac_out) {
     if (list == NULL) {
         return;
@@ -401,7 +431,11 @@ void save_instruction_list(instruction_list* list,  FILE* tac_out) {
     }
 }
 
-
+/**
+ * Dado un operando devuelve su representacion en formato de cadena.
+ * @param op Operando.
+ * @return Cadena que representa un operando.
+ */
 char* operand_to_str(operand op) {
     char* buffer = malloc(64);
     switch(op.class) {
@@ -433,6 +467,11 @@ char* operand_to_str(operand op) {
     return buffer;
 }
 
+/**
+ * Dada una instrucción devuelve su representacion en formato de cadena.
+ * @param i Instrucción que se representara como una cadena.
+ * @return Devuelve una cadena que especifica una instrucción.
+ */
 char* instruction_representation(instruction i) {
     char* buffer = malloc(128);
     
@@ -549,6 +588,11 @@ char* instruction_representation(instruction i) {
     return buffer;
 }
 
+/**
+ * Devuelve una cadena que especifica un tipo de instrucción.
+ * @param type Tipo de instrucción.
+ * @return Cadena que especifica un tipo de instrucción.
+ */
 char* op_to_tr(instruction_type type) {
     switch(type){
         case PLUS:
@@ -580,6 +624,11 @@ char* op_to_tr(instruction_type type) {
     }
 }
 
+/**
+ * Devuelve un tipo de instrucción.
+ * @param type Valor que indica un tipo de operacion en el AST.
+ * @return Valor que representa una instrucción en el enumerado instruction_type.
+ */
 instruction_type op_name_to_inst_type(OpType type) {
     switch(type) {
         case OP_ASSIGN:

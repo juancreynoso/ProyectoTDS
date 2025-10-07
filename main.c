@@ -158,11 +158,11 @@ int main(int argc, char *argv[]) {
                 }  
                 fclose(lex_out);
                 fclose(parser_out); 
-            } else if (strcmp(stage, "cod-inter") == 0) {
+            } else if (strcmp(stage, "tac") == 0) {
         
                 FILE *lex_out = fopen("outputs/output.lex", "w");
                 FILE *parser_out = fopen("outputs/output.sint", "w");
-                FILE *tac_out = fopen("outputs/tac.ci", "w");
+                FILE *tac_out = fopen("outputs/output.ci", "w");
 
                 set_file(lex_out);
                 
@@ -194,7 +194,7 @@ int main(int argc, char *argv[]) {
 
             FILE *lex_out = fopen("outputs/output.lex", "w");
             FILE *parser_out = fopen("outputs/output.sint", "w"); 
-            FILE *tac_out = fopen("outputs/tac.ci", "w");       
+            FILE *tac_out = fopen("outputs/output.ci", "w");   
             set_file(lex_out);
 
             yyin = input_file;
