@@ -202,36 +202,10 @@ void traverse_ast_for_tac(node* root, instruction_list **list) {
             }
             break;
         
-        // case NODE_CALL_METH: {
-        //     if (root->info->METH_CALL.c_params != NULL) {
-        //         Node_C_List* param_cursor = root->info->METH_CALL.c_params->head;
-        //         while (param_cursor != NULL) {
-        //             operand param_value = gen_tac_code(param_cursor->p, list);
-                    
-        //             instruction i_param;
-        //             i_param.type = PARAM;
-        //             i_param.op1 = param_value;
-        //             insert_instruction(list, i_param);
-                    
-        //             param_cursor = param_cursor->next;
-        //         }
-        //     }
-        //     operand temp; // Temp para el resultado del metodo
-        //     temp.class = OPE_TEMP;
-        //     temp.name = new_temp();
-            
-        //     operand op_call;
-        //     op_call.class = OPE_CALL_METH;
-        //     op_call.name = root->info->METH_CALL.name;
-            
-        //     instruction i_call;
-        //     i_call.type = CALL;
-        //     i_call.op1 = op_call;
-        //     i_call.result = temp;
-        //     insert_instruction(list, i_call);
-            
-        //     break;
-        // }
+        case NODE_CALL_METH: {
+            gen_tac_code(root, list);
+            break;
+        }
             
         case NODE_RET: {
             operand t1 = gen_tac_code(root->left, list);
@@ -557,13 +531,9 @@ char* instruction_representation(instruction i) {
             break;
         case CALL: {
             op1_str = operand_to_str(i.op1);
-            if (i.result.class == OPE_TEMP) {
-                result_str = operand_to_str(i.result);
-                snprintf(buffer, 128, "%s := CALL %s\n", result_str, op1_str);
-                free(result_str);
-            } else {
-                snprintf(buffer, 128, "CALL %s\n", op1_str);
-            }
+            result_str = operand_to_str(i.result);
+            snprintf(buffer, 128, "%s := CALL %s\n", result_str, op1_str);
+            free(result_str);
             free(op1_str);
             break;
         }
