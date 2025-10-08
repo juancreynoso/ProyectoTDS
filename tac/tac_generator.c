@@ -36,7 +36,7 @@ char* new_label() {
 void tac_code(node* root, FILE* tac_out) {
     instruction_list* list = init_instruction_list();
 
-    traverse_ast_for_tac(root, &list);
+    generate_tac_from_ast(root, &list);
     save_instruction_list(list, tac_out);
 }
 
@@ -45,7 +45,7 @@ void tac_code(node* root, FILE* tac_out) {
  * @param root Nodo actual del AST a procesar 
  * @param list Lista donde se almacenan las instruccioens.
  */
-void traverse_ast_for_tac(node* root, instruction_list **list) {
+void generate_tac_from_ast(node* root, instruction_list **list) {
     if (root == NULL) {
         return;
     }
@@ -62,7 +62,7 @@ void traverse_ast_for_tac(node* root, instruction_list **list) {
             start_func.op1 = op1;
             insert_instruction(list, start_func);
 
-            traverse_ast_for_tac(root->left, list); // Entro al bloque
+            generate_tac_from_ast(root->left, list); // Entro al bloque
 
             instruction end_func;
             end_func.type = FFUNC;           
@@ -76,7 +76,7 @@ void traverse_ast_for_tac(node* root, instruction_list **list) {
             instruction i_cond;
             i_cond.type = IF_COND;
 
-            operand cond = gen_tac_code(root->info->IF_ELSE.expr, list);
+            operand cond = generate_tac_from_expression(root->info->IF_ELSE.expr, list);
             operand lbl;
             lbl.name = new_label();
             lbl.class = OPE_LABEL;
@@ -107,7 +107,7 @@ void traverse_ast_for_tac(node* root, instruction_list **list) {
 
                 insert_instruction(list, if_label);
 
-                traverse_ast_for_tac(root->info->IF_ELSE.if_block, list);
+                generate_tac_from_ast(root->info->IF_ELSE.if_block, list);
 
                 instruction end_label;
                 end_label.type  = LABEL;
@@ -133,7 +133,7 @@ void traverse_ast_for_tac(node* root, instruction_list **list) {
 
                 insert_instruction(list, if_label);
 
-                traverse_ast_for_tac(root->info->IF_ELSE.if_block, list);
+                generate_tac_from_ast(root->info->IF_ELSE.if_block, list);
 
                 // GOTO END
                 instruction end_gt;
@@ -152,7 +152,7 @@ void traverse_ast_for_tac(node* root, instruction_list **list) {
 
                 insert_instruction(list, else_label);
 
-                traverse_ast_for_tac(root->info->IF_ELSE.else_block, list);
+                generate_tac_from_ast(root->info->IF_ELSE.else_block, list);
 
                 instruction end_label;
                 end_label.type = LABEL;
@@ -175,7 +175,7 @@ void traverse_ast_for_tac(node* root, instruction_list **list) {
             i_start.op1 = start_label;
             insert_instruction(list, i_start);
             
-            operand cond = gen_tac_code(root->info->WHILE.expr, list);
+            operand cond = generate_tac_from_expression(root->info->WHILE.expr, list);
             
             operand end_label;
             end_label.class = OPE_LABEL;
@@ -187,7 +187,7 @@ void traverse_ast_for_tac(node* root, instruction_list **list) {
             i_cond.op2 = end_label;
             insert_instruction(list, i_cond);
             
-            traverse_ast_for_tac(root->info->WHILE.block, list);
+            generate_tac_from_ast(root->info->WHILE.block, list);
             
             instruction i_goto;
             i_goto.type = GOTO; // GOTO L0
@@ -203,8 +203,8 @@ void traverse_ast_for_tac(node* root, instruction_list **list) {
         case NODE_OP:
             switch(root->info->OP.name){
                 case OP_ASSIGN: {
-                    operand t1 = gen_tac_code(root->right, list); 
-                    operand id = gen_tac_code(root->left, list);
+                    operand t1 = generate_tac_from_expression(root->right, list); 
+                    operand id = generate_tac_from_expression(root->left, list);
 
                     instruction i;
                     i.type = op_name_to_inst_type(root->info->OP.name);
@@ -221,12 +221,12 @@ void traverse_ast_for_tac(node* root, instruction_list **list) {
             break;
         
         case NODE_CALL_METH: {
-            gen_tac_code(root, list);
+            generate_tac_from_expression(root, list);
             break;
         }
             
         case NODE_RET: {
-            operand t1 = gen_tac_code(root->left, list);
+            operand t1 = generate_tac_from_expression(root->left, list);
             instruction i;
             i.type = RET;
             i.op1 = t1;
@@ -236,8 +236,8 @@ void traverse_ast_for_tac(node* root, instruction_list **list) {
         }
 
         default:
-            traverse_ast_for_tac(root->left, list);
-            traverse_ast_for_tac(root->right, list);
+            generate_tac_from_ast(root->left, list);
+            generate_tac_from_ast(root->right, list);
             break;
     }
 
@@ -249,7 +249,7 @@ void traverse_ast_for_tac(node* root, instruction_list **list) {
  * @param list Lista donde se almacenan las instrucciones.
  * @return Operando.
  */
-operand gen_tac_code(node* root, instruction_list **list) {
+operand generate_tac_from_expression(node* root, instruction_list **list) {
     switch(root->type){
         case NODE_NUM: {
             operand op;
@@ -285,8 +285,8 @@ operand gen_tac_code(node* root, instruction_list **list) {
                 case OP_EQUALS:
                 case OP_AND:
                 case OP_OR:{
-                    operand left = gen_tac_code(root->left, list);
-                    operand right = gen_tac_code(root->right, list);
+                    operand left = generate_tac_from_expression(root->left, list);
+                    operand right = generate_tac_from_expression(root->right, list);
                     operand t1;
                     t1.class = OPE_TEMP;
                     t1.name = new_temp();
@@ -303,7 +303,7 @@ operand gen_tac_code(node* root, instruction_list **list) {
                 }
                 case OP_NOT:
                 case OP_MINUS: {
-                    operand left = gen_tac_code(root->left, list);
+                    operand left = generate_tac_from_expression(root->left, list);
                     operand t1;
                     t1.class = OPE_TEMP;
                     t1.name = new_temp();
@@ -327,7 +327,7 @@ operand gen_tac_code(node* root, instruction_list **list) {
             if (root->info->METH_CALL.c_params != NULL) {
                 Node_C_List* param_cursor = root->info->METH_CALL.c_params->head;
                 while (param_cursor != NULL) {
-                    operand param_value = gen_tac_code(param_cursor->p, list);
+                    operand param_value = generate_tac_from_expression(param_cursor->p, list);
                     
                     instruction i_param;
                     i_param.type = PARAM;
@@ -354,12 +354,13 @@ operand gen_tac_code(node* root, instruction_list **list) {
             return temp;
         }
         default:
-            gen_tac_code(root->left, list);
-            gen_tac_code(root->right, list);
+            generate_tac_from_expression(root->left, list);
+            generate_tac_from_expression(root->right, list);
             break;
     }
-
- }
+    operand def = {0};
+    return def;
+}
 
 /**
  * Funcion que inserta una instruccion en una lista de instrucciones

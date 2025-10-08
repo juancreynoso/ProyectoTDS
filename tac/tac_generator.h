@@ -7,7 +7,7 @@
 #include "../ast/ast.h"
 
 // Tipos de instrucciones
-typedef enum{
+typedef enum {
     PRG,
     END_PRG,
     FUNC,
@@ -32,10 +32,10 @@ typedef enum{
     CALL,
     PARAM,
     NOT
-}instruction_type;
+} instruction_type;
 
 // Tipos de operandos
-typedef enum{
+typedef enum {
     OPE_DECL_METH,
     OPE_CALL_METH,
     OPE_TEMP,
@@ -43,34 +43,34 @@ typedef enum{
     OPE_NUM,
     OPE_BOOL,
     OPE_LABEL
-}op_class;
+} op_class;
 
 /* Estructura de un operando */
-typedef struct operand{
+typedef struct operand {
     op_class class;
     char* name;
     union type *info;
-}operand;
+} operand;
 
 /* Estructura de una instruccion */
-typedef struct instruction{
+typedef struct instruction {
     instruction_type type;
     operand op1;             
     operand op2;
     operand result; 
-}instruction;
+} instruction;
 
 /* Nodo de la lista de instrucciones */
-typedef struct instruction_node{
+typedef struct instruction_node {
     instruction i;
     struct instruction_node* next;
-}instruction_node;
+} instruction_node;
 
 /* Lista de instrucciones */
-typedef struct instruction_list{
+typedef struct instruction_list {
     instruction_node* head;
     int size;
-}instruction_list;
+} instruction_list;
 
 /* Funciones necesarias para crear nuevos temporales y labels */
 char* new_temp();
@@ -78,8 +78,8 @@ char* new_label();
 
 /* Funciones principales para generar el codigo tres direcciones*/
 void tac_code(node* root, FILE* tac_out);
-void traverse_ast_for_tac(node* root, instruction_list **list); 
-operand gen_tac_code(node* root, instruction_list **list);
+void generate_tac_from_ast(node* root, instruction_list **list); 
+operand generate_tac_from_expression(node* root, instruction_list **list);
 
 /* Funciones para manipular la lista de instrucciones */
 instruction_list* init_instruction_list();
