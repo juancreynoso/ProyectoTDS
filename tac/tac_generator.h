@@ -31,6 +31,7 @@ typedef enum {
     IF_FALSE_GOTO,
     CALL,
     PARAM,
+    LOAD,
     NOT
 } instruction_type;
 
@@ -42,7 +43,8 @@ typedef enum {
     OPE_VAR,
     OPE_NUM,
     OPE_BOOL,
-    OPE_LABEL
+    OPE_LABEL,
+    OPE_PARAM
 } op_class;
 
 /* Estructura de un operando */

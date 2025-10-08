@@ -52,6 +52,7 @@ void generate_tac_from_ast(node* root, instruction_list **list) {
 
     switch(root->type){
         case NODE_DECL_METH: {
+
             operand op1;
             op1.info = root->info;
             op1.class = OPE_DECL_METH;
@@ -61,6 +62,25 @@ void generate_tac_from_ast(node* root, instruction_list **list) {
             start_func.type = FUNC;
             start_func.op1 = op1;
             insert_instruction(list, start_func);
+
+            if (root->info->METH_DECL.f_params != NULL) {
+                Node_P_List* param_cursor = root->info->METH_DECL.f_params->head;
+                while (param_cursor != NULL) {
+                    operand param;
+                    param.info = malloc(sizeof(union type));
+                    param.class = OPE_PARAM;
+                    param.name = param_cursor->p.name;
+                    param.info->ID.name = param_cursor->p.name;
+                    param.info->ID.type = param_cursor->p.type;
+                    
+                    instruction i_param;
+                    i_param.type = PARAM;
+                    i_param.op1 = param;
+                    insert_instruction(list, i_param);
+                    
+                    param_cursor = param_cursor->next;
+                }
+            }
 
             generate_tac_from_ast(root->left, list); // Entro al bloque
 
@@ -330,7 +350,7 @@ operand generate_tac_from_expression(node* root, instruction_list **list) {
                     operand param_value = generate_tac_from_expression(param_cursor->p, list);
                     
                     instruction i_param;
-                    i_param.type = PARAM;
+                    i_param.type = LOAD;
                     i_param.op1 = param_value;
                     insert_instruction(list, i_param);
                     
@@ -461,6 +481,9 @@ char* operand_to_str(operand op) {
         case OPE_LABEL:
             snprintf(buffer, 64, "%s", op.name);
             break;
+        case OPE_PARAM:
+            snprintf(buffer, 64, "%s", op.name);
+            break;
         default:
             snprintf(buffer, 64, "???");
             break;
@@ -580,6 +603,10 @@ char* instruction_representation(instruction i) {
         case PARAM:
             op1_str = operand_to_str(i.op1);
             snprintf(buffer, 128, "PARAM %s\n", op1_str);
+            break;
+        case LOAD:
+            op1_str = operand_to_str(i.op1);
+            snprintf(buffer, 128, "LOAD %s\n", op1_str);
             break;
         default:
             snprintf(buffer, 128, "UNKNOWN\n");
