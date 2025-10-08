@@ -11,7 +11,7 @@ Este proyecto implementa un mini compilador para un lenguaje de programación qu
     Rama: `semantic`
 
 - **Tercer entrega**  
-    Rama: `cod-inter`
+    Rama: `three-address-code`
 
 ## Características
 
