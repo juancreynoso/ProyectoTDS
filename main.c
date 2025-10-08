@@ -30,7 +30,7 @@ char* invalidCommandMessage(int cod_msg){
             break;
         case 1:
             msg = "Por favor utilice una de las siguientes opciones:\n"
-            " Etapas: [lexer, parser, sem, ci, ass, opt] \n"
+            " Etapas: [lex, parse, sem, tac, ass, opt] \n"
             "  c-tds -target <etapa> <archivo>\n\n";
             break;
         default:
@@ -116,7 +116,7 @@ int main(int argc, char *argv[]) {
 
             char *stage = argv[2];
 
-            if (strcmp(stage, "lexer") == 0) {
+            if (strcmp(stage, "lex") == 0) {
                 printf(">> Ejecutando Analizador Lexico...\n");
                 
                 FILE *lex_out = fopen("outputs/output.lex", "w");
@@ -128,7 +128,7 @@ int main(int argc, char *argv[]) {
                 fclose(lex_out);
                 printf(">> Analisis correcto, sin errores lexicos\n");
 
-            } else if (strcmp(stage, "parser") == 0) {
+            } else if (strcmp(stage, "parse") == 0) {
                 printf(">> Ejecutando Analizador Lexico...\n");
                 printf(">> Ejecutando Parser...\n");
                 
@@ -143,7 +143,7 @@ int main(int argc, char *argv[]) {
                 }   
                 fclose(lex_out);
                 fclose(parser_out); 
-            } else if (strcmp(stage, "semantic") == 0) {
+            } else if (strcmp(stage, "sem") == 0) {
                 
                 FILE *lex_out = fopen("outputs/output.lex", "w");
                 FILE *parser_out = fopen("outputs/output.sint", "w");
