@@ -7,7 +7,7 @@ BISON = bison -v -d
 FLEX = flex
 
 SRC_DIRS = sintax lexer ast semantic compile tac
-OBJS = sintax/sintax.tab.o lexer/lex.yy.o ast/ast.o main.o semantic/semantic_analyzer.o semantic/type_check.o semantic/symbol_table.o common.o ast/param_list.o tac/tac_generator.o ass/assembler_generator.o
+OBJS = sintax/sintax.tab.o lexer/lex.yy.o ast/ast.o ast/set_offsets.o main.o semantic/semantic_analyzer.o semantic/type_check.o semantic/symbol_table.o common.o ast/param_list.o tac/tac_generator.o ass/assembler_generator.o
 TARGET = c-tds
 
 # Carpeta de archivos de salida
@@ -47,6 +47,9 @@ ast/param_list.o: ast/param_list.c ast/param_list.h
 	${CC} ${CFLAGS} -c -o $@ $<
 
 ast/ast.o: ast/ast.c ast/ast.h
+	${CC} ${CFLAGS} -c -o $@ $<
+
+ast/set_offsets.o : ast/set_offsets.c ast/set_offsets.h
 	${CC} ${CFLAGS} -c -o $@ $<
 
 semantic/semantic_analyzer.o: semantic/semantic_analyzer.c semantic/semantic_analyzer.h

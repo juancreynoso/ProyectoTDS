@@ -70,12 +70,14 @@ typedef struct  BoolInfo{
 typedef struct OpInfo{
     OpType name;
     VarType type;
+    int is_glbl;
     union values value;
 }OpInfo;
 
 typedef struct IdInfo{
     char* name;
     VarType type;
+    int is_glbl;
     union values value;
 }IdInfo;
 

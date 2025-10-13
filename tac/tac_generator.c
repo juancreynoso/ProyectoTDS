@@ -5,8 +5,6 @@
 /* Contadores de temporales y labels */
 static int temp_count = 0;
 static int label_count = 0;
-static int var_offset = 0;
-static int param_offset = 8;
 
 /**
  * Genera un nuevo temporal.
@@ -26,21 +24,6 @@ char* new_label() {
     char* name = malloc(10);
     sprintf(name, "L%d", label_count++);
     return name;
-}
-
-void reset_offsets(){
-    var_offset = 0;
-    param_offset = 8;    
-}
-
-int new_var_offset() {
-    var_offset -= 8;
-    return var_offset;
-}
-
-int new_param_offset() {
-    param_offset += 8;
-    return param_offset;
 }
 
 /**
@@ -99,9 +82,6 @@ void generate_tac_from_ast(node* root, instruction_list **list) {
                     param_cursor = param_cursor->next;
                 }
             }
-
-            // Se resetean los offsets para el nuevo scope
-            reset_offsets();
 
             generate_tac_from_ast(root->left, list); // Entro al bloque
 
