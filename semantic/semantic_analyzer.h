@@ -8,11 +8,13 @@
 #include "ast.h"
 #include "symbol_table.h"
 #include "type_check.h"
+#include "set_offsets.h"
 
 typedef struct tables_stack tables_stack;
 typedef struct symbol_table symbol_table;
 
 extern int exists_main;
+extern int scope;
 
 void semantic_analysis_recursive(node* root, tables_stack* stack, symbol_table* table, node* parent, FILE* semantic_out);
 tables_stack* analyze_semantics(node* root, FILE* semantic_out);

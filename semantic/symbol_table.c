@@ -4,7 +4,7 @@
 #include <string.h>
 
 int exists_main = 0;
-
+int scope = 0;
 
 /**
  * Crea una pila vacía para gestionar los scopes de símbolos.
