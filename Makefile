@@ -1,13 +1,13 @@
 # Compilador
 CC = gcc
-CFLAGS = -Wall -g -I. -Iast -Ist -Isintax -Ilexer -Isemantic -Itac -Icompile
+CFLAGS = -Wall -g -I. -Iast -Ist -Isintax -Ilexer -Isemantic -Itac -Iass -Icompile
 
 # Archivos y carpetas
 BISON = bison -v -d
 FLEX = flex
 
 SRC_DIRS = sintax lexer ast semantic compile tac
-OBJS = sintax/sintax.tab.o lexer/lex.yy.o ast/ast.o main.o semantic/semantic_analyzer.o semantic/type_check.o semantic/symbol_table.o common.o ast/param_list.o tac/tac_generator.o
+OBJS = sintax/sintax.tab.o lexer/lex.yy.o ast/ast.o main.o semantic/semantic_analyzer.o semantic/type_check.o semantic/symbol_table.o common.o ast/param_list.o tac/tac_generator.o ass/assembler_generator.o
 TARGET = c-tds
 
 # Carpeta de archivos de salida
@@ -64,6 +64,9 @@ common.o: common.c
 tac/tac_generator.o: tac/tac_generator.c tac/tac_generator.h
 	${CC} ${CFLAGS} -c -o $@ $<
 
+ass/assembler_generator.o: ass/assembler_generator.c ass/assembler_generator.h
+	${CC} ${CFLAGS} -c -o $@ $<
+	
 main.o: main.c
 	${CC} ${CFLAGS} -c -o $@ $<
 

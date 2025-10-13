@@ -12,7 +12,7 @@ static VarType current_return_type = NONE;
  * @param table Tabla de símbolos del scope actual
  * @param parent Nodo padre del nodo actual (para contexto)
  */
-void semantic_analysis_recursive(node* root, tables_stack* stack, symbol_table* table, node* parent) {
+void semantic_analysis_recursive(node* root, tables_stack* stack, symbol_table* table, node* parent, FILE* semantic_out) {
     if (!root) return;
 
     switch (root->type) {
@@ -28,14 +28,14 @@ void semantic_analysis_recursive(node* root, tables_stack* stack, symbol_table* 
                 exists_main = 1;
             }
 
-            printf("Se declara nuevo método: %s\n", s.info->METH_DECL.name);
+            fprintf(semantic_out, "Se declara nuevo método: %s\n", s.info->METH_DECL.name);
             insert_symbol(&(stack->top->data), s, root->type);
             
             VarType previous_return_type = current_return_type;
             current_return_type = root->info->METH_DECL.returnType;
             
-            semantic_analysis_recursive(root->left, stack, table, root);
-            semantic_analysis_recursive(root->right, stack, table, root);
+            semantic_analysis_recursive(root->left, stack, table, root, semantic_out);
+            semantic_analysis_recursive(root->right, stack, table, root, semantic_out);
             
             current_return_type = previous_return_type;
             break;
@@ -47,13 +47,13 @@ void semantic_analysis_recursive(node* root, tables_stack* stack, symbol_table* 
                 printf("Error de tipo [línea %d, columna %d]: la condición del IF debe ser bool\n", root->line, root->column);
                 exit(EXIT_FAILURE);
             }
-            semantic_analysis_recursive(root->info->IF_ELSE.expr, stack, table, NULL);
+            semantic_analysis_recursive(root->info->IF_ELSE.expr, stack, table, NULL, semantic_out);
             
             if (root->info->IF_ELSE.if_block) {
-                semantic_analysis_recursive(root->info->IF_ELSE.if_block, stack, table, root);
+                semantic_analysis_recursive(root->info->IF_ELSE.if_block, stack, table, root, semantic_out);
             }
             if (root->info->IF_ELSE.else_block) {
-                semantic_analysis_recursive(root->info->IF_ELSE.else_block, stack, table, root);
+                semantic_analysis_recursive(root->info->IF_ELSE.else_block, stack, table, root, semantic_out);
             }
             break;
         }
@@ -64,8 +64,8 @@ void semantic_analysis_recursive(node* root, tables_stack* stack, symbol_table* 
                 printf("Error de tipo [línea %d, columna %d]: la condición del WHILE debe ser bool\n", root->line, root->column);
                 exit(EXIT_FAILURE);
             }
-            semantic_analysis_recursive(root->info->WHILE.expr, stack, table, NULL);
-            semantic_analysis_recursive(root->info->WHILE.block, stack, table, root);
+            semantic_analysis_recursive(root->info->WHILE.expr, stack, table, NULL, semantic_out);
+            semantic_analysis_recursive(root->info->WHILE.block, stack, table, root, semantic_out);
             break;
         }
 
@@ -76,49 +76,49 @@ void semantic_analysis_recursive(node* root, tables_stack* stack, symbol_table* 
             if (parent) {
                 switch(parent->type) {
                     case NODE_DECL_METH:
-                        printf(">>> Nuevo scope (Método: %s)\n", parent->info->METH_DECL.name);
+                        fprintf(semantic_out, ">>> Nuevo scope (Método: %s)\n", parent->info->METH_DECL.name);
                         // Agregar parámetros formales al scope del método
                         if (parent->info->METH_DECL.f_params) {
-                            add_formal_params_to_scope(stack, parent->info->METH_DECL.f_params);
+                            add_formal_params_to_scope(stack, parent->info->METH_DECL.f_params, semantic_out);
                         }
                         break;
                     case NODE_WHILE:
-                        printf(">>> Nuevo scope (WHILE)\n");
+                        fprintf(semantic_out, ">>> Nuevo scope (WHILE)\n");
                         break;
                     case NODE_IF_ELSE:
                         if (root == parent->info->IF_ELSE.if_block) {
-                            printf(">>> Nuevo scope (IF)\n");
+                            fprintf(semantic_out, ">>> Nuevo scope (IF)\n");
                         } else if (root == parent->info->IF_ELSE.else_block) {
-                            printf(">>> Nuevo scope (ELSE)\n");
+                            fprintf(semantic_out, ">>> Nuevo scope (ELSE)\n");
                         } else {
-                            printf(">>> Nuevo scope (IF/ELSE)\n");
+                            fprintf(semantic_out, ">>> Nuevo scope (IF/ELSE)\n");
                         }
                         break;
                     default:
-                        printf(">>> Nuevo scope (BLOCK)\n");
+                        fprintf(semantic_out, ">>> Nuevo scope (BLOCK)\n");
                         break;
                 }
             } else {
-                printf(">>> Nuevo scope (BLOCK - Aislado)\n");
+                fprintf(semantic_out, ">>> Nuevo scope (BLOCK - Aislado)\n");
             }
             
-            semantic_analysis_recursive(root->left, stack, stack->top->data, NULL);
-            semantic_analysis_recursive(root->right, stack, stack->top->data, NULL);
+            semantic_analysis_recursive(root->left, stack, stack->top->data, NULL, semantic_out);
+            semantic_analysis_recursive(root->right, stack, stack->top->data, NULL, semantic_out);
             
-            printf("Scope del bloque antes de cerrarlo:\n");
-            print_symbol_table(stack->top->data);
+            fprintf(semantic_out, "Scope del bloque antes de cerrarlo:\n");
+            print_symbol_table(stack->top->data, semantic_out);
             
             pop(stack);
-            printf("<<< Cierra scope (BLOCK)\n");
+            fprintf(semantic_out, "<<< Cierra scope (BLOCK)\n");
             break;
         }
 
         case NODE_DECL: {
             symbol s;
             s.info = root->info;
-            printf("Se declara variable: %s\n", s.info->ID.name);
+            fprintf(semantic_out, "Se declara variable: %s\n", s.info->ID.name);
             insert_symbol(&(stack->top->data), s, root->type);
-            semantic_analysis_recursive(root->right, stack, table, NULL);
+            semantic_analysis_recursive(root->right, stack, table, NULL, semantic_out);
             break;
         }
 
@@ -152,15 +152,15 @@ void semantic_analysis_recursive(node* root, tables_stack* stack, symbol_table* 
                 }
             } 
             root->info->METH_CALL.returnType = method->METH_DECL.returnType;
-            printf("Call method: %s %s\n", type_to_string(root->info->METH_CALL.returnType),  root->info->METH_CALL.name);
+            fprintf(semantic_out, "Call method: %s %s\n", type_to_string(root->info->METH_CALL.returnType),  root->info->METH_CALL.name);
             break;
         }
 
         case NODE_OP: {
             switch(root->info->OP.name) {
                 case OP_ASSIGN:{
-                    semantic_analysis_recursive(root->left, stack, table, NULL);
-                    semantic_analysis_recursive(root->right, stack, table, NULL);
+                    semantic_analysis_recursive(root->left, stack, table, NULL, semantic_out);
+                    semantic_analysis_recursive(root->right, stack, table, NULL, semantic_out);
                     get_expression_type(root, stack);
                     break; 
                 }
@@ -172,7 +172,7 @@ void semantic_analysis_recursive(node* root, tables_stack* stack, symbol_table* 
         }
 
         case NODE_RET: {
-            semantic_analysis_recursive(root->left, stack, table, NULL);
+            semantic_analysis_recursive(root->left, stack, table, NULL, semantic_out);
             VarType return_type = get_expression_type(root->left, stack);
             if (return_type != current_return_type) {
                 printf("Error de tipo [línea %d, columna %d]: tipo de retorno incompatible. Esperado '%s', Recibido '%s'\n", 
@@ -186,8 +186,8 @@ void semantic_analysis_recursive(node* root, tables_stack* stack, symbol_table* 
         }
 
         default:
-            semantic_analysis_recursive(root->left, stack, table, NULL);
-            semantic_analysis_recursive(root->right, stack, table, NULL);
+            semantic_analysis_recursive(root->left, stack, table, NULL, semantic_out);
+            semantic_analysis_recursive(root->right, stack, table, NULL, semantic_out);
             break;
     }
 }
@@ -199,7 +199,7 @@ void semantic_analysis_recursive(node* root, tables_stack* stack, symbol_table* 
  * @param stack Pila de scopes (para insertar en el scope actual)
  * @param f_params Lista de parámetros formales del método
  */
-void add_formal_params_to_scope(tables_stack* stack, Formal_P_List* f_params) {
+void add_formal_params_to_scope(tables_stack* stack, Formal_P_List* f_params, FILE* semantic_out) {
     if (!f_params || !f_params->head) return;
     
     Node_P_List* cursor = f_params->head;
@@ -211,7 +211,7 @@ void add_formal_params_to_scope(tables_stack* stack, Formal_P_List* f_params) {
         
         symbol s;
         s.info = param_info;
-        printf("Se declara parámetro formal: %s\n", cursor->p.name);
+        fprintf(semantic_out, "Se declara parámetro formal: %s\n", cursor->p.name);
         insert_symbol(&(stack->top->data), s, NODE_DECL);
         
         cursor = cursor->next;

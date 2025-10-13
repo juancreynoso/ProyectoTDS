@@ -52,14 +52,14 @@ symbol_table* pop(tables_stack* stack) {
  * @param root Nodo raíz del AST a analizar
  * @return Pila de tablas de símbolos construida durante el análisis
  */
-tables_stack* analyze_semantics(node* root) {
+tables_stack* analyze_semantics(node* root, FILE* semantic_out) {
         tables_stack *stack = create_stack();
         symbol_table *table = NULL;
         push(stack, table);
 
-        printf(">>> Se crea scope global\n");
-        semantic_analysis_recursive(root, stack, table, NULL);
-        printf("<<< Se cierra scope global\n");
+        fprintf(semantic_out, ">>> Se crea scope global\n");
+        semantic_analysis_recursive(root, stack, table, NULL, semantic_out);
+        fprintf(semantic_out, "<<< Se cierra scope global\n");
 
         if (exists_main == 0){
             printf("Error. El programa debe incluir un metodo MAIN\n");
@@ -167,26 +167,26 @@ union type* search_in_table(symbol_table* table, char* name) {
  * Muestra información detallada de cada símbolo (variables y métodos) para debugging.
  * @param table Tabla de símbolos a imprimir
  */
-void print_symbol_table(symbol_table *table) {
+void print_symbol_table(symbol_table *table, FILE* semantic_out) {
     if (table == NULL) {
-        printf("(scope vacío)\n");
+        fprintf(semantic_out, "(scope vacío)\n");
         return;
     }
     
     symbol_table *cursor = table;
-    printf("\n---- Inicio Tabla de Simbolos ----\n");
+    fprintf(semantic_out, "\n---- Inicio Tabla de Simbolos ----\n");
     
     while(cursor != NULL) {
         switch(cursor->nodeType) {
             case NODE_DECL:
             case NODE_ID_USE:
-                printf("VARIABLE: %s\n", cursor->s.info->ID.name);
-                printf("TYPE: %s\n", cursor->s.info->ID.type == TYPE_INT ? "INT" : "BOOL");
+                fprintf(semantic_out, "VARIABLE: %s\n", cursor->s.info->ID.name);
+                fprintf(semantic_out, "TYPE: %s\n", cursor->s.info->ID.type == TYPE_INT ? "INT" : "BOOL");
                 break;
                 
             case NODE_DECL_METH:
-                printf("METHOD: %s\n", cursor->s.info->METH_DECL.name);
-                printf("RETURN: %s\n", 
+                fprintf(semantic_out, "METHOD: %s\n", cursor->s.info->METH_DECL.name);
+                fprintf(semantic_out, "RETURN: %s\n", 
                        cursor->s.info->METH_DECL.returnType == TYPE_INT ? "INT" : 
                        cursor->s.info->METH_DECL.returnType == TYPE_BOOL ? "BOOL" : "VOID");
                 break;
@@ -195,10 +195,10 @@ void print_symbol_table(symbol_table *table) {
         }
         
         if (cursor->next != NULL) {
-            printf("-----\n");
+            fprintf(semantic_out, "-----\n");
         }
         cursor = cursor->next;
     }
-    printf("\n---- Fin Tabla de Simbolos ----\n");
+    fprintf(semantic_out, "\n---- Fin Tabla de Simbolos ----\n");
 }
 

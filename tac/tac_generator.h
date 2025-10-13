@@ -50,6 +50,7 @@ typedef enum {
 /* Estructura de un operando */
 typedef struct operand {
     op_class class;
+    int offset;
     char* name;
     union type *info;
 } operand;
@@ -79,7 +80,7 @@ char* new_temp();
 char* new_label();
 
 /* Funciones principales para generar el codigo tres direcciones*/
-void tac_code(node* root, FILE* tac_out);
+instruction_list* tac_code(node* root, FILE* tac_out);
 void generate_tac_from_ast(node* root, instruction_list **list); 
 operand generate_tac_from_expression(node* root, instruction_list **list);
 

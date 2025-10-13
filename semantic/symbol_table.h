@@ -38,7 +38,7 @@ typedef struct tables_stack {
 void insert_symbol(symbol_table **table, symbol s, NodeType nodeType);
 union type* search_symbol(tables_stack *stack, char* name, NodeType type);
 union type* search_in_table(symbol_table* table, char* name);
-void print_symbol_table(symbol_table *table);
+void print_symbol_table(symbol_table *table, FILE* semantic_out);
 tables_stack* create_stack();
 void push(tables_stack* stack, symbol_table* table);
 symbol_table* pop(tables_stack* stack);

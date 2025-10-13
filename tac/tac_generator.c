@@ -5,7 +5,8 @@
 /* Contadores de temporales y labels */
 static int temp_count = 0;
 static int label_count = 0;
-
+static int var_offset = 0;
+static int param_offset = 8;
 
 /**
  * Genera un nuevo temporal.
@@ -27,17 +28,34 @@ char* new_label() {
     return name;
 }
 
+void reset_offsets(){
+    var_offset = 0;
+    param_offset = 8;    
+}
+
+int new_var_offset() {
+    var_offset -= 8;
+    return var_offset;
+}
+
+int new_param_offset() {
+    param_offset += 8;
+    return param_offset;
+}
+
 /**
  * Genera el código intermedio en forma de lista de instrucciones TAC
  * a partir del AST y lo guarda en un archivo.
  * @param root Nodo raíz del AST del programa.
  * @param tac_out Archivo de salida donde se escribirá el código TAC.
  */
-void tac_code(node* root, FILE* tac_out) {
+instruction_list* tac_code(node* root, FILE* tac_out) {
     instruction_list* list = init_instruction_list();
 
     generate_tac_from_ast(root, &list);
     save_instruction_list(list, tac_out);
+    
+    return list;
 }
 
 /**
@@ -81,6 +99,9 @@ void generate_tac_from_ast(node* root, instruction_list **list) {
                     param_cursor = param_cursor->next;
                 }
             }
+
+            // Se resetean los offsets para el nuevo scope
+            reset_offsets();
 
             generate_tac_from_ast(root->left, list); // Entro al bloque
 
