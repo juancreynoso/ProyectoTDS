@@ -35,6 +35,7 @@ VarType get_expression_type(node* root, tables_stack* stack) {
                     printf("Error: variable '%s' no encontrada para verificación de tipos\n", root->info->ID.name);
                     exit(EXIT_FAILURE);
                 }
+                root->info = var_info;
                 return var_info->ID.type;
             }
 

@@ -4,6 +4,7 @@
 #include "ast.h"
 #include "semantic_analyzer.h"
 #include "tac_generator.h"
+#include "set_offsets.h"
 #include "assembler_generator.h"
 
 int yyparse(void);
@@ -198,6 +199,7 @@ int main(int argc, char *argv[]) {
                     printf("Realizando analisis semantico...\n");
                     analyze_semantics(root, semantic_out);
                     instruction_list* list = tac_code(root, tac_out);
+                    set_offsets(root);
                     ass_gen(list, ass_out);
                 }  
                 fclose(lex_out);
@@ -237,6 +239,8 @@ int main(int argc, char *argv[]) {
                 save_ast(root, 0, parser_out);
                 analyze_semantics(root, semantic_out);
                 instruction_list* list = tac_code(root, tac_out);
+                set_offsets(root);
+                save_ast(root, 0, parser_out);
                 ass_gen(list, ass_out);
             }
             fclose(lex_out);

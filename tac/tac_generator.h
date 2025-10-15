@@ -50,7 +50,6 @@ typedef enum {
 /* Estructura de un operando */
 typedef struct operand {
     op_class class;
-    int offset;
     char* name;
     union type *info;
 } operand;
