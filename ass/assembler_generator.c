@@ -29,7 +29,8 @@ char* instruction_to_assembler(instruction i, FILE* ass_out){
             } else {
                 fprintf(ass_out, "%s: \n", i.op1.name);
             }
-            fprintf(ass_out, "    enter  $(8*2), $0\n");
+            int frame_size = i.op1.info->METH_DECL.frame_size;
+            fprintf(ass_out, "    enter  $%d, $0\n", frame_size);
             break;
         case FFUNC:
             fprintf(ass_out, "    leave\n"); 

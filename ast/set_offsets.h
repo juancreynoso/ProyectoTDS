@@ -8,6 +8,7 @@
 void reset_offsets();
 int new_var_offset();
 int new_param_offset();
+int get_frame_size();
 
 void set_offsets(node* root);
 

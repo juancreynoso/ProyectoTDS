@@ -3,6 +3,7 @@
 
 static int var_offset = 0;
 static int param_offset = 8;
+static int max_offset = 0;
 
 void reset_offsets(){
     var_offset = 0;
@@ -11,12 +12,19 @@ void reset_offsets(){
 
 int new_var_offset() {
     var_offset -= 8;
+    if (var_offset < max_offset) {
+        max_offset = var_offset; 
+    }
     return var_offset;
 }
 
 int new_param_offset() {
     param_offset += 8;
     return param_offset;
+}
+
+int get_frame_size() {
+    return -max_offset;
 }
 
 void set_offsets(node* root) {
@@ -53,6 +61,32 @@ void set_offsets(node* root) {
                     break;
             }
             break;
+        case NODE_DECL_METH:
+            reset_offsets();
+            int count = 0;
+            
+            if (root->info->METH_DECL.f_params == NULL) {
+                break;
+            }
+
+            Node_P_List* cursor =  root->info->METH_DECL.f_params->head;
+        
+            while (cursor != NULL) {
+                if (count < 6) {
+                    cursor->p.offset = new_param_offset();
+                    printf("Offset para parámetro %s: %d\n", cursor->p.name, cursor->p.offset);
+                    count++;
+                } else {
+                    cursor->p.offset = new_var_offset();
+                    printf("Offset para parámetro %s: %d\n", cursor->p.name, cursor->p.offset);
+                }
+                cursor = cursor->next;
+            }
+            set_offsets(root->left);
+            root->info->METH_DECL.frame_size = get_frame_size();
+            printf("Tamaño maximo de frame del metodo %s: %d\n",root->info->METH_DECL.name, root->info->METH_DECL.frame_size);
+            break;
+            
         default:
             printf("voy por default \n");
             set_offsets(root->left);

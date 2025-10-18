@@ -98,6 +98,7 @@ typedef struct MethDecl_Info{
     Formal_P_List* f_params;
     VarType returnType;
     int is_extern;
+    int frame_size;
 }MethDecl_Info;
 
 typedef struct MethCall_Info{

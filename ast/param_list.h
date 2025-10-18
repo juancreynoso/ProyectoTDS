@@ -11,6 +11,7 @@ typedef struct node node;
 typedef struct Formal_P{
     char* name;
     VarType type;
+    int offset;
 }Formal_P;
 
 /* Nodo de la lista de parametros formales */
