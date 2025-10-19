@@ -10,7 +10,6 @@
 void ass_gen(instruction_list* list, FILE* ass_out) {
     instruction_node* cursor = list->head;
 
-
     while(cursor){
         instruction_to_assembler(cursor->i, ass_out);
         cursor = cursor->next;
@@ -70,7 +69,44 @@ char* instruction_to_assembler(instruction i, FILE* ass_out){
 
             break;
         case SUB:
+            if (i.op1.class == OPE_NUM ) {
+                fprintf(ass_out, "    mov $%d, %%r10\n", i.op1.info->INT.value);
+            }  else if (i.op1.class == OPE_TEMP){
+                fprintf(ass_out, "    mov %d(%%rbp), %%r10\n", i.op1.info->OP.offset);
+            } else if (i.op1.class == OPE_VAR) {
+                printf("Aca %d\n", i.op1.info->ID.offset);
+                fprintf(ass_out, "    %s mov %d(%%rbp), %%r10\n", i.op1.info->ID.name, i.op1.info->ID.offset);
+            }
+
+            if ( i.op2.class == OPE_NUM ) {
+                fprintf(ass_out, "    sub $%d, %%r10\n", i.op2.info->INT.value);
+            } else if ( i.op2.class == OPE_TEMP) {
+                fprintf(ass_out, "    sub %d(%%rbp), %%r10\n", i.op2.info->OP.offset);
+            } else if (i.op2.class == OPE_VAR) {
+                fprintf(ass_out, "    sub %d(%%rbp), %%r10\n", i.op2.info->ID.offset);
+            }
+
+            fprintf(ass_out, "    mov %%r10, %d(%%rbp)\n", i.result.info->OP.offset);
+
         case MULT:
+            if (i.op1.class == OPE_NUM ) {
+                fprintf(ass_out, "    mov $%d, %%r10\n", i.op1.info->INT.value);
+            }  else if (i.op1.class == OPE_TEMP){
+                fprintf(ass_out, "    mov %d(%%rbp), %%r10\n", i.op1.info->OP.offset);
+            } else if (i.op1.class == OPE_VAR) {
+                printf("Aca %d\n", i.op1.info->ID.offset);
+                fprintf(ass_out, "    %s mov %d(%%rbp), %%r10\n", i.op1.info->ID.name, i.op1.info->ID.offset);
+            }
+
+            if ( i.op2.class == OPE_NUM ) {
+                fprintf(ass_out, "    imul $%d, %%r10\n", i.op2.info->INT.value);
+            } else if ( i.op2.class == OPE_TEMP) {
+                fprintf(ass_out, "    imul %d(%%rbp), %%r10\n", i.op2.info->OP.offset);
+            } else if (i.op2.class == OPE_VAR) {
+                fprintf(ass_out, "    imul %d(%%rbp), %%r10\n", i.op2.info->ID.offset);
+            }
+
+            fprintf(ass_out, "    mov %%r10, %d(%%rbp)\n", i.result.info->OP.offset);
         // case DIV:
         // case REST:
         // case MINUS:
@@ -84,17 +120,30 @@ char* instruction_to_assembler(instruction i, FILE* ass_out){
 //        case LOAD:
             //fprintf(ass_out, "    %s offset %d \n", i.op1.name, i.op1.offset);
             break;
-         case RET:{
+        case RET:{
             int offset;
             if (i.op1.class == OPE_VAR){
                 offset = i.op1.info->ID.offset;
             } else {
                 offset = i.op1.info->OP.offset;
             }
-            fprintf(ass_out, "    mov %d(%%rbp), %%rax,\n", offset);
+            fprintf(ass_out, "    mov %d(%%rbp), %%rax\n", offset);
 
             break; 
-         }         
+        }   
+        case IF_COND:
+            // Suponiendo que primero es solamente un if_then
+            // fprintf();
+            // fprintf();
+            fprintf(ass_out, "    je .%s\n", i.op2.name);
+
+            break;      
+        case LABEL:
+            fprintf(ass_out, ".%s:\n", i.op1.name);
+            break;
+        case GOTO:
+            fprintf(ass_out, "    jmp .%s\n", i.op1.name);
+            break;
         case CALL:
             fprintf(ass_out, "    CALL %s\n", i.op1.name);
             break;         
