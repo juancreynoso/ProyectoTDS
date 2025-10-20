@@ -63,6 +63,12 @@ void set_offsets(node* root) {
                     break;
             }
             break;
+        case NODE_IF_ELSE:
+            printf("NODE_IF_ELSE\n");
+            set_offsets(root->info->IF_ELSE.expr);
+            set_offsets(root->info->IF_ELSE.if_block);
+            set_offsets(root->info->IF_ELSE.else_block);
+            break;
         case NODE_DECL_METH:
             printf("NODE_DECL_METH\n");
             reset_offsets();

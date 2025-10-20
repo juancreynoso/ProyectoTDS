@@ -124,8 +124,16 @@ char* instruction_to_assembler(instruction i, FILE* ass_out){
             int offset;
             if (i.op1.class == OPE_VAR){
                 offset = i.op1.info->ID.offset;
-            } else {
+            } else if (i.op1.class == OPE_TEMP) {
                 offset = i.op1.info->OP.offset;
+            } else if (i.op1.class == OPE_NUM){
+               offset = i.op1.info->INT.value; 
+               fprintf(ass_out, "    mov $%d, %%rax\n", offset);
+               break;
+            } else {
+               offset = i.op1.info->BOOL.value; 
+               fprintf(ass_out, "    mov $%d, %%rax\n", offset);
+               break;                
             }
             fprintf(ass_out, "    mov %d(%%rbp), %%rax\n", offset);
 
@@ -133,8 +141,15 @@ char* instruction_to_assembler(instruction i, FILE* ass_out){
         }   
         case IF_COND:
             // Suponiendo que primero es solamente un if_then
-            // fprintf();
-            // fprintf();
+            if (i.op1.class == OPE_VAR) {
+                printf("Entrare aca??\n");
+                fprintf(ass_out,    "mov %d(%%rbp), %%rax\n", i.op1.info->ID.offset);
+            } else if (i.op1.class == OPE_TEMP){
+               fprintf(ass_out,    "mov %d(%%rbp), %%rax\n", i.op1.info->OP.offset);
+            }
+            fprintf(ass_out,    "cmp $1, %%rax\n");
+            
+            // JUMP if_then block 
             fprintf(ass_out, "    je .%s\n", i.op2.name);
 
             break;      
