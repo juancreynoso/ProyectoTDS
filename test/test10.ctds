@@ -1,15 +1,21 @@
 // While correcto con variable booleana
 
 Program {
-    void main() {
-        bool seguir = true;
+    integer sum(integer a, integer b, bool c, bool d, bool e, bool f, bool g) {
+        integer x = a + b;
+        integer j = 1;
+        return x;
+    }
+    integer x = 1;
+    integer main() {
         integer i = 0;
-    
-        while (1) {
-            i = i + 1;
-            if (true && 1) then {
-                seguir = false;
-            }
-        }
+        bool a = true;
+        bool b = true;
+        bool c = true;
+        bool d = true;
+        bool e = true;
+        
+        i = sum(i, x, a, b, c, d, e);
+        return 3;
     }
 }

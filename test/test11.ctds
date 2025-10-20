@@ -1,0 +1,13 @@
+Program
+{   
+    integer main(){
+        integer z = 1 + 4;
+        integer x = 1;
+        integer t = z;
+
+        while (false) {
+            x = x + 1;
+        }
+        return x;
+    }
+}
