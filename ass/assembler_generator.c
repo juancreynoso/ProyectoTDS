@@ -130,8 +130,11 @@ char* instruction_to_assembler(instruction i, FILE* ass_out){
                 fprintf(ass_out, "    cmp %d(%%rbp), %%r10\n", i.op2.info->ID.offset);
             }
 
-            fprintf(ass_out, "    mov %%r10, %d(%%rbp)\n", i.result.info->OP.offset);
-        
+            fprintf(ass_out, "    mov $1, %%r10\n");
+            fprintf(ass_out, "    mov $0, %%r11\n");
+            fprintf(ass_out, "    cmove %%r10, %%r11\n");
+            fprintf(ass_out, "    mov %%r11, %d(%%rbp)\n", i.result.info->OP.offset);
+
             break;
 //        case AND:
 //        case OR:
@@ -139,7 +142,7 @@ char* instruction_to_assembler(instruction i, FILE* ass_out){
 //        case LOAD:
             //fprintf(ass_out, "    %s offset %d \n", i.op1.name, i.op1.offset);
             break;
-        case RET:{
+        case RET: {
             int offset;
             if (i.op1.class == OPE_VAR){
                 offset = i.op1.info->ID.offset;
