@@ -174,8 +174,51 @@ char* instruction_to_assembler(instruction i, FILE* ass_out){
             // fprintf(ass_out, "    movq %%r10, %d(%%rbp)\n", i.result.info->OP.offset);
         
             // break;
-        // case GT:
-        // case LT:
+        case GT:
+            if (i.op1.class == OPE_NUM ) {
+                fprintf(ass_out, "    mov $%d, %%r10\n", i.op1.info->INT.value);
+            }  else if (i.op1.class == OPE_TEMP){
+                fprintf(ass_out, "    mov %d(%%rbp), %%r10\n", i.op1.info->OP.offset);
+            } else if (i.op1.class == OPE_VAR) {
+                fprintf(ass_out, "    mov %d(%%rbp), %%r10\n", i.op1.info->ID.offset);
+            }
+
+            if ( i.op2.class == OPE_NUM ) {
+                fprintf(ass_out, "    cmp $%d, %%r10\n", i.op2.info->INT.value);
+            } else if ( i.op2.class == OPE_TEMP) {
+                fprintf(ass_out, "    cmp %d(%%rbp), %%r10\n", i.op2.info->OP.offset);
+            } else if (i.op2.class == OPE_VAR) {
+                fprintf(ass_out, "    cmp %d(%%rbp), %%r10\n", i.op2.info->ID.offset);
+            }
+
+            fprintf(ass_out, "    mov $1, %%r10\n");
+            fprintf(ass_out, "    mov $0, %%r11\n");
+            fprintf(ass_out, "    cmovg %%r10, %%r11\n");
+            fprintf(ass_out, "    mov %%r11, %d(%%rbp)\n", i.result.info->OP.offset);
+            break;
+        case LT:
+            if (i.op1.class == OPE_NUM ) {
+                fprintf(ass_out, "    mov $%d, %%r10\n", i.op1.info->INT.value);
+            }  else if (i.op1.class == OPE_TEMP){
+                fprintf(ass_out, "    mov %d(%%rbp), %%r10\n", i.op1.info->OP.offset);
+            } else if (i.op1.class == OPE_VAR) {
+                fprintf(ass_out, "    mov %d(%%rbp), %%r10\n", i.op1.info->ID.offset);
+            }
+
+            if ( i.op2.class == OPE_NUM ) {
+                fprintf(ass_out, "    cmp $%d, %%r10\n", i.op2.info->INT.value);
+            } else if ( i.op2.class == OPE_TEMP) {
+                fprintf(ass_out, "    cmp %d(%%rbp), %%r10\n", i.op2.info->OP.offset);
+            } else if (i.op2.class == OPE_VAR) {
+                fprintf(ass_out, "    cmp %d(%%rbp), %%r10\n", i.op2.info->ID.offset);
+            }
+
+            fprintf(ass_out, "    mov $1, %%r10\n");
+            fprintf(ass_out, "    mov $0, %%r11\n");
+            fprintf(ass_out, "    cmovl %%r10, %%r11\n");
+            fprintf(ass_out, "    mov %%r11, %d(%%rbp)\n", i.result.info->OP.offset);
+
+            break;
         case EQUALS:
             if (i.op1.class == OPE_NUM ) {
                 fprintf(ass_out, "    mov $%d, %%r10\n", i.op1.info->INT.value);
@@ -242,7 +285,50 @@ char* instruction_to_assembler(instruction i, FILE* ass_out){
             fprintf(ass_out, "    or %%r10, %%r11\n");
             fprintf(ass_out, "    mov %%r11, %d(%%rbp)\n", i.result.info->OP.offset);
             break;
-//      case LOAD:
+        case LOAD: {
+            const char* regs[] = {"%rdi","%rsi","%rdx","%rcx","%r8","%r9"};
+            int index = i.op2.info->INT.value;   // índice del parámetro
+
+            if (index < 6) {
+                if (i.op1.class == OPE_NUM) {
+                    fprintf(ass_out, "    mov $%d, %s\n", i.op1.info->INT.value, regs[index]);
+                } else if (i.op1.class == OPE_VAR) {
+                    fprintf(ass_out, "    mov %d(%%rbp), %s\n", i.op1.info->ID.offset, regs[index]);
+                } else if (i.op1.class == OPE_TEMP) {
+                    fprintf(ass_out, "    mov %d(%%rbp), %s\n", i.op1.info->OP.offset, regs[index]);
+                } else if (i.op1.class == OPE_BOOL) {
+                    fprintf(ass_out, "    mov $%d, %s\n", i.op1.info->BOOL.value, regs[index]);
+                }
+            } else {
+                if (i.op1.class == OPE_NUM) {
+                    fprintf(ass_out, "    mov $%d, %%r10\n", i.op1.info->INT.value);
+                } else if (i.op1.class == OPE_VAR) {
+                    fprintf(ass_out, "    mov %d(%%rbp), %%r10\n", i.op1.info->ID.offset);
+                } else if (i.op1.class == OPE_TEMP) {
+                    fprintf(ass_out, "    mov %d(%%rbp), %%r10\n", i.op1.info->OP.offset);
+                } else if (i.op1.class == OPE_BOOL) {
+                    fprintf(ass_out, "    mov $%d, %%r10\n", i.op1.info->BOOL.value);
+                }
+                fprintf(ass_out, "    push %%r10\n");
+            }
+            break;
+        }
+        case PARAM: {
+            const char* regs[] = {"%rdi", "%rsi", "%rdx", "%rcx", "%r8", "%r9"};
+            static int index = 0;
+            
+            if (index < 6) {
+                if (i.op1.class == OPE_VAR) { // guradar parametro
+                    fprintf(ass_out, "    mov %s, %d(%%rbp)\n", regs[index], i.op1.info->ID.offset);
+                }
+            } else {
+                int param_stack_offset = 16 + 8 * (index - 6);
+                fprintf(ass_out, "    mov %d(%%rbp), %%r10\n", param_stack_offset);
+                fprintf(ass_out, "    mov %%r10, %d(%%rbp)\n", i.op1.info->ID.offset);
+            }
+            
+            break;
+        }
         case RET: {
             int offset;
             if (i.op1.class == OPE_VAR){
@@ -279,7 +365,6 @@ char* instruction_to_assembler(instruction i, FILE* ass_out){
                 fprintf(ass_out, "    mov %d(%%rbp), %%rax\n", i.op1.info->ID.offset);
             } else if (i.op1.class == OPE_TEMP) {
                 fprintf(ass_out, "    mov %d(%%rbp), %%rax\n", i.op1.info->OP.offset);
-                printf("Valor offset de %d: %d\n", i.op1.info->OP.name, i.op1.info->OP.offset);
             } else if (i.op1.class == OPE_BOOL) {
                 fprintf(ass_out, "    mov $%d, %%rax\n", i.op1.info->BOOL.value);
             }
@@ -295,7 +380,7 @@ char* instruction_to_assembler(instruction i, FILE* ass_out){
             fprintf(ass_out, "    jmp .%s\n", i.op1.name);
             break;
         case CALL:
-            fprintf(ass_out, "    CALL %s\n", i.op1.name);
+            fprintf(ass_out, "    call %s\n", i.op1.name);
             break;         
         default:
             break;
