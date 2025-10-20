@@ -112,11 +112,30 @@ char* instruction_to_assembler(instruction i, FILE* ass_out){
         // case MINUS:
         // case GT:
         // case LT:
-        // case EQUALS:
-        // case AND:
-        // case OR:
-            fprintf(ass_out, "    temp offset %d \n",i.op1.info->OP.offset);
+        case EQUALS:
+            if (i.op1.class == OPE_NUM ) {
+                fprintf(ass_out, "    mov $%d, %%r10\n", i.op1.info->INT.value);
+            }  else if (i.op1.class == OPE_TEMP){
+                fprintf(ass_out, "    mov %d(%%rbp), %%r10\n", i.op1.info->OP.offset);
+            } else if (i.op1.class == OPE_VAR) {
+                printf("Aca %d\n", i.op1.info->ID.offset);
+                fprintf(ass_out, "    mov %d(%%rbp), %%r10\n", i.op1.info->ID.offset);
+            }
+
+            if ( i.op2.class == OPE_NUM ) {
+                fprintf(ass_out, "    cmp $%d, %%r10\n", i.op2.info->INT.value);
+            } else if ( i.op2.class == OPE_TEMP) {
+                fprintf(ass_out, "    cmp %d(%%rbp), %%r10\n", i.op2.info->OP.offset);
+            } else if (i.op2.class == OPE_VAR) {
+                fprintf(ass_out, "    cmp %d(%%rbp), %%r10\n", i.op2.info->ID.offset);
+            }
+
+            fprintf(ass_out, "    mov %%r10, %d(%%rbp)\n", i.result.info->OP.offset);
+        
             break;
+//        case AND:
+//        case OR:
+
 //        case LOAD:
             //fprintf(ass_out, "    %s offset %d \n", i.op1.name, i.op1.offset);
             break;
@@ -143,11 +162,11 @@ char* instruction_to_assembler(instruction i, FILE* ass_out){
             // Suponiendo que primero es solamente un if_then
             if (i.op1.class == OPE_VAR) {
                 printf("Entrare aca??\n");
-                fprintf(ass_out,    "mov %d(%%rbp), %%rax\n", i.op1.info->ID.offset);
+                fprintf(ass_out,    "    mov %d(%%rbp), %%rax\n", i.op1.info->ID.offset);
             } else if (i.op1.class == OPE_TEMP){
-               fprintf(ass_out,    "mov %d(%%rbp), %%rax\n", i.op1.info->OP.offset);
+               fprintf(ass_out,    "    mov %d(%%rbp), %%rax\n", i.op1.info->OP.offset);
             }
-            fprintf(ass_out,    "cmp $1, %%rax\n");
+            fprintf(ass_out,    "    cmp $1, %%rax\n");
             
             // JUMP if_then block 
             fprintf(ass_out, "    je .%s\n", i.op2.name);
