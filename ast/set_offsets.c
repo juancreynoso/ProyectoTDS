@@ -90,11 +90,11 @@ void set_offsets(node* root) {
         
             while (cursor != NULL) {
                 if (count < 6) {
-                    cursor->p.offset = new_param_offset();
+                    cursor->p.offset = new_var_offset();
                     printf("Offset para parámetro %s: %d\n", cursor->p.name, cursor->p.offset);
                     count++;
                 } else {
-                    cursor->p.offset = new_var_offset();
+                    cursor->p.offset = new_param_offset();
                     printf("Offset para parámetro %s: %d\n", cursor->p.name, cursor->p.offset);
                 }
                 cursor = cursor->next;

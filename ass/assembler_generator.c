@@ -437,22 +437,22 @@ char* instruction_to_assembler(instruction i, char** data_ptr, char** text_ptr){
             }
             break;
         }
-        case PARAM: {
-            const char* regs[] = {"%rdi", "%rsi", "%rdx", "%rcx", "%r8", "%r9"};
-            static int index = 0;
+        // case PARAM: {
+        //     const char* regs[] = {"%rdi", "%rsi", "%rdx", "%rcx", "%r8", "%r9"};
+        //     static int index = 0;
             
-            if (index < 6) {
-                if (i.op1.class == OPE_VAR_USE) { // guardar parametro
-                    *text_ptr += sprintf(*text_ptr, "    mov %s, %d(%%rbp)\n", regs[index], i.op1.info->ID.offset);
-                }
-            } else {
-                int param_stack_offset = 16 + 8 * (index - 6);
-                *text_ptr += sprintf(*text_ptr, "    mov %d(%%rbp), %%r10\n", param_stack_offset);
-                *text_ptr += sprintf(*text_ptr, "    mov %%r10, %d(%%rbp)\n", i.op1.info->ID.offset);
-            }
+        //     if (index < 6) {
+        //         if (i.op1.class == OPE_VAR_USE) { // guardar parametro
+        //             *text_ptr += sprintf(*text_ptr, "    mov %s, %d(%%rbp)\n", regs[index], i.op1.info->ID.offset);
+        //         }
+        //     } else {
+        //         int param_stack_offset = 16 + 8 * (index - 6);
+        //         *text_ptr += sprintf(*text_ptr, "    mov %d(%%rbp), %%r10\n", param_stack_offset);
+        //         *text_ptr += sprintf(*text_ptr, "    mov %%r10, %d(%%rbp)\n", i.op1.info->ID.offset);
+        //     }
             
-            break;
-        }
+        //     break;
+        // }
         case RET: {
             int offset;
             if (i.op1.class == OPE_VAR_USE){

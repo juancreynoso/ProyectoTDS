@@ -230,6 +230,7 @@ void add_formal_params_to_scope(tables_stack* stack, Formal_P_List* f_params, FI
         param_info->ID.name = strdup(cursor->p.name);
         param_info->ID.type = cursor->p.type;
         param_info->ID.value.num = 0; 
+        param_info->ID.offset = cursor->p.offset;
         
         symbol s;
         s.info = param_info;
