@@ -75,8 +75,7 @@
         </div>
       </div>
 
-      <p><em>Las fases posteriores (generación de código intermedio, código objeto y optimización) 
-      se implementarán en etapas siguientes del proyecto. Esta página irá siendo actualizada así como las que corresponden a cada etapa.</em></p>
+      <p><em>Esta página irá siendo actualizada así como las que corresponden a cada etapa.</em></p>
     </section>
 
     <section>
@@ -99,18 +98,26 @@
       <div class="status-grid">
         <div class="status-item completed">
           <h4>✓ Análisis Léxico</h4>
-          <p>Scanner completo con Flex, reconocimiento de todos los tokens del lenguaje</p>
+          <p>Scanner completo con Flex, reconocimiento de todos los tokens del lenguaje.</p>
         </div>
         <div class="status-item completed">
           <h4>✓ Análisis Sintáctico</h4>
-          <p>Parser LALR(1) con Bison y manejo de errores</p>
+          <p>Parser LALR(1) con Bison y manejo de errores.</p>
         </div>
         <div class="status-item completed">
           <h4>✓ Análisis Semántico</h4>
-          <p>Construcción de AST, ST y chequeo de tipos y declaraciones</p>
+          <p>Construcción de AST, ST y chequeo de tipos y declaraciones.</p>
+        </div>
+        <div class="status-item completed">
+          <h4>✓ Generación de Cod. Intermedio</h4>
+          <p>Traducción del AST a una representación de tres direcciones, utilizada como etapa intermedia entre la semántica y el código máquina.</p>
+        </div>
+        <div class="status-item completed">
+          <h4>✓ Generación de Cod. Assembler</h4>
+          <p>Generacion de codigo assembler a partir del codigo intermedio generado.</p>
         </div>
         <div class="status-item in-progress">
-          <h4>✓ Generación de Cod. Intermedio</h4>
+          <h4>✓ Optimizador</h4>
           <p></p>
         </div>
       </div>

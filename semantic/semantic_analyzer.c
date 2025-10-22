@@ -138,7 +138,6 @@ void semantic_analysis_recursive(node* root, tables_stack* stack, symbol_table* 
             }
             fprintf(semantic_out, "Se declara variable: %s\n", s.info->ID.name);
             insert_symbol(&(stack->top->data), s, root->type);
-            printf("is glbl %d \n", root->info->ID.is_glbl);
             semantic_analysis_recursive(root->right, stack, table, NULL, semantic_out);
             break;
         }
@@ -151,7 +150,6 @@ void semantic_analysis_recursive(node* root, tables_stack* stack, symbol_table* 
                 exit(EXIT_FAILURE);
             }
             root->info = info;
-            printf("is glbl %d \n", root->info->ID.is_glbl);
             break;
         }
 
@@ -182,6 +180,13 @@ void semantic_analysis_recursive(node* root, tables_stack* stack, symbol_table* 
             switch(root->info->OP.name) {
                 case OP_ASSIGN:{
                     semantic_analysis_recursive(root->left, stack, table, NULL, semantic_out);
+                    if (root->left->type == NODE_DECL && root->left->info->ID.is_glbl == 1) {
+                        if (root->right->type != NODE_NUM && root->right->type != NODE_BOOL) {
+                            printf("Error: Variable global %s solo se puede inicializar con un valor constante \n", root->left->info->ID.name);
+                            exit(EXIT_FAILURE);
+                            break;
+                        }
+                    }
                     semantic_analysis_recursive(root->right, stack, table, NULL, semantic_out);
                     get_expression_type(root, stack);
                     break; 
@@ -231,7 +236,7 @@ void add_formal_params_to_scope(tables_stack* stack, Formal_P_List* f_params, FI
         param_info->ID.type = cursor->p.type;
         param_info->ID.value.num = 0; 
         param_info->ID.offset = cursor->p.offset;
-        
+
         symbol s;
         s.info = param_info;
         fprintf(semantic_out, "Se declara parámetro formal: %s\n", cursor->p.name);

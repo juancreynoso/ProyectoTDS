@@ -237,9 +237,9 @@ int main(int argc, char *argv[]) {
             if (yyparse() == 0) {
                 printf("Parseado correctamente, sin errores sintactico.\n");
                 save_ast(root, 0, parser_out);
+                set_offsets(root);
                 analyze_semantics(root, semantic_out);
                 instruction_list* list = tac_code(root, tac_out);
-                set_offsets(root);
                 save_ast(root, 0, parser_out);
                 ass_gen(list, ass_out);
             }

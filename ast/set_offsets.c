@@ -34,14 +34,12 @@ void set_offsets(node* root) {
 
     switch(root->type) {
         case NODE_DECL:
-            printf("NODE_DECL\n");
             root->info->ID.offset = new_var_offset(); 
             break;
         case NODE_CALL_METH:
             root->info->METH_CALL.offset = new_var_offset(); 
             break;
         case NODE_OP:
-            printf("NODE_OP\n");
             switch(root->info->OP.name) {
                 case OP_PLUS:
                 case OP_SUB:
@@ -67,21 +65,17 @@ void set_offsets(node* root) {
             }
             break;
         case NODE_IF_ELSE:
-            printf("NODE_IF_ELSE\n");
             set_offsets(root->info->IF_ELSE.expr);
             set_offsets(root->info->IF_ELSE.if_block);
             set_offsets(root->info->IF_ELSE.else_block);
             break;
         case NODE_WHILE:
-            printf("NODE_WHILE\n");
             set_offsets(root->info->WHILE.block);
             set_offsets(root->info->WHILE.expr);
             break;
         case NODE_DECL_METH:
-            printf("NODE_DECL_METH\n");
             reset_offsets();
             int count = 0;
-            
             if (root->info->METH_DECL.f_params == NULL) {
                 set_offsets(root->left);
                 root->info->METH_DECL.frame_size = get_frame_size();
@@ -90,7 +84,7 @@ void set_offsets(node* root) {
             }
 
             Node_P_List* cursor =  root->info->METH_DECL.f_params->head;
-        
+            
             while (cursor != NULL) {
                 if (count < 6) {
                     cursor->p.offset = new_var_offset();
@@ -102,12 +96,14 @@ void set_offsets(node* root) {
                 }
                 cursor = cursor->next;
             }
+
             set_offsets(root->left);
+
+
             root->info->METH_DECL.frame_size = get_frame_size();
             printf("Tamaño maximo de frame del metodo %s: %d\n",root->info->METH_DECL.name, root->info->METH_DECL.frame_size);
             break;
         default:
-            printf("voy por default \n");
             set_offsets(root->left);
             set_offsets(root->right);
             break;

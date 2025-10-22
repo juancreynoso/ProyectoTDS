@@ -13,6 +13,9 @@ Este proyecto implementa un mini compilador para un lenguaje de programación qu
 - **Tercer entrega**  
     Rama: `cod-inter`
 
+- **Cuarta entrega**  
+    Rama: `assembler`
+
 ## Características
 
 * Tipos de datos soportados: int y bool
@@ -35,6 +38,8 @@ Este proyecto implementa un mini compilador para un lenguaje de programación qu
     *   Contiene el codigo fuente que genera la tabla de simbolos.
 * `tac`
     *  Contiene el codigo fuente que genera el codigo de tres direcciones.
+* `ass`
+    *  Contiene el codigo fuente que genera el codigo assembler.
 *   `test`: Archivos con código de prueba.
 *   `README.md`: Este archivo.
 
@@ -60,6 +65,7 @@ Utilizar archivos del directorio `test/` para probar el funcionamiento del mini 
     * parser → análisis sintáctico
     * semantic → análisis semantico
     * tac → generacion de código de tres direcciones
+    * ass → generacion de código assembler
 
 Al ejecutar un `test`, cada etapa generará su propio archivo dentro de la carpeta `outputs`. Por ejemplo:
 

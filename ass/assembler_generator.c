@@ -22,8 +22,6 @@ void ass_gen(instruction_list* list, FILE* ass_out) {
         instruction_to_assembler(cursor->i, &data_ptr, &text_ptr);
         cursor = cursor->next;
     }
-
-    printf(" Cantidad de instrucciones: %d \n", list->size);
     
     // concatenacion en el archivo ass_out
     fprintf(ass_out, ".data\n%s\n.text\n%s", data_segment, text_segment);
