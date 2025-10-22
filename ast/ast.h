@@ -106,6 +106,7 @@ typedef struct MethCall_Info{
     Formal_P_List* f_params;
     Current_P_List* c_params;
     VarType returnType;
+    int offset;
 }MethCall_Info;
 
 typedef struct BlockInfo {

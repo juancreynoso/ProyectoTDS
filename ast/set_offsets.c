@@ -37,6 +37,9 @@ void set_offsets(node* root) {
             printf("NODE_DECL\n");
             root->info->ID.offset = new_var_offset(); 
             break;
+        case NODE_CALL_METH:
+            root->info->METH_CALL.offset = new_var_offset(); 
+            break;
         case NODE_OP:
             printf("NODE_OP\n");
             switch(root->info->OP.name) {

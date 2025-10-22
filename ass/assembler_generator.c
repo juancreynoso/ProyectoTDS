@@ -52,7 +52,7 @@ char* instruction_to_assembler(instruction i, char** data_ptr, char** text_ptr){
                 } else {
                     *data_ptr += sprintf(*data_ptr, "    %s: .quad %d\n",  i.op1.info->ID.name, i.op2.info->INT.value); 
                 }
-            }else {
+            } else {
                 if (i.op2.class == OPE_NUM) {
                     *text_ptr += sprintf(*text_ptr, "    mov $%d, %%r10\n", i.op2.info->INT.value);
                     *text_ptr += sprintf(*text_ptr, "    mov %%r10, %d(%%rbp)\n",  i.op1.info->ID.offset);  
@@ -518,6 +518,7 @@ char* instruction_to_assembler(instruction i, char** data_ptr, char** text_ptr){
             break;
         case CALL:
             *text_ptr += sprintf(*text_ptr, "    call %s\n", i.op1.name);
+            *text_ptr += sprintf(*text_ptr, "    mov %%rax, %d(%%rbp)\n", i.result.info->OP.offset);
             break;         
         default:
             break;

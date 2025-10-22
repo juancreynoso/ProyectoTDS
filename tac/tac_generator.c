@@ -369,6 +369,8 @@ operand generate_tac_from_expression(node* root, instruction_list **list) {
             operand temp; // Temp para el resultado del metodo
             temp.class = OPE_TEMP;
             temp.name = new_temp();
+            temp.info = malloc(sizeof(union type));
+            temp.info->OP.offset = root->info->METH_CALL.offset;
             
             operand op_call;
             op_call.class = OPE_CALL_METH;
