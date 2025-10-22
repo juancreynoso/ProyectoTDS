@@ -73,6 +73,7 @@ void generate_tac_from_ast(node* root, instruction_list **list) {
                     param.name = param_cursor->p.name;
                     param.info->ID.name = param_cursor->p.name;
                     param.info->ID.type = param_cursor->p.type;
+                    param.info->ID.offset = param_cursor->p.offset;
                     
                     instruction i_param;
                     i_param.type = PARAM;
@@ -182,7 +183,6 @@ void generate_tac_from_ast(node* root, instruction_list **list) {
                 insert_instruction(list, end_label);
                 
             }
-
             break;
         } 
 
