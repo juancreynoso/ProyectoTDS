@@ -27,7 +27,6 @@ void ass_gen(instruction_list* list, FILE* ass_out) {
     
     // concatenacion en el archivo ass_out
     fprintf(ass_out, ".data\n%s\n.text\n%s", data_segment, text_segment);
-
 }
 
 char* instruction_to_assembler(instruction i, char** data_ptr, char** text_ptr){
@@ -47,11 +46,12 @@ char* instruction_to_assembler(instruction i, char** data_ptr, char** text_ptr){
             *text_ptr+= sprintf(*text_ptr, "    ret\n");
             break;
          case ASSIGN:
-
             if (i.op1.info->ID.is_glbl == 1) {
-                // Deberia verificar si son solamente asignaciones con constantes
-                *data_ptr += sprintf(*data_ptr, "    %s: .quad %d\n",  i.op1.info->ID.name, i.op2.info->INT.value); 
-
+                if (i.op1.class == OPE_VAR_USE) {
+                    *text_ptr += sprintf(*text_ptr, "    mov $%d, %s(%%rip)\n",  i.op2.info->INT.value, i.op1.info->ID.name); 
+                } else {
+                    *data_ptr += sprintf(*data_ptr, "    %s: .quad %d\n",  i.op1.info->ID.name, i.op2.info->INT.value); 
+                }
             }else {
                 if (i.op2.class == OPE_NUM) {
                     *text_ptr += sprintf(*text_ptr, "    mov $%d, %%r10\n", i.op2.info->INT.value);
@@ -62,7 +62,7 @@ char* instruction_to_assembler(instruction i, char** data_ptr, char** text_ptr){
                 } else if (i.op2.class == OPE_TEMP){
                     *text_ptr += sprintf(*text_ptr, "    mov %d(%%rbp), %%r10\n", i.op2.info->OP.offset);
                     *text_ptr += sprintf(*text_ptr, "    mov %%r10, %d(%%rbp)\n",  i.op1.info->ID.offset);  
-                } else if (i.op2.class == OPE_VAR) {
+                } else if (i.op2.class == OPE_VAR_USE) {
                     if (i.op2.info->ID.is_glbl == 1) {
                         *text_ptr += sprintf(*text_ptr, "    mov %s(%%rip), %%r10\n", i.op2.info->ID.name); 
                     } else {
@@ -77,7 +77,7 @@ char* instruction_to_assembler(instruction i, char** data_ptr, char** text_ptr){
                 *text_ptr += sprintf(*text_ptr, "    mov $%d, %%r10\n", i.op1.info->INT.value);
             }  else if (i.op1.class == OPE_TEMP){
                 *text_ptr += sprintf(*text_ptr, "    mov %d(%%rbp), %%r10\n", i.op1.info->OP.offset);
-            } else if (i.op1.class == OPE_VAR) {
+            } else if (i.op1.class == OPE_VAR_USE) {
                 if (i.op1.info->ID.is_glbl == 1) {
                     *text_ptr += sprintf(*text_ptr, "    mov %s(%%rip), %%r10\n", i.op1.info->ID.name);
                 } else {
@@ -89,7 +89,7 @@ char* instruction_to_assembler(instruction i, char** data_ptr, char** text_ptr){
                 *text_ptr += sprintf(*text_ptr, "    add $%d, %%r10\n", i.op2.info->INT.value);
             } else if ( i.op2.class == OPE_TEMP) {
                 *text_ptr += sprintf(*text_ptr, "    add %d(%%rbp), %%r10\n", i.op2.info->OP.offset);
-            } else if (i.op2.class == OPE_VAR) {
+            } else if (i.op2.class == OPE_VAR_USE) {
                 if (i.op2.info->ID.is_glbl == 1) {
                     *text_ptr += sprintf(*text_ptr, "    add %s(%%rip), %%r10\n", i.op2.info->ID.name);
                 } else {
@@ -104,7 +104,7 @@ char* instruction_to_assembler(instruction i, char** data_ptr, char** text_ptr){
                 *text_ptr += sprintf(*text_ptr, "    mov $%d, %%r10\n", i.op1.info->INT.value);
             }  else if (i.op1.class == OPE_TEMP){
                 *text_ptr += sprintf(*text_ptr, "    mov %d(%%rbp), %%r10\n", i.op1.info->OP.offset);
-            } else if (i.op1.class == OPE_VAR) {
+            } else if (i.op1.class == OPE_VAR_USE) {
                 if (i.op1.info->ID.is_glbl == 1) {
                     *text_ptr += sprintf(*text_ptr, "    mov %s(%%rip), %%r10\n", i.op1.info->ID.name);
                 } else {
@@ -116,7 +116,7 @@ char* instruction_to_assembler(instruction i, char** data_ptr, char** text_ptr){
                 *text_ptr += sprintf(*text_ptr, "    sub $%d, %%r10\n", i.op2.info->INT.value);
             } else if ( i.op2.class == OPE_TEMP) {
                 *text_ptr += sprintf(*text_ptr, "    sub %d(%%rbp), %%r10\n", i.op2.info->OP.offset);
-            } else if (i.op2.class == OPE_VAR) {
+            } else if (i.op2.class == OPE_VAR_USE) {
                 if (i.op1.info->ID.is_glbl == 1) {
                     *text_ptr += sprintf(*text_ptr, "    sub %s(%%rip), %%r10\n", i.op2.info->ID.name);
                 } else {
@@ -131,7 +131,7 @@ char* instruction_to_assembler(instruction i, char** data_ptr, char** text_ptr){
                 *text_ptr += sprintf(*text_ptr, "    mov $%d, %%r10\n", i.op1.info->INT.value);
             }  else if (i.op1.class == OPE_TEMP){
                 *text_ptr += sprintf(*text_ptr, "    mov %d(%%rbp), %%r10\n", i.op1.info->OP.offset);
-            } else if (i.op1.class == OPE_VAR) {
+            } else if (i.op1.class == OPE_VAR_USE) {
                 if (i.op1.info->ID.is_glbl == 1) {
                     *text_ptr += sprintf(*text_ptr, "    mov %s(%%rip), %%r10\n", i.op1.info->ID.name);
                 } else {
@@ -143,7 +143,7 @@ char* instruction_to_assembler(instruction i, char** data_ptr, char** text_ptr){
                 *text_ptr += sprintf(*text_ptr, "    imul $%d, %%r10\n", i.op2.info->INT.value);
             } else if ( i.op2.class == OPE_TEMP) {
                 *text_ptr += sprintf(*text_ptr, "    imul %d(%%rbp), %%r10\n", i.op2.info->OP.offset);
-            } else if (i.op2.class == OPE_VAR) {
+            } else if (i.op2.class == OPE_VAR_USE) {
                 if (i.op2.info->ID.is_glbl == 1) {
                     *text_ptr += sprintf(*text_ptr, "    imul %s(%%rip), %%r10\n", i.op2.info->ID.name);
                 } else {
@@ -158,7 +158,7 @@ char* instruction_to_assembler(instruction i, char** data_ptr, char** text_ptr){
                 *text_ptr += sprintf(*text_ptr, "    mov $%d, %%rax\n", i.op1.info->INT.value);
             }  else if (i.op1.class == OPE_TEMP){
                 *text_ptr += sprintf(*text_ptr, "    mov %d(%%rbp), %%rax\n", i.op1.info->OP.offset);
-            } else if (i.op1.class == OPE_VAR) {
+            } else if (i.op1.class == OPE_VAR_USE) {
                 if (i.op1.info->ID.is_glbl == 1) {
                     *text_ptr += sprintf(*text_ptr, "    mov %s(%%rip), %%rax\n", i.op1.info->ID.name);
                 } else {
@@ -172,7 +172,7 @@ char* instruction_to_assembler(instruction i, char** data_ptr, char** text_ptr){
                 *text_ptr += sprintf(*text_ptr, "    mov $%d, %%r10\n", i.op2.info->INT.value);
             } else if ( i.op2.class == OPE_TEMP) {
                 *text_ptr += sprintf(*text_ptr, "    mov %d(%%rbp), %%r10\n", i.op2.info->OP.offset);
-            } else if (i.op2.class == OPE_VAR) {
+            } else if (i.op2.class == OPE_VAR_USE) {
                 if (i.op2.info->ID.is_glbl == 1) {
                     *text_ptr += sprintf(*text_ptr, "    mov %s(%%rip), %%r10\n", i.op2.info->ID.name);
                 } else {
@@ -189,7 +189,7 @@ char* instruction_to_assembler(instruction i, char** data_ptr, char** text_ptr){
                 *text_ptr += sprintf(*text_ptr, "    mov $%d, %%rax\n", i.op1.info->INT.value);
             }  else if (i.op1.class == OPE_TEMP){
                 *text_ptr += sprintf(*text_ptr, "    mov %d(%%rbp), %%rax\n", i.op1.info->OP.offset);
-            } else if (i.op1.class == OPE_VAR) {
+            } else if (i.op1.class == OPE_VAR_USE) {
                 if (i.op1.info->ID.is_glbl == 1) {
                     *text_ptr += sprintf(*text_ptr, "    mov %s(%%rbp), %%rax\n", i.op1.info->ID.name);
                 } else {
@@ -203,7 +203,7 @@ char* instruction_to_assembler(instruction i, char** data_ptr, char** text_ptr){
                 *text_ptr += sprintf(*text_ptr, "    mov $%d, %%r10\n", i.op2.info->INT.value);
             } else if ( i.op2.class == OPE_TEMP) {
                 *text_ptr += sprintf(*text_ptr, "    mov %d(%%rbp), %%r10\n", i.op2.info->OP.offset);
-            } else if (i.op2.class == OPE_VAR) {
+            } else if (i.op2.class == OPE_VAR_USE) {
                 if (i.op2.info->ID.is_glbl == 1) {
                     *text_ptr += sprintf(*text_ptr, "    mov %s(%%rip), %%r10\n", i.op2.info->ID.name);
                 } else {
@@ -222,7 +222,7 @@ char* instruction_to_assembler(instruction i, char** data_ptr, char** text_ptr){
 //             // }  else if (i.op1.class == OPE_TEMP){
 //             //     fprintf(ass_out, "    mov %d(%%rbp), %%r10\n", i.op1.info->OP.offset);
 //             //     fprintf(ass_out, "    neg %%r10\n");
-//             // } else if (i.op1.class == OPE_VAR) {
+//             // } else if (i.op1.class == OPE_VAR_USE) {
 //             //     fprintf(ass_out, "    mov %d(%%rbp), %%r10\n", i.op1.info->ID.offset);
 //             //     fprintf(ass_out, "    neg %%r10\n");
 //             // }
@@ -235,7 +235,7 @@ char* instruction_to_assembler(instruction i, char** data_ptr, char** text_ptr){
                 *text_ptr += sprintf(*text_ptr, "    mov $%d, %%r10\n", i.op1.info->INT.value);
             }  else if (i.op1.class == OPE_TEMP){
                 *text_ptr += sprintf(*text_ptr, "    mov %d(%%rbp), %%r10\n", i.op1.info->OP.offset);
-            } else if (i.op1.class == OPE_VAR) {
+            } else if (i.op1.class == OPE_VAR_USE) {
                 if (i.op1.info->ID.is_glbl == 1) {
                     *text_ptr += sprintf(*text_ptr, "    mov %s(%%rip), %%r10\n", i.op1.info->ID.name);
                 } else {
@@ -247,7 +247,7 @@ char* instruction_to_assembler(instruction i, char** data_ptr, char** text_ptr){
                 *text_ptr += sprintf(*text_ptr, "    cmp $%d, %%r10\n", i.op2.info->INT.value);
             } else if ( i.op2.class == OPE_TEMP) {
                 *text_ptr += sprintf(*text_ptr, "    cmp %d(%%rbp), %%r10\n", i.op2.info->OP.offset);
-            } else if (i.op2.class == OPE_VAR) {
+            } else if (i.op2.class == OPE_VAR_USE) {
                 if (i.op2.info->ID.is_glbl == 1) {
                     *text_ptr += sprintf(*text_ptr, "    cmp %s(%%rip), %%r10\n", i.op2.info->ID.name);
                 } else {
@@ -266,7 +266,7 @@ char* instruction_to_assembler(instruction i, char** data_ptr, char** text_ptr){
                 *text_ptr += sprintf(*text_ptr, "    mov $%d, %%r10\n", i.op1.info->INT.value);
             }  else if (i.op1.class == OPE_TEMP){
                 *text_ptr += sprintf(*text_ptr, "    mov %d(%%rbp), %%r10\n", i.op1.info->OP.offset);
-            } else if (i.op1.class == OPE_VAR) {
+            } else if (i.op1.class == OPE_VAR_USE) {
                 if (i.op1.info->ID.is_glbl == 1) {
                     *text_ptr += sprintf(*text_ptr, "    mov %s(%%rip), %%r10\n", i.op1.info->ID.name);
                 } else {
@@ -278,7 +278,7 @@ char* instruction_to_assembler(instruction i, char** data_ptr, char** text_ptr){
                 *text_ptr += sprintf(*text_ptr, "    cmp $%d, %%r10\n", i.op2.info->INT.value);
             } else if ( i.op2.class == OPE_TEMP) {
                 *text_ptr += sprintf(*text_ptr, "    cmp %d(%%rbp), %%r10\n", i.op2.info->OP.offset);
-            } else if (i.op2.class == OPE_VAR) {
+            } else if (i.op2.class == OPE_VAR_USE) {
                 if (i.op2.info->ID.is_glbl == 1) {
                     *text_ptr += sprintf(*text_ptr, "    cmp %s(%%rip), %%r10\n", i.op2.info->ID.name);
                 } else {
@@ -297,7 +297,7 @@ char* instruction_to_assembler(instruction i, char** data_ptr, char** text_ptr){
                 *text_ptr += sprintf(*text_ptr, "    mov $%d, %%r10\n", i.op1.info->INT.value);
             }  else if (i.op1.class == OPE_TEMP){
                 *text_ptr += sprintf(*text_ptr, "    mov %d(%%rbp), %%r10\n", i.op1.info->OP.offset);
-            } else if (i.op1.class == OPE_VAR) {
+            } else if (i.op1.class == OPE_VAR_USE) {
                 if (i.op1.info->ID.is_glbl == 1) {
                     *text_ptr += sprintf(*text_ptr, "    mov %s(%%rip), %%r10\n", i.op1.info->ID.name);
                 } else {
@@ -309,7 +309,7 @@ char* instruction_to_assembler(instruction i, char** data_ptr, char** text_ptr){
                 *text_ptr += sprintf(*text_ptr, "    cmp $%d, %%r10\n", i.op2.info->INT.value);
             } else if ( i.op2.class == OPE_TEMP) {
                 *text_ptr += sprintf(*text_ptr, "    cmp %d(%%rbp), %%r10\n", i.op2.info->OP.offset);
-            } else if (i.op2.class == OPE_VAR) {
+            } else if (i.op2.class == OPE_VAR_USE) {
                 if (i.op2.info->ID.is_glbl == 1) {
                     *text_ptr += sprintf(*text_ptr, "    cmp %s(%%rip), %%r10\n", i.op2.info->ID.name);
                 } else {
@@ -329,7 +329,7 @@ char* instruction_to_assembler(instruction i, char** data_ptr, char** text_ptr){
                 *text_ptr += sprintf(*text_ptr, "    mov $%d, %%r10\n", i.op1.info->INT.value);
             }  else if (i.op1.class == OPE_TEMP){
                 *text_ptr += sprintf(*text_ptr, "    mov %d(%%rbp), %%r10\n", i.op1.info->OP.offset);
-            } else if (i.op1.class == OPE_VAR) {
+            } else if (i.op1.class == OPE_VAR_USE) {
                 if (i.op1.info->ID.is_glbl == 1) {
                     *text_ptr += sprintf(*text_ptr, "    mov %s(%%rip), %%r10\n", i.op1.info->ID.name);
                 } else {
@@ -349,7 +349,7 @@ char* instruction_to_assembler(instruction i, char** data_ptr, char** text_ptr){
                 *text_ptr += sprintf(*text_ptr, "    mov $%d, %%r10\n", i.op1.info->INT.value);
             }  else if (i.op1.class == OPE_TEMP){
                 *text_ptr += sprintf(*text_ptr, "    mov %d(%%rbp), %%r10\n", i.op1.info->OP.offset);
-            } else if (i.op1.class == OPE_VAR) {
+            } else if (i.op1.class == OPE_VAR_USE) {
                 if (i.op1.info->ID.is_glbl == 1) {
                     *text_ptr += sprintf(*text_ptr, "    mov %s(%%rip), %%r10\n", i.op1.info->ID.name);
                 } else {
@@ -361,7 +361,7 @@ char* instruction_to_assembler(instruction i, char** data_ptr, char** text_ptr){
                 *text_ptr += sprintf(*text_ptr, "    mov $%d, %%r11\n", i.op2.info->INT.value);
             } else if ( i.op2.class == OPE_TEMP) {
                 *text_ptr += sprintf(*text_ptr, "    mov %d(%%rbp), %%r11\n", i.op2.info->OP.offset);
-            } else if (i.op2.class == OPE_VAR) {
+            } else if (i.op2.class == OPE_VAR_USE) {
                 if (i.op2.info->ID.is_glbl == 1) {
                     *text_ptr += sprintf(*text_ptr, "    mov %s(%%rip), %%r11\n", i.op2.info->ID.name);
                 } else {
@@ -378,7 +378,7 @@ char* instruction_to_assembler(instruction i, char** data_ptr, char** text_ptr){
                 *text_ptr += sprintf(*text_ptr, "    mov $%d, %%r10\n", i.op1.info->INT.value);
             }  else if (i.op1.class == OPE_TEMP){
                 *text_ptr += sprintf(*text_ptr, "    mov %d(%%rbp), %%r10\n", i.op1.info->OP.offset);
-            } else if (i.op1.class == OPE_VAR) {
+            } else if (i.op1.class == OPE_VAR_USE) {
                 if (i.op1.info->ID.is_glbl == 1) {
                     *text_ptr += sprintf(*text_ptr, "    mov %s(%%rip), %%r10\n", i.op1.info->ID.name);
                 } else {
@@ -390,7 +390,7 @@ char* instruction_to_assembler(instruction i, char** data_ptr, char** text_ptr){
                 *text_ptr += sprintf(*text_ptr, "    mov $%d, %%r11\n", i.op2.info->INT.value);
             } else if ( i.op2.class == OPE_TEMP) {
                 *text_ptr += sprintf(*text_ptr, "    mov %d(%%rbp), %%r11\n", i.op2.info->OP.offset);
-            } else if (i.op2.class == OPE_VAR) {
+            } else if (i.op2.class == OPE_VAR_USE) {
                 if (i.op2.info->ID.is_glbl == 1) {
                     *text_ptr += sprintf(*text_ptr, "    mov %s(%%rip), %%r11\n", i.op2.info->ID.name);
                 } else {
@@ -408,7 +408,7 @@ char* instruction_to_assembler(instruction i, char** data_ptr, char** text_ptr){
             if (index < 6) {
                 if (i.op1.class == OPE_NUM) {
                     *text_ptr += sprintf(*text_ptr, "    mov $%d, %s\n", i.op1.info->INT.value, regs[index]);
-                } else if (i.op1.class == OPE_VAR) {
+                } else if (i.op1.class == OPE_VAR_USE) {
                     if (i.op1.info->ID.is_glbl == 1) {
                         *text_ptr += sprintf(*text_ptr, "    mov %s(%%rip), %s\n", i.op1.info->ID.name, regs[index]);
                     } else {
@@ -422,7 +422,7 @@ char* instruction_to_assembler(instruction i, char** data_ptr, char** text_ptr){
             } else {
                 if (i.op1.class == OPE_NUM) {
                     *text_ptr += sprintf(*text_ptr, "    mov $%d, %%r10\n", i.op1.info->INT.value);
-                } else if (i.op1.class == OPE_VAR) {
+                } else if (i.op1.class == OPE_VAR_USE) {
                     if (i.op1.info->ID.is_glbl == 1) {
                         *text_ptr += sprintf(*text_ptr, "    mov %s(%%rip), %%r10\n", i.op1.info->ID.name);
                     } else {
@@ -442,7 +442,7 @@ char* instruction_to_assembler(instruction i, char** data_ptr, char** text_ptr){
             static int index = 0;
             
             if (index < 6) {
-                if (i.op1.class == OPE_VAR) { // guardar parametro
+                if (i.op1.class == OPE_VAR_USE) { // guardar parametro
                     *text_ptr += sprintf(*text_ptr, "    mov %s, %d(%%rbp)\n", regs[index], i.op1.info->ID.offset);
                 }
             } else {
@@ -455,7 +455,7 @@ char* instruction_to_assembler(instruction i, char** data_ptr, char** text_ptr){
         }
         case RET: {
             int offset;
-            if (i.op1.class == OPE_VAR){
+            if (i.op1.class == OPE_VAR_USE){
                 if (i.op1.info->ID.is_glbl == 1) {
                     *text_ptr += sprintf(*text_ptr, "    mov %s(%%rip), %%rax\n", i.op1.info->ID.name);
                     break;
@@ -478,7 +478,7 @@ char* instruction_to_assembler(instruction i, char** data_ptr, char** text_ptr){
             break; 
         }   
         case IF_COND:
-            if (i.op1.class == OPE_VAR) {
+            if (i.op1.class == OPE_VAR_USE) {
                 if (i.op1.info->ID.is_glbl == 1) {
                     *text_ptr += sprintf(*text_ptr, "    mov %s(%%rip), %%rax\n", i.op1.info->ID.name);
                 } else {
@@ -494,7 +494,7 @@ char* instruction_to_assembler(instruction i, char** data_ptr, char** text_ptr){
         case IF_FALSE_GOTO: {
             if (i.op1.class == OPE_NUM) {
                 *text_ptr += sprintf(*text_ptr, "    mov $%d, %%rax\n", i.op1.info->INT.value);
-            } else if (i.op1.class == OPE_VAR) {
+            } else if (i.op1.class == OPE_VAR_USE) {
                 if (i.op1.info->ID.is_glbl == 1) {
                     *text_ptr += sprintf(*text_ptr, "    mov %s(%%rip), %%rax\n", i.op1.info->ID.name);
                 } else {

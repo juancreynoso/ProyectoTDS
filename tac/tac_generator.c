@@ -285,11 +285,15 @@ operand generate_tac_from_expression(node* root, instruction_list **list) {
             op.info = root->info;
             return op;
         } 
-
-        case NODE_DECL:
+        case NODE_DECL: {
+            operand op;
+            op.class = OPE_VAR_DECL;
+            op.info = root->info;
+            return op;
+        } 
         case NODE_ID_USE: {
             operand op;
-            op.class = OPE_VAR;
+            op.class = OPE_VAR_USE;
             op.info = root->info;
             return op; 
         }
@@ -470,7 +474,8 @@ char* operand_to_str(operand op) {
         case OPE_TEMP:
             snprintf(buffer, 64, "%s", op.name);
             break;
-        case OPE_VAR:
+        case OPE_VAR_USE:
+        case OPE_VAR_DECL:
             snprintf(buffer, 64, "%s", op.info->ID.name);
             break;
         case OPE_DECL_METH:
