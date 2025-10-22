@@ -351,12 +351,16 @@ operand generate_tac_from_expression(node* root, instruction_list **list) {
         case NODE_CALL_METH: {
             if (root->info->METH_CALL.c_params != NULL) {
                 Node_C_List* param_cursor = root->info->METH_CALL.c_params->head;
+                int param_index = 0;
+
                 while (param_cursor != NULL) {
                     operand param_value = generate_tac_from_expression(param_cursor->p, list);
                     
                     instruction i_param;
                     i_param.type = LOAD;
                     i_param.op1 = param_value;
+                    i_param.op2.info = malloc(sizeof(union type)); // para guardar el indice
+                    i_param.op2.info->INT.value = param_index++;   // usar index en assembler
                     insert_instruction(list, i_param);
                     
                     param_cursor = param_cursor->next;
