@@ -323,7 +323,27 @@ char* instruction_to_assembler(instruction i, char** data_ptr, char** text_ptr){
             *text_ptr += sprintf(*text_ptr, "    mov %%r11, %d(%%rbp)\n", i.result.info->OP.offset);
 
             break;
-// //   case NOT:
+
+        case NOT:
+            if (i.op1.class == OPE_BOOL ) {
+                *text_ptr += sprintf(*text_ptr, "    mov $%d, %%r10\n", i.op1.info->INT.value);
+            }  else if (i.op1.class == OPE_TEMP){
+                *text_ptr += sprintf(*text_ptr, "    mov %d(%%rbp), %%r10\n", i.op1.info->OP.offset);
+            } else if (i.op1.class == OPE_VAR) {
+                if (i.op1.info->ID.is_glbl == 1) {
+                    *text_ptr += sprintf(*text_ptr, "    mov %s(%%rip), %%r10\n", i.op1.info->ID.name);
+                } else {
+                    *text_ptr += sprintf(*text_ptr, "    mov %d(%%rbp), %%r10\n", i.op1.info->ID.offset);
+                }
+            }  
+
+            *text_ptr += sprintf(*text_ptr, "    test %%r10, %%r10\n");
+            *text_ptr += sprintf(*text_ptr, "    setz %%r10b\n");
+            *text_ptr += sprintf(*text_ptr, "    movzb %%r10b, %%r10\n");
+            
+            *text_ptr += sprintf(*text_ptr, "    mov %%r10, %d(%%rbp)\n", i.result.info->OP.offset);
+            break;
+
         case AND:
             if (i.op1.class == OPE_BOOL ) {
                 *text_ptr += sprintf(*text_ptr, "    mov $%d, %%r10\n", i.op1.info->INT.value);
