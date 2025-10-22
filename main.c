@@ -197,9 +197,9 @@ int main(int argc, char *argv[]) {
                     printf("Parseado correctamente, sin errores sintactico.\n");
                     save_ast(root, 0, parser_out);
                     printf("Realizando analisis semantico...\n");
+                    set_offsets(root);
                     analyze_semantics(root, semantic_out);
                     instruction_list* list = tac_code(root, tac_out);
-                    set_offsets(root);
                     ass_gen(list, ass_out);
                 }  
                 fclose(lex_out);
