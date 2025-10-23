@@ -42,8 +42,14 @@ VarType get_expression_type(node* root, tables_stack* stack) {
             case NODE_DECL:
                 return root->info->ID.type;
 
-            case NODE_CALL_METH:
+            case NODE_CALL_METH: {
+                Node_C_List* cursor = root->info->METH_CALL.c_params->head;
+                while (cursor != NULL) {
+                    get_expression_type(cursor->p, stack);
+                    cursor = cursor->next;
+                }
                 return root->info->METH_CALL.returnType;
+            }
             default:
                 break;
         }

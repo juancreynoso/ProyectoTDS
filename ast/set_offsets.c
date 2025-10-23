@@ -38,6 +38,13 @@ void set_offsets(node* root) {
             break;
         case NODE_CALL_METH:
             root->info->METH_CALL.offset = new_var_offset(); 
+            if (root->info->METH_CALL.c_params != NULL) {
+                Node_C_List* cursor = root->info->METH_CALL.c_params->head;
+                while (cursor != NULL) {
+                    set_offsets_actual_params(cursor->p);
+                    cursor = cursor->next;
+                }
+            }
             break;
         case NODE_OP:
             switch(root->info->OP.name) {
@@ -56,7 +63,6 @@ void set_offsets(node* root) {
                     root->info->OP.offset = new_var_offset();
                     set_offsets(root->right);
                     set_offsets(root->left);
-                    printf("Gen este offset %d\n", root->info->OP.offset);
                     break;
                 case OP_ASSIGN:
                     set_offsets(root->right);
@@ -106,6 +112,22 @@ void set_offsets(node* root) {
         default:
             set_offsets(root->left);
             set_offsets(root->right);
+            break;
+    }
+}
+
+void set_offsets_actual_params(node* root) {
+    if (root == NULL) {
+        return ;
+    }    
+
+    switch(root->type){
+        case NODE_OP:
+            root->info->OP.offset = new_var_offset();
+            break;
+        default:
+            set_offsets_actual_params(root->left);
+            set_offsets_actual_params(root->right);
             break;
     }
 }

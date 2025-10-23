@@ -11,5 +11,6 @@ int new_param_offset();
 int get_frame_size();
 
 void set_offsets(node* root);
+void set_offsets_actual_params(node* root);
 
 #endif
