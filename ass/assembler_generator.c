@@ -213,21 +213,29 @@ char* instruction_to_assembler(instruction i, char** data_ptr, char** text_ptr){
             *text_ptr += sprintf(*text_ptr, "    mov %%rdx, %d(%%rbp)\n", i.result.info->OP.offset);
 
             break;
-//         case MINUS:
-//             // if (i.op1.class == OPE_NUM ) {
-//             //     fprintf(ass_out, "    mov $%d, %%r10\n", i.op1.info->INT.value);
-//             //     fprintf(ass_out, "    neg %%r10\n");
-//             // }  else if (i.op1.class == OPE_TEMP){
-//             //     fprintf(ass_out, "    mov %d(%%rbp), %%r10\n", i.op1.info->OP.offset);
-//             //     fprintf(ass_out, "    neg %%r10\n");
-//             // } else if (i.op1.class == OPE_VAR_USE) {
-//             //     fprintf(ass_out, "    mov %d(%%rbp), %%r10\n", i.op1.info->ID.offset);
-//             //     fprintf(ass_out, "    neg %%r10\n");
-//             // }
+        case MINUS:
+             if (i.op1.class == OPE_NUM ) {
+                *text_ptr += sprintf(*text_ptr, "    mov $%d, %%r10\n", i.op1.info->INT.value);
+                *text_ptr += sprintf(*text_ptr, "    neg %%r10\n");
+            }  else if (i.op1.class == OPE_TEMP){
+                *text_ptr += sprintf(*text_ptr, "    mov %d(%%rbp), %%r10\n", i.op1.info->OP.offset);
+                *text_ptr += sprintf(*text_ptr, "    neg %%r10\n");
+            } else if (i.op1.class == OPE_VAR_USE) {
+                if (i.op1.info->ID.is_glbl == 1) {
+                    *text_ptr += sprintf(*text_ptr, "    mov %s(%%rip), %%r10", i.op1.info->ID.name);
+                    *text_ptr += sprintf(*text_ptr, "    neg %%r10");
+                    *text_ptr += sprintf(*text_ptr, "    mov %%r10, %s(%%rip)", i.op1.info->ID.name);
+                } else {
+                    *text_ptr += sprintf(*text_ptr, "    mov %d(%%rbp), %%r10", i.op1.info->ID.offset);
+                    *text_ptr += sprintf(*text_ptr, "    neg %%r10");
+                    *text_ptr += sprintf(*text_ptr, "    mov %%r10, %d(%%rbp)", i.op1.info->ID.offset);
+                }
+                break;
+            }
 
-//             // fprintf(ass_out, "    movq %%r10, %d(%%rbp)\n", i.result.info->OP.offset);
+            *text_ptr += sprintf(*text_ptr, "    movq %%r10, %d(%%rbp)\n", i.result.info->OP.offset);
         
-//             // break;
+            break;
         case GT:
             if (i.op1.class == OPE_NUM ) {
                 *text_ptr += sprintf(*text_ptr, "    mov $%d, %%r10\n", i.op1.info->INT.value);

@@ -53,6 +53,7 @@ void generate_tac_from_ast(node* root, instruction_list **list) {
 
     switch(root->type){
         case NODE_DECL_METH: {
+            if (root->info->METH_DECL.is_extern == 0) {
 
             operand op1;
             op1.info = root->info;
@@ -88,8 +89,9 @@ void generate_tac_from_ast(node* root, instruction_list **list) {
 
             instruction end_func;
             end_func.type = FFUNC;           
+            end_func.op1 = op1;
             insert_instruction(list, end_func);
-
+            }
             break;
         }   
 
