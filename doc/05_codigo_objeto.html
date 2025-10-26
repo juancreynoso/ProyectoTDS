@@ -23,13 +23,38 @@
   <main>
   <h2>Descripción</h2> 
     <p> La etapa de <b>Generación de Código Objeto</b> tiene como objetivo producir el <b>código assembler</b> a partir de la lista de instrucciones en 
-    <b>código de tres direcciones</b> generada en la etapa anterior. <br> 
+    <b>código de tres direcciones</b> generada en la etapa anterior. <br>
+    <h3>Generacion de Offsets</h3> 
     Durante esta fase fue necesario asignar <b>offsets</b> tanto a variables locales como a temporales. Los offsets representan 
     la posición que cada identificador ocupará dentro de la <b>pila de ejecución</b>, permitiendo acceder correctamente a sus valores durante la ejecución del programa. </p>
-    <h3>Ejemplo offsets</h3>
-    <p>
-      ...
-    </p>
+    <h4>Por ejemplo</h4>
+    <p>Asignacion de offsets a temporales:</p>
+    <pre>
+      case NODE_OP:
+        switch(root->info->OP.name) {
+            case OP_PLUS:
+            case OP_SUB:
+            case OP_MULT:
+            case OP_DIV:
+            case OP_REST:
+            case OP_MINUS:
+            case OP_GT:
+            case OP_LT:
+            case OP_EQUALS:
+            case OP_AND:
+            case OP_OR:
+            case OP_NOT:
+                root->info->OP.offset = new_var_offset();
+                set_offsets(root->right);
+                set_offsets(root->left);
+                break;
+            case OP_ASSIGN:
+                set_offsets(root->right);
+                set_offsets(root->left);
+                break;
+        }
+      break;
+    </pre>
     <br>
     <h3>Un ejemplo de traduccion de <b>codigo tres direcciones</b> a <b>codigo assembler</b></h3>
     <pre>
@@ -99,10 +124,22 @@
 
     <h2>Decisiones de diseño</h2>
     <p>
-      Consideraciones sobre como definir la seccion data.
-      Tambien sobre solo permitir variables globales inicializadas con constantes
-      setz usado en not
+
+      <ul>
+          <li>
+            Con el objetivo de reducir la complejidad del compilador, se estableció que las variables globales solo pueden ser inicializadas con valores constantes.
+          </li>
+          <li>
+            Durante el diseño de la gramática del lenguaje se decidió permitir que las definiciones de variables y funciones puedan intercalarse entre sí. 
+            Para generar las secciones <code>.text</code> y <code>.data</code> del código assembler, se utilizaron punteros a buffers separados que permitieron construir cada sección de forma independiente y luego concatenarlas en un único archivo de salida.
+          </li>
+      </ul>  
+      <br>
+
+      <b>setz usado en not????</b>
     </p>
+
+
 
     </main>
 

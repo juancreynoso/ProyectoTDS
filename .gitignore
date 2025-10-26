@@ -18,3 +18,4 @@ assembly.txt
 c-tds
 *.o
 *.pdf
+.DS_store

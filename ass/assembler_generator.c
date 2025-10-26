@@ -4,8 +4,9 @@
 
 
 /**
- @param list
- @param ass_out
+ * Funcion que se encarga de traducir cada instruccion en tres direcciones a codigo assembler.
+ * @param list lista de instrucciones de codigo intermedio a traducir.
+ * @param ass_out archivo de salida donde se escribira el codigo en assembler.
  */
 void ass_gen(instruction_list* list, FILE* ass_out) {
     instruction_node* cursor = list->head;
@@ -27,7 +28,13 @@ void ass_gen(instruction_list* list, FILE* ass_out) {
     fprintf(ass_out, ".data\n%s\n.text\n%s", data_segment, text_segment);
 }
 
-char* instruction_to_assembler(instruction i, char** data_ptr, char** text_ptr){
+/** 
+ * Traduce una instruccion a codigo assembler.
+ * @param i instruccion en tres direcciones
+ * @param data_ptr puntero al buffer de la seccion data.
+ * @param text_ptr puntero al buffer de la seccion text.
+*/
+void instruction_to_assembler(instruction i, char** data_ptr, char** text_ptr){
     switch(i.type){
         case FUNC:
             if (strcmp("main", i.op1.name) == 0) {

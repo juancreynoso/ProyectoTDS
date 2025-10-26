@@ -159,8 +159,9 @@ void semantic_analysis_recursive(node* root, tables_stack* stack, symbol_table* 
                 printf("Error de declaración [línea %d, columna %d]: Método '%s' no declarado\n", root->line, root->column, root->info->METH_CALL.name);
                 exit(EXIT_FAILURE);
             }
-            
+
             if (root->info->METH_CALL.c_params != NULL) {
+            
                 if (!verify_method_params(method->METH_DECL.f_params, root->info->METH_CALL.c_params, stack, root->info->METH_CALL.name)) {
                     exit(EXIT_FAILURE);
                 }           
@@ -171,6 +172,7 @@ void semantic_analysis_recursive(node* root, tables_stack* stack, symbol_table* 
                     exit(EXIT_FAILURE);
                 }
             } 
+
             root->info->METH_CALL.returnType = method->METH_DECL.returnType;
             fprintf(semantic_out, "Call method: %s %s\n", type_to_string(root->info->METH_CALL.returnType),  root->info->METH_CALL.name);
             break;
@@ -273,6 +275,7 @@ int verify_method_params(Formal_P_List* formal_params, Current_P_List* actual_pa
 
     for (int i = 0; i < formal_params->size; i++) {
         VarType formal_p = formal_cursor->p.type;
+
         VarType actual_p = get_expression_type(actual_cursor->p, stack);
 
         if (formal_p != actual_p) {
