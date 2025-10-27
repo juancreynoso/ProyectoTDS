@@ -53,7 +53,21 @@ void instruction_to_assembler(instruction i, char** data_ptr, char** text_ptr){
          case ASSIGN:
             if (i.op1.info->ID.is_glbl == 1) {
                 if (i.op1.class == OPE_VAR_USE) {
-                    *text_ptr += sprintf(*text_ptr, "    mov $%d, %s(%%rip)\n",  i.op2.info->INT.value, i.op1.info->ID.name); 
+                    if (i.op2.class == OPE_NUM) {
+                        *text_ptr += sprintf(*text_ptr, "    mov $%d, %s(%%rip)\n",  i.op2.info->INT.value, i.op1.info->ID.name);   
+                    } else if (i.op2.class == OPE_BOOL) {
+                        *text_ptr += sprintf(*text_ptr, "    mov $%d, %s(%%rip)\n",  i.op2.info->BOOL.value, i.op1.info->ID.name);                  
+                    } else if (i.op2.class == OPE_TEMP){
+                        *text_ptr += sprintf(*text_ptr, "    mov %d(%%rbp), %%r10\n", i.op2.info->OP.offset);
+                        *text_ptr += sprintf(*text_ptr, "    mov %%r10, %s(%%rip)\n",  i.op1.info->ID.name);  
+                    } else if (i.op2.class == OPE_VAR_USE) {
+                        if (i.op2.info->ID.is_glbl == 1) {
+                            *text_ptr += sprintf(*text_ptr, "    mov %s(%%rip), %%r10\n", i.op2.info->ID.name); 
+                        } else {
+                            *text_ptr += sprintf(*text_ptr, "    mov %d(%%rbp), %%r10\n", i.op2.info->ID.offset); 
+                        }                
+                        *text_ptr += sprintf(*text_ptr, "    mov %%r10,  %s(%%rip)\n", i.op1.info->ID.name); 
+                    } 
                 } else {
                     *data_ptr += sprintf(*data_ptr, "    %s: .quad %d\n",  i.op1.info->ID.name, i.op2.info->INT.value); 
                 }
@@ -498,6 +512,8 @@ void instruction_to_assembler(instruction i, char** data_ptr, char** text_ptr){
                 }
             } else if (i.op1.class == OPE_TEMP){
                *text_ptr += sprintf(*text_ptr, "    mov %d(%%rbp), %%rax\n", i.op1.info->OP.offset);
+            } else if (i.op1.class == OPE_BOOL) {
+                *text_ptr += sprintf(*text_ptr, "    mov $%d, %%rax\n", i.op1.info->BOOL.value);
             }
             *text_ptr += sprintf(*text_ptr, "    cmp $1, %%rax\n");
             *text_ptr += sprintf(*text_ptr, "    je .%s\n", i.op2.name);
