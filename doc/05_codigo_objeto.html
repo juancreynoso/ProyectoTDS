@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Codigo Assembler</title>
+  <title>Generación de Código Assembler</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -15,136 +15,189 @@
         <li><a href="02_analisis_sintactico.html">Análisis Sintáctico</a></li>
         <li><a href="03_analisis_semantico.html">Análisis Semántico</a></li>
         <li><a href="04_codigo_intermedio.html">Generación de Código Intermedio</a></li>
-        <li><a href="05_codigo_objeto.html">Generación de Código Objeto</a></li>
+        <li><a href="05_codigo_objeto.html">Generación de Código Assembler</a></li>
         <li><a href="06_optimizacion.html">Optimización</a></li>
       </ul>
     </nav>
   </header>
+
   <main>
-  <h2>Descripción</h2> 
-    <p> La etapa de <b>Generación de Código Objeto</b> tiene como objetivo producir el <b>código assembler</b> a partir de la lista de instrucciones en 
-    <b>código de tres direcciones</b> generada en la etapa anterior. <br>
-    <h3>Generacion de Offsets</h3> 
-    Durante esta fase fue necesario asignar <b>offsets</b> tanto a variables locales como a temporales. Los offsets representan 
-    la posición que cada identificador ocupará dentro de la <b>pila de ejecución</b>, permitiendo acceder correctamente a sus valores durante la ejecución del programa. </p>
-    <h4>Por ejemplo</h4>
-    <p>Asignacion de offsets a temporales:</p>
-    <pre>
-      case NODE_OP:
-        switch(root->info->OP.name) {
-            case OP_PLUS:
-            case OP_SUB:
-            case OP_MULT:
-            case OP_DIV:
-            case OP_REST:
-            case OP_MINUS:
-            case OP_GT:
-            case OP_LT:
-            case OP_EQUALS:
-            case OP_AND:
-            case OP_OR:
-            case OP_NOT:
-                root->info->OP.offset = new_var_offset();
-                set_offsets(root->right);
-                set_offsets(root->left);
-                break;
-            case OP_ASSIGN:
-                set_offsets(root->right);
-                set_offsets(root->left);
-                break;
-        }
-      break;
-    </pre>
-    <br>
-    <h3>Un ejemplo de traduccion de <b>codigo tres direcciones</b> a <b>codigo assembler</b></h3>
-    <pre>
-      PROGRAM
-      FUNC loop 
-      PARAM a
-      L0
-      t0 := a GT 0
-      ifFalse t0 GOTO L1
-      t1 := a SUB 1
-      a := t1
-      GOTO L0
-      L1
-      RET a
-      FFUNC
-      FUNC main 
-      LOAD 5
-      t2 := CALL loop
-      x := t2
-      RET x
-      FFUNC
-      END
-
-    </pre>
-    <p>En Assembler:</p>
-    <pre>
-      .data
-
-      .text
-      loop: 
-          enter  $24, $0
-          mov %rdi, -8(%rbp)
-      .L0:
-          mov -8(%rbp), %r10
-          cmp $0, %r10
-          mov $1, %r10
-          mov $0, %r11
-          cmovg %r10, %r11
-          mov %r11, -24(%rbp)
-          mov -24(%rbp), %rax
-          cmp $0, %rax
-          je .L1
-          mov -8(%rbp), %r10
-          sub $1, %r10
-          mov %r10, -16(%rbp)
-          mov -16(%rbp), %r10
-          mov %r10, -8(%rbp)
-          jmp .L0
-      .L1:
-          mov -8(%rbp), %rax
-          leave
-          ret
-      .globl main
-      main: 
-          enter  $24, $0
-          mov $5, %rdi
-          call loop
-          mov %rax, -8(%rbp)
-          mov -8(%rbp), %r10
-          mov %r10, -16(%rbp)
-          mov -16(%rbp), %rax
-          leave
-          ret
-
-    </pre>
-
-
-    <h2>Decisiones de diseño</h2>
+    <h2>Descripción</h2> 
     <p>
-
-      <ul>
-          <li>
-            Con el objetivo de reducir la complejidad del compilador, se estableció que las variables globales solo pueden ser inicializadas con valores constantes.
-          </li>
-          <li>
-            Durante el diseño de la gramática del lenguaje se decidió permitir que las definiciones de variables y funciones puedan intercalarse entre sí. 
-            Para generar las secciones <code>.text</code> y <code>.data</code> del código assembler, se utilizaron punteros a buffers separados que permitieron construir cada sección de forma independiente y luego concatenarlas en un único archivo de salida.
-          </li>
-      </ul>  
-      <br>
-
-      <b>setz usado en not????</b>
+      La <b>generación de código assembler</b> tiene como objetivo traducir las <b>instrucciones de tres direcciones</b> obtenidas en la etapa anterior 
+      a instrucciones equivalentes en <b>lenguaje ensamblador x86-64</b>.
     </p>
 
+    <h3>Gestión de memoria y offsets</h3>
+    <p>
+      Durante esta fase se asignan <b>offsets</b> a todas las variables locales y temporales.  
+      El offset representa la posición relativa dentro del <b>frame de activación</b> de cada función, 
+      es decir, su ubicación en la pila en relación al registro <code>%rbp</code>.
+      <br><br>
+      De esta forma, cada identificador dentro del bloque puede ser accedido mediante direcciones como <code>-8(%rbp)</code>, <code>-16(%rbp)</code>, etc.
+    </p>
 
+    <h2>Ejemplo — Asignación de offsets a temporales</h2>
+    <pre><code>
+case NODE_OP:
+    switch(root->info->OP.name) {
+        case OP_PLUS:
+        case OP_SUB:
+        case OP_MULT:
+        case OP_DIV:
+        case OP_REST:
+        case OP_MINUS:
+        case OP_GT:
+        case OP_LT:
+        case OP_EQUALS:
+        case OP_AND:
+        case OP_OR:
+        case OP_NOT:
+            root->info->OP.offset = new_var_offset();
+            set_offsets(root->right);
+            set_offsets(root->left);
+            break;
+        case OP_ASSIGN:
+            set_offsets(root->right);
+            set_offsets(root->left);
+            break;
+    }
+    break;
+    </code></pre>
 
-    </main>
+    <p>
+      En este ejemplo, cada operación aritmética o lógica recibe su propio offset negativo, 
+      reservando espacio en el stack frame para guardar el resultado temporal.
+    </p>
 
-    <footer>
+    <h2>Ejemplo de traducción a Assembler</h2>
+    <h4>Código de tres direcciones</h4>
+    <pre><code>
+PROGRAM
+FUNC loop 
+PARAM a
+L0
+t0 := a GT 0
+ifFalse t0 GOTO L1
+t1 := a SUB 1
+a := t1
+GOTO L0
+L1
+RET a
+FFUNC
+FUNC main 
+LOAD 5
+t2 := CALL loop
+x := t2
+RET x
+FFUNC
+END
+    </code></pre>
+
+    <h4>Traducción generada en assembler x86-64</h4>
+    <pre><code>
+.data
+
+.text
+loop: 
+    enter  $24, $0
+    mov %rdi, -8(%rbp)
+.L0:
+    mov -8(%rbp), %r10
+    cmp $0, %r10
+    mov $1, %r10
+    mov $0, %r11
+    cmovg %r10, %r11
+    mov %r11, -24(%rbp)
+    mov -24(%rbp), %rax
+    cmp $0, %rax
+    je .L1
+    mov -8(%rbp), %r10
+    sub $1, %r10
+    mov %r10, -16(%rbp)
+    mov -16(%rbp), %r10
+    mov %r10, -8(%rbp)
+    jmp .L0
+.L1:
+    mov -8(%rbp), %rax
+    leave
+    ret
+
+.globl main
+main: 
+    enter  $24, $0
+    mov $5, %rdi
+    call loop
+    mov %rax, -8(%rbp)
+    mov -8(%rbp), %r10
+    mov %r10, -16(%rbp)
+    mov -16(%rbp), %rax
+    leave
+    ret
+    </code></pre>
+
+    <h2>Convenciones de registros utilizadas</h2>
+    <ul>
+      <li><code>%rbp</code>: base del frame de activación de la función.</li>
+      <li><code>%rsp</code>: puntero al tope de la pila.</li>
+      <li><code>%rdi, %rsi, %rdx, %rcx, %r8, %r9</code>: registros usados para los primeros seis parámetros de una función.</li>
+      <li><code>%rax</code>: almacena el valor de retorno de las funciones.</li>
+      <li><code>%r10</code>, <code>%r11</code>: registros temporales utilizados para operaciones intermedias.</li>
+    </ul>
+
+    <h2>Decisiones de diseño</h2>
+    <ul>
+      <li>Para simplificar el compilador, las variables globales solo pueden inicializarse con valores constantes.</li>
+      <li>Las declaraciones de funciones y variables pueden intercalarse en el código fuente. 
+          Para manejar esto, se construyeron buffers separados para las secciones <code>.text</code> y <code>.data</code>, 
+          que luego se combinan en un único archivo assembler de salida.</li>
+      <li>El tamaño del frame de cada función se calcula en función de la cantidad de variables locales y temporales utilizadas.</li>
+      <li>Las instrucciones condicionales usan saltos como <code>je</code> o <code>jne</code>, generados a partir de operaciones lógicas
+          como <code>IF_FALSE_GOTO</code> o comparaciones (<code>GT</code>, <code>LT</code>, <code>EQUALS</code>).</li>
+      <h3>Instrucciones utilizadas en las operaciones lógicas</h3>
+      <p>
+        Se utilizaron las siguientes instrucciones para la implementacion del operador NOT:
+      </p>
+
+      <ul>
+        <li>
+          <b><code>test</code></b>: realiza una operación <b>AND bit a bit</b> entre dos operandos, pero <b>no guarda el resultado</b>; 
+          solo <b>actualiza los flags</b> (por ejemplo: Zero Flag).  
+          <br>En el compilador se usa comúnmente como <code>test %rax, %rax</code> para verificar si el contenido de <code>%rax</code> es cero, 
+          ya que el resultado del AND será 0 si y solo si el valor era 0.
+        </li>
+
+        <li>
+          <b><code>setz</code></b>: coloca el valor <b>1</b> en el operando de destino si el <b>Zero Flag</b> está activo (es decir, si el resultado de la operación anterior fue cero),
+          y <b>0</b> en caso contrario.  
+          <br>Esta instrucción permite implementar el operador lógico <b>NOT</b>, convirtiendo una condición falsa (0) en verdadera (1), y viceversa.
+        </li>
+
+        <li>
+          <b><code>movzb</code></b>: copia un valor de 8 bits a un registro de 64 bits, completando los bits superiores con ceros.  
+          <br>Se utiliza luego de <code>setz</code> para mover el resultado booleano (almacenado como un solo byte) a un registro completo, 
+          por ejemplo:
+          <pre><code>
+          test %rax, %rax
+          setz %al
+          movzb %al, %rax
+          </code></pre>
+          De esta forma, <code>%rax</code> contendrá 0 o 1, representando el valor booleano final.
+        </li>
+      </ul>
+
+    </ul>
+
+    <h2>Herramientas de prueba</h2>
+    <p>
+      Para probar el código assembler generado se utilizó un contenedor Docker basado en Ubuntu x86-64, 
+      con las herramientas <code>gcc</code> y <code>as</code> preinstaladas.  
+      Esto permite compilar y ejecutar programas directamente desde MacOS sin depender del entorno nativo ARM64.
+    </p>
+  </main>
+
+  <footer>
     <a href="index.html">← Volver al índice</a>
-    </footer>
+  </footer>
 </body>
-</html>     
+</html>
