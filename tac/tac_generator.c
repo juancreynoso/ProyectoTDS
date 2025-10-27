@@ -358,19 +358,31 @@ operand generate_tac_from_expression(node* root, instruction_list **list) {
                 Node_C_List* param_cursor = root->info->METH_CALL.c_params->head;
                 int param_index = 0;
 
+                operand_list* op_list = NULL;
+                operand param_value;
+
                 while (param_cursor != NULL) {
-                    operand param_value = generate_tac_from_expression(param_cursor->p, list);
-                    
+                    param_value = generate_tac_from_expression(param_cursor->p, list);
+
+                    insert_operand(&op_list, param_value);
+                    param_cursor = param_cursor->next;                    
+                }
+
+                operand_node* cursor = op_list->head;
+
+                while (cursor != NULL) { 
                     instruction i_param;
                     i_param.type = LOAD;
-                    i_param.op1 = param_value;
+                    i_param.op1 = cursor->op;
                     i_param.op2.info = malloc(sizeof(union type)); // para guardar el indice
                     i_param.op2.info->INT.value = param_index++;   // usar index en assembler
                     insert_instruction(list, i_param);
                     
-                    param_cursor = param_cursor->next;
+                    cursor = cursor->next;
                 }
+
             }
+
             operand temp; // Temp para el resultado del metodo
             temp.class = OPE_TEMP;
             temp.name = new_temp();
@@ -419,6 +431,33 @@ void insert_instruction(instruction_list** list, instruction i) {
 
     (*list)->size++;
 }
+
+/**
+ * Funcion que inserta un operador en una lista de operadores
+ * @param list Lista de operadores.
+ * @param i Nuevo operadores.
+ */
+void insert_operand(operand_list** list, operand op) {
+    operand_node* new_op = malloc(sizeof(operand_node));
+
+    new_op->op = op;
+    new_op->next = NULL;
+
+    
+    if ((*list) == NULL) {
+        (*list) = malloc(sizeof(operand_list));
+        (*list)->head = new_op;
+    } else {
+        operand_node* temp = (*list)->head;
+        while (temp->next != NULL) {
+            temp = temp->next;
+        }
+        temp->next = new_op;
+    }
+
+    (*list)->size++;
+}
+
 
 /**
  * Devuelve una lista de instrucciones inicializada.

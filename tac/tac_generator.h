@@ -75,6 +75,18 @@ typedef struct instruction_list {
     int size;
 } instruction_list;
 
+/* Nodo de la lista de operando */
+typedef struct operand_node {
+    operand op;
+    struct operand_node* next;
+} operand_node;
+
+/* Lista de operandos */
+typedef struct operand_list {
+    operand_node* head;
+    int size;
+} operand_list;
+
 /* Funciones necesarias para crear nuevos temporales y labels */
 char* new_temp();
 char* new_label();
@@ -87,6 +99,9 @@ operand generate_tac_from_expression(node* root, instruction_list **list);
 /* Funciones para manipular la lista de instrucciones */
 instruction_list* init_instruction_list();
 void insert_instruction(instruction_list** list, instruction i);
+
+/* Funciones para manipular la lista de operandos */
+void insert_operand(operand_list** list, operand i);
 
 /* Funciones para mostrar y guardar las instrucciones en un formato mas legible */
 void save_instruction_list(instruction_list* list, FILE* tac_out);
