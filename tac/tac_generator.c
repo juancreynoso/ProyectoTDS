@@ -67,6 +67,7 @@ void generate_tac_from_ast(node* root, instruction_list **list) {
 
             if (root->info->METH_DECL.f_params != NULL) {
                 Node_P_List* param_cursor = root->info->METH_DECL.f_params->head;
+                int param_index = 0;
                 while (param_cursor != NULL) {
                     operand param;
                     param.info = malloc(sizeof(union type));
@@ -75,10 +76,12 @@ void generate_tac_from_ast(node* root, instruction_list **list) {
                     param.info->ID.name = param_cursor->p.name;
                     param.info->ID.type = param_cursor->p.type;
                     param.info->ID.offset = param_cursor->p.offset;
-
+                    
                     instruction i_param;
                     i_param.type = PARAM;
                     i_param.op1 = param;
+                    i_param.op2.info = malloc(sizeof(union type)); // para guardar el indice
+                    i_param.op2.info->INT.value = param_index++;   // usar index en assembler
                     insert_instruction(list, i_param);
                     
                     param_cursor = param_cursor->next;
