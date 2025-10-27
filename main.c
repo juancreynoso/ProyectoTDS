@@ -189,7 +189,7 @@ int main(int argc, char *argv[]) {
                 FILE *parser_out = fopen("outputs/output.sint", "w");
                 FILE *semantic_out = fopen("outputs/output.sem", "w");
                 FILE *tac_out = fopen("outputs/output.ci", "w");
-                FILE *ass_out = fopen("outputs/output.ass", "w");
+                FILE *ass_out = fopen("outputs/output.s", "w");
 
                 set_file(lex_out);
                 
@@ -227,7 +227,7 @@ int main(int argc, char *argv[]) {
             FILE *parser_out = fopen("outputs/output.sint", "w"); 
             FILE *semantic_out = fopen("outputs/output.sem", "w");
             FILE *tac_out = fopen("outputs/output.ci", "w");
-            FILE *ass_out = fopen("outputs/output.ass", "w");
+            FILE *ass_out = fopen("outputs/output.s", "w");
             
             set_file(lex_out);
 
