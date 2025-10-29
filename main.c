@@ -6,7 +6,7 @@
 #include "tac_generator.h"
 #include "set_offsets.h"
 #include "assembler_generator.h"
-#include "opt/constants_propagation.h"
+#include "opt/optimizations.h"
 
 int yyparse(void);
 void set_file(FILE *out);
