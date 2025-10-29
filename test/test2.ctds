@@ -1,15 +1,11 @@
 Program {
-    /* this is 
-    a multi line 
-    comment
-    */
-
-    integer print() extern;
-
-    void main(){
-        integer i_1 = 4;
-        while (i == 0) {
-            i = i - 1;
+    integer main(){
+        integer x = 1;
+        while (true)  {
+            return 1;
+            return x;
         }
+        return x + 2;
+        return 3 + 2;
     }
 }

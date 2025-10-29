@@ -81,6 +81,7 @@ node* remove_dead_code(node* root) {
     }
 
     if (root->type == NODE_INFO && root->left->type == NODE_RET) {
+        printf("info: %s \n", root->info->NODE_INFO.info);
         delete_subtree(root->right);
         root->right = NULL;
     }

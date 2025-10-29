@@ -5,6 +5,7 @@
 /* Contadores de temporales y labels */
 static int temp_count = 0;
 static int label_count = 0;
+static char* ret_label;
 
 /**
  * Genera un nuevo temporal.
@@ -88,11 +89,19 @@ void generate_tac_from_ast(node* root, instruction_list **list) {
                 }
             }
 
+            // Se genera label para el retorno
+            ret_label = new_label();
+
             generate_tac_from_ast(root->left, list); // Entro al bloque
+            
+            operand ret_op;
+            ret_op.class = OPE_LABEL;
+            ret_op.name = ret_label;
 
             instruction end_func;
             end_func.type = FFUNC;           
             end_func.op1 = op1;
+            end_func.op2 = ret_op;
             insert_instruction(list, end_func);
             }
             break;
@@ -252,12 +261,19 @@ void generate_tac_from_ast(node* root, instruction_list **list) {
         }
             
         case NODE_RET: {
-            operand t1 = generate_tac_from_expression(root->left, list);
             instruction i;
             i.type = RET;
-            i.op1 = t1;
+            operand t1;
+            operand final_lbl;
+            final_lbl.name = ret_label;
+            if (root->left != NULL) {
+                t1 = generate_tac_from_expression(root->left, list); 
+            } else {
+                t1.info = NULL;
+            }
+            i.op1 = t1;  
+            i.op2 = final_lbl; 
             insert_instruction(list, i);
-
             break;
         }
 

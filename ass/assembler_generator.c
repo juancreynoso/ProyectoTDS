@@ -2,6 +2,7 @@
 #include <string.h>
 #include "assembler_generator.h"
 
+static int final_ret = 0;
 
 /**
  * Funcion que se encarga de traducir cada instruccion en tres direcciones a codigo assembler.
@@ -20,6 +21,11 @@ void ass_gen(instruction_list* list, FILE* ass_out) {
     char* text_ptr = text_segment;
 
     while(cursor){
+        if (cursor->next != NULL) {
+            if (cursor->next->i.type == FFUNC) {
+                final_ret = 1;
+            }
+        }
         instruction_to_assembler(cursor->i, &data_ptr, &text_ptr);
         cursor = cursor->next;
     }
@@ -47,6 +53,7 @@ void instruction_to_assembler(instruction i, char** data_ptr, char** text_ptr){
             *text_ptr += sprintf(*text_ptr, "    enter  $%d, $0\n", frame_size);
             break;
         case FFUNC:
+            *text_ptr += sprintf(*text_ptr, ".%s:\n", i.op2.name); 
             *text_ptr += sprintf(*text_ptr, "    leave\n"); 
             *text_ptr+= sprintf(*text_ptr, "    ret\n");
             break;
@@ -481,26 +488,32 @@ void instruction_to_assembler(instruction i, char** data_ptr, char** text_ptr){
         }
         case RET: {
             int offset;
-            if (i.op1.class == OPE_VAR_USE){
-                if (i.op1.info->ID.is_glbl == 1) {
-                    *text_ptr += sprintf(*text_ptr, "    mov %s(%%rip), %%rax\n", i.op1.info->ID.name);
-                    break;
-                } else {
-                    offset = i.op1.info->ID.offset;
-                }
-            } else if (i.op1.class == OPE_TEMP) {
-                offset = i.op1.info->OP.offset;
-            } else if (i.op1.class == OPE_NUM){
-               offset = i.op1.info->INT.value; 
-               *text_ptr += sprintf(*text_ptr, "    mov $%d, %%rax\n", offset);
-               break;
-            } else {
-               offset = i.op1.info->BOOL.value; 
-               *text_ptr += sprintf(*text_ptr, "    mov $%d, %%rax\n", offset);
-               break;                
-            }
-            *text_ptr += sprintf(*text_ptr, "    mov %d(%%rbp), %%rax\n", offset);
 
+            if (i.op1.info != NULL) {
+                if (i.op1.class == OPE_VAR_USE){
+                    if (i.op1.info->ID.is_glbl == 1) {
+                        *text_ptr += sprintf(*text_ptr, "    mov %s(%%rip), %%rax\n", i.op1.info->ID.name);
+                    } else {
+                        offset = i.op1.info->ID.offset;
+                        *text_ptr += sprintf(*text_ptr, "    mov %d(%%rbp), %%rax\n", offset);
+                    }
+                } else if (i.op1.class == OPE_TEMP) {
+                    offset = i.op1.info->OP.offset;
+                    *text_ptr += sprintf(*text_ptr, "    mov %d(%%rbp), %%rax\n", offset);
+                } else if (i.op1.class == OPE_NUM){
+                    offset = i.op1.info->INT.value; 
+                    *text_ptr += sprintf(*text_ptr, "    mov $%d, %%rax\n", offset);
+                } else {
+                    offset = i.op1.info->BOOL.value; 
+                    *text_ptr += sprintf(*text_ptr, "    mov $%d, %%rax\n", offset);                
+                }
+
+                if (final_ret == 1) {
+                        final_ret = 0;
+                } else {
+                        *text_ptr += sprintf(*text_ptr, "    jmp .%s\n", i.op2.name);
+                }                
+            }
             break; 
         }   
         case IF_COND:
