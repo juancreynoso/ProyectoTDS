@@ -6,6 +6,7 @@
 #include "tac_generator.h"
 #include "set_offsets.h"
 #include "assembler_generator.h"
+#include "opt/constants_propagation.h"
 
 int yyparse(void);
 void set_file(FILE *out);
@@ -195,6 +196,7 @@ int main(int argc, char *argv[]) {
                 
                 if (yyparse() == 0) {
                     printf("Parseado correctamente, sin errores sintactico.\n");
+                    optimize_constants(root);
                     save_ast(root, 0, parser_out);
                     printf("Realizando analisis semantico...\n");
                     set_offsets(root);
@@ -237,6 +239,7 @@ int main(int argc, char *argv[]) {
             if (yyparse() == 0) {
                 printf("Parseado correctamente, sin errores sintactico.\n");
                 save_ast(root, 0, parser_out);
+                optimize_constants(root);
                 set_offsets(root);
                 analyze_semantics(root, semantic_out);
                 instruction_list* list = tac_code(root, tac_out);

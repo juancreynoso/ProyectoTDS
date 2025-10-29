@@ -6,8 +6,8 @@ CFLAGS = -Wall -g -I. -Iast -Ist -Isintax -Ilexer -Isemantic -Itac -Iass -Icompi
 BISON = bison -v -d
 FLEX = flex
 
-SRC_DIRS = sintax lexer ast semantic compile tac
-OBJS = sintax/sintax.tab.o lexer/lex.yy.o ast/ast.o ast/set_offsets.o main.o semantic/semantic_analyzer.o semantic/type_check.o semantic/symbol_table.o common.o ast/param_list.o tac/tac_generator.o ass/assembler_generator.o
+SRC_DIRS = sintax lexer ast semantic compile tac opt
+OBJS = sintax/sintax.tab.o lexer/lex.yy.o ast/ast.o ast/set_offsets.o main.o semantic/semantic_analyzer.o semantic/type_check.o semantic/symbol_table.o common.o ast/param_list.o tac/tac_generator.o ass/assembler_generator.o opt/constants_propagation.o
 TARGET = c-tds
 
 # Carpeta de archivos de salida
@@ -68,6 +68,9 @@ tac/tac_generator.o: tac/tac_generator.c tac/tac_generator.h
 	${CC} ${CFLAGS} -c -o $@ $<
 
 ass/assembler_generator.o: ass/assembler_generator.c ass/assembler_generator.h
+	${CC} ${CFLAGS} -c -o $@ $<
+
+opt/constants_propagation.o: opt/constants_propagation.c opt/constants_propagation.h
 	${CC} ${CFLAGS} -c -o $@ $<
 	
 main.o: main.c
