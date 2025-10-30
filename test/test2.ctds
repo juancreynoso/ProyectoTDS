@@ -1,11 +1,23 @@
 Program {
+    integer sum(){
+        return 1;
+        return 2;
+    }
+
     integer main(){
         integer x = 1;
         while (true)  {
-            return 1;
+            return 7;
             return x;
         }
-        return x + 2;
-        return 3 + 2;
+        if (true) then {
+            return x + 2;
+            return 3 + 2;
+        }
+
+        {
+            return x + 12;
+            return 23 + 2;
+        }
     }
 }

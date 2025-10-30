@@ -75,21 +75,29 @@ node* optimize_constants(node* root) {
     return root;
 }
 
-node* remove_dead_code(node* root) {
+void remove_dead_code(node* root) {
     if (root == NULL) {
-        return NULL;
+        return;
     }
 
     if (root->type == NODE_INFO && root->left->type == NODE_RET) {
-        printf("info: %s \n", root->info->NODE_INFO.info);
         delete_subtree(root->right);
         root->right = NULL;
+    } 
+
+    switch(root->type) {
+        case NODE_IF_ELSE:
+            remove_dead_code(root->info->IF_ELSE.if_block);
+            remove_dead_code(root->info->IF_ELSE.else_block);
+            break;
+        case NODE_WHILE:
+            remove_dead_code(root->info->WHILE.block);
+            break;
+        default:
+            remove_dead_code(root->left);
+            remove_dead_code(root->right);
+            break;
     }
-
-    root->left = remove_dead_code(root->left);
-    root->right = remove_dead_code(root->right);
-
-    return root;
 }
 
 void run_optimization(node* root) {
