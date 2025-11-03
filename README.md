@@ -14,7 +14,7 @@ Este proyecto implementa un mini compilador para un lenguaje de programación qu
     Rama: `cod-inter`
 
 - **Cuarta entrega**  
-    Rama: `assembler`
+    Rama: `object-code`
 
 ## Características
 
