@@ -195,7 +195,13 @@ void instruction_to_assembler(instruction i, char** data_ptr, char** text_ptr){
             *text_ptr += sprintf(*text_ptr, "    xor %%rdx, %%rdx\n");
 
             if ( i.op2.class == OPE_NUM ) {
-                *text_ptr += sprintf(*text_ptr, "    mov $%d, %%r10\n", i.op2.info->INT.value);
+                if (i.op2.info->INT.value == 2) {
+                    *text_ptr += sprintf(*text_ptr, "    sar $1, %%rax\n");
+                    *text_ptr += sprintf(*text_ptr, "    mov %%rax, %d(%%rbp)\n", i.result.info->OP.offset);
+                    break;
+                } else {
+                    *text_ptr += sprintf(*text_ptr, "    mov $%d, %%r10\n", i.op2.info->INT.value);
+                 }
             } else if ( i.op2.class == OPE_TEMP) {
                 *text_ptr += sprintf(*text_ptr, "    mov %d(%%rbp), %%r10\n", i.op2.info->OP.offset);
             } else if (i.op2.class == OPE_VAR_USE) {
