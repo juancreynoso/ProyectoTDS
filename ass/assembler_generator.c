@@ -193,7 +193,7 @@ void instruction_to_assembler(instruction i, char** data_ptr, char** text_ptr){
             }
 
             *text_ptr += sprintf(*text_ptr, "    xor %%rdx, %%rdx\n");
-
+            *text_ptr += sprintf(*text_ptr, "    cqto\n");
             if ( i.op2.class == OPE_NUM ) {
                 if (i.op2.info->INT.value == 2) {
                     *text_ptr += sprintf(*text_ptr, "    sar $1, %%rax\n");
