@@ -6,6 +6,9 @@ node* optimize_constants(node* root) {
         return NULL;
     }
 
+    root->left = optimize_constants(root->left);
+    root->right = optimize_constants(root->right);
+
     if (root->type == NODE_OP && root->left && root->right)  {
         if (root->left->type == NODE_NUM && root->right->type == NODE_NUM) {
             int a = root->left->info->INT.value;
@@ -68,9 +71,6 @@ node* optimize_constants(node* root) {
             return new_node;
         }
     }
-
-    root->left = optimize_constants(root->left);
-    root->right = optimize_constants(root->right);
     
     return root;
 }
