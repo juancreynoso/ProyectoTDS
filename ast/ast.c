@@ -206,7 +206,7 @@ void print_node(node *root, int level, FILE* parser_out) {
             switch (root->info->OP.name) {
             case OP_GT: fprintf(parser_out, ">\n"); break;
             case OP_LT: fprintf(parser_out, "<\n"); break;                                
-            case OP_PLUS: fprintf(parser_out, "+ offset %d\n",  root->info->OP.offset); break;
+            case OP_PLUS: fprintf(parser_out, "+\n"); break;
             case OP_SUB: fprintf(parser_out, "-\n"); break;
             case OP_MULT: fprintf(parser_out, "*\n"); break;
             case OP_DIV: fprintf(parser_out, "/\n"); break;
@@ -227,10 +227,10 @@ void print_node(node *root, int level, FILE* parser_out) {
                 case TYPE_BOOL: fprintf(parser_out, "bool "); break;
                 case NONE: fprintf(parser_out, "none "); break;
             }
-            fprintf(parser_out, "%s offset %d\n", root->info->ID.name ? root->info->ID.name : "NULL", root->info->ID.offset);
+            fprintf(parser_out, "%s\n", root->info->ID.name ? root->info->ID.name : "NULL");
             break;
         case NODE_ID_USE:
-            fprintf(parser_out, "%s offset %d\n", root->info->ID.name ? root->info->ID.name : "NULL", root->info->ID.offset);
+            fprintf(parser_out, "%s\n", root->info->ID.name ? root->info->ID.name : "NULL");
             break;
         case NODE_DECL_METH:
             if (root->info->METH_DECL.is_extern  == 1) {
@@ -250,12 +250,11 @@ void print_node(node *root, int level, FILE* parser_out) {
                     fprintf(parser_out, "%s", root->info->METH_DECL.name);
                     break;
             }
-            fprintf(parser_out, "%s size: %d \n ", list_to_string(root->info->METH_DECL.f_params), root->info->METH_DECL.f_params ? root->info->METH_DECL.f_params->size : 0 );      
+            fprintf(parser_out, "%s \n ", list_to_string(root->info->METH_DECL.f_params));      
             break;
         case NODE_CALL_METH:
             fprintf(parser_out, " %s",root->info->METH_CALL.name);
             print_c_params(root->info->METH_CALL.c_params, parser_out);
-            fprintf(parser_out, " size: %d", root->info->METH_CALL.c_params ? root->info->METH_CALL.c_params->size : 0 );
             fprintf(parser_out, "\n");
             break;
         case NODE_IF_ELSE:

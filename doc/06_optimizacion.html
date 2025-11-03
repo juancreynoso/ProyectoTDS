@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Optimización</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header>
+    <h1>Optimización</h1>
+    <nav>
+      <ul>
+        <li><a href="index.html">Inicio</a></li>
+        <li><a href="01_analisis_lexico.html">Análisis Léxico</a></li>
+        <li><a href="02_analisis_sintactico.html">Análisis Sintáctico</a></li>
+        <li><a href="03_analisis_semantico.html">Análisis Semántico</a></li>
+        <li><a href="04_codigo_intermedio.html">Generación de Código Intermedio</a></li>
+        <li><a href="05_codigo_objeto.html">Generación de Código Assembler</a></li>
+        <li><a href="06_optimizacion.html">Optimización</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <h2>Descripción</h2> 
+    <p>En esta etapa se aplicaron una serie de optimizaciones en distintas etapas para producir un codigo de mejor calidad y mas eficiente</p>
+
+    <h2>Optimizaciones generadas</h2>
+    <h3>Propagación de constantes</h3>
+    <p>
+      Esta optimización consiste en reemplazar expresiones compuestas por constantes, por el valor que denotan. De esta manera, expresiones como <code>x = 5 * 5</code> 
+      se simplifican directamente a <code>x = 25</code>, reduciendo la carga de cálculos en tiempo de ejecución. Además, al propagarse estas constantes a lo largo del 
+      árbol sintáctico abstracto (AST), este ultimo puede simplificarse y por ende resultara un codigo mas liviano y simple.
+    </p>
+
+    <h4>Por ejemplo, teniendo el siguiente programa:</h4>
+
+    <pre>
+    Program
+    {
+      integer main() {
+          integer x = 10 + 7 + 1 + ((10 * 10)/ 10);
+          return x;
+      }
+    }
+    </pre>
+            
+    <h4>Sin aplicar la optimización:</h4>
+
+    <pre>
+      Program
+        decl
+            int main() size: 0 
+                block 
+                  decl
+                    =
+                        int x
+                        +
+                          +
+                              +
+                                10
+                                7
+                              1
+                          /
+                              *
+                                10
+                                10
+                              10
+                  stmt
+                    ret 
+                        x
+    </pre>
+
+    <h4>Aplicando la optimización:</h4>
+
+    <pre>
+      Program
+        decl
+            int main() size: 0 
+                block 
+                  decl
+                    =
+                        int x
+                        28
+                  stmt
+                    ret 
+                        x        
+    </pre>
+
+    <h3>Codigo muerto</h3>
+    <p>
+      Esta optimización consiste en <b>NO</b> generar codigo para aquellas sentencias que siguen a una sentencia <b>return</b>, ya que no seran ejecutadas. Esto resulta en un 
+      codigo mas simple y un poco mas eficiente.
+    </p>
+
+    <h4>Por ejemplo, teniendo el siguiente programa:</h4>
+
+    <pre>
+    Program
+    {
+        integer main() {
+            integer x = 10 + 9;
+            return x;
+            x = 10;
+            if (x < 10) then {
+                x = 10;
+            } else {
+                x = 20;
+            }
+            return x;
+        }
+    }
+    </pre>
+
+    <h4>Sin aplicar la optimización:</h4>
+
+    <pre>
+    Program
+      decl
+          int main() 
+              block 
+                decl
+                  =
+                      int x
+                      +
+                        10
+                        9
+                stmt
+                  ret 
+                      x
+                  stmt
+                      =
+                        x
+                        10
+                      stmt
+                        if 
+                            <
+                              x
+                              10
+                            block 
+                              stmt
+                                  =
+                                    x
+                                    10
+                            block 
+                              stmt
+                                  =
+                                    x
+                                    20
+                        stmt
+                            ret 
+                           x
+    </pre>
+
+    <h4>Aplicando la optimización:</h4>
+
+    <pre>
+    Program
+      decl
+          int main() 
+              block 
+                decl
+                  =
+                      int x
+                      19
+                stmt
+                  ret 
+                      x
+    </pre>
+
+    <p>
+      <b>Nota:</b> es importante destacar que, por una decisión de diseño, la optimización de código muerto se aplica únicamente dentro de un mismo bloque. 
+      Es decir, no se considera cómo pueden afectar sentencias <code>return</code> dentro de un bloque, al código siguiente al mismo. Para realizar un análisis más detallado,
+      sería necesario contar con una estructura más compleja, como un grafo de control de flujo.
+    </p>
+
+    <h3>Division por constante "2"</h3>
+
+    <p>
+      Esta optimización se basa en que, cuando tenemos una division por la constante entera <b>2</b>, se utiliza la instruccion de <b>shift</b>, en lugar de usar la instruccion <b>idiv</b> por ejemplo. Basicamente hay un cambio
+      en el codigo assembler que se genera. Hacer este cambio resulta en un codigo mas eficiente y simple.
+    </p>
+
+    <h4>Por ejemplo, teniendo el siguiente programa:</h4>
+    <pre>
+    Program
+    {
+        void main() {
+            integer x = 10/2;
+        }
+    }
+
+    </pre>
+
+    <h4>Sin aplicar la optimización:</h4>
+
+    <pre>
+    .data
+
+    .text
+    .globl main
+    main: 
+        enter  $16, $0
+        mov $10, %r10
+        mov %r10, -8(%rbp)
+        mov -8(%rbp), %rax
+        xor %rdx, %rdx
+        cqto
+        mov $2, %r10
+        idiv %r10
+        mov %rax, -16(%rbp)
+        mov -16(%rbp), %r10
+        mov %r10, -8(%rbp)
+    .L0:
+        leave
+        ret
+      
+    </pre>
+    
+    <h4>Aplicando la optimización:</h4>
+
+    <pre>
+    .data
+
+    .text
+    .globl main
+    main: 
+        enter  $16, $0
+        mov $10, %rax
+        xor %rdx, %rdx
+        cqto
+        sar $1, %rax
+        mov %rax, -8(%rbp)
+        mov -8(%rbp), %r10
+        mov %r10, -16(%rbp)
+    .L0:
+        leave
+        ret
+      
+    </pre>    
+
+    <h3>Asignacion de offsets</h3>
+    <h2>Division de trabajo</h2>
+
+  </main>
+
+  <footer>
+    <a href="index.html">← Volver al índice</a>
+  </footer>
+</body>
+</html>
