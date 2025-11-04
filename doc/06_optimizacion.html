@@ -174,7 +174,7 @@
       sería necesario contar con una estructura más compleja, como un grafo de control de flujo.
     </p>
 
-    <h3>Division por constante "2"</h3>
+    <h3>División por constante "2"</h3>
 
     <p>
       Esta optimización se basa en que, cuando tenemos una division por la constante entera <b>2</b>, se utiliza la instruccion de <b>shift</b>, en lugar de usar la instruccion <b>idiv</b> por ejemplo. Basicamente hay un cambio
@@ -239,8 +239,104 @@
       
     </pre>    
 
-    <h3>Asignacion de offsets</h3>
-    <h2>Division de trabajo</h2>
+    <h3>Reasignación de offsets</h3>
+    <p>
+      Además de las optimizaciones anteriores, se implementó una optimización de <b>memoria</b>. 
+      En lugar de asignar un nuevo offset cada vez que se crea un temporal (decrementando 8 bytes continuamente), 
+      el compilador detecta cuándo un temporal ya no se utiliza y guarda su offset en una lista de offsets libres.
+      Luego, al necesitar asignar un nuevo temporal, se reutiliza el primer offset disponible. 
+      Si no hay offsets libres, se continúa con la asignación normal.
+    </p>
+
+    <h4>Por ejemplo, teniendo el siguiente programa:</h4>
+    <pre>
+    Program {
+        integer print(integer a) extern;
+
+        integer main() {
+            integer y = 1;
+            integer x = 0;
+            x = y + 3;
+            y = x * 2;
+
+            print(y);
+            return y;
+        }
+    }
+    </pre>
+
+    <h4>Sin aplicar la optimización:</h4>
+
+    <pre>
+    .data
+
+    .text
+    .globl main
+    main: 
+        enter  $40, $0
+        mov $1, %r10
+        mov %r10, -8(%rbp)
+        mov $0, %r10
+        mov %r10, -16(%rbp)
+        mov -8(%rbp), %r10
+        add $3, %r10
+        mov %r10, -24(%rbp)
+        mov -24(%rbp), %r10
+        mov %r10, -16(%rbp)
+        mov -16(%rbp), %r10
+        imul $2, %r10
+        mov %r10, -32(%rbp)
+        mov -32(%rbp), %r10
+        mov %r10, -8(%rbp)
+        mov -8(%rbp), %rdi
+        call print
+        mov %rax, -40(%rbp)
+        mov -8(%rbp), %rax
+    .L0:
+        leave
+        ret
+    </pre>
+
+    <h4>Aplicando optimización:</h4>
+    <pre>
+      .data
+
+    .text
+    .globl main
+    main: 
+        enter  $24, $0
+        mov $1, %r10
+        mov %r10, -8(%rbp)
+        mov $0, %r10
+        mov %r10, -16(%rbp)
+        mov -8(%rbp), %r10
+        add $3, %r10
+        mov %r10, -24(%rbp)
+        mov -24(%rbp), %r10
+        mov %r10, -16(%rbp)
+        mov -16(%rbp), %r10
+        imul $2, %r10
+        mov %r10, -24(%rbp)
+        mov -24(%rbp), %r10
+        mov %r10, -8(%rbp)
+        mov -8(%rbp), %rdi
+        call print
+        mov %rax, -24(%rbp)
+        mov -8(%rbp), %rax
+    .L0:
+        leave
+        ret
+    </pre>
+    <p>
+      Observando los ejemplos anteriores, se aprecia cómo los offsets se reutilizan para distintos temporales 
+      y cómo la instrucción <code>enter</code> reserva un espacio de pila menor, evidenciando un uso de memoria más eficiente.
+    </p>
+    <h2>División de trabajo</h2>
+      <p>
+        Se implementaron cuatro optimizaciones en total. Cada integrante del equipo desarrolló dos de ellas:  
+        por un lado, la <b>eliminación de código muerto</b> y la <b>división por constante 2</b>;  
+        por el otro, la <b>propagación de constantes</b> y la <b>reutilización de offsets</b>.
+      </p>
 
   </main>
 
