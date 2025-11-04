@@ -1,13 +1,16 @@
 Program
-{   
-    integer main(){
-        integer z = 1 + 4;
-        integer x = 1;
-        integer t = z;
+{
+    integer inc(integer x) {
+        return x + 1;
+    }
 
-        while (false) {
-            x = x + 1;
-        }
+    integer sum (integer a, integer b) {
+        return a+b;
+    }
+
+    integer main() {
+        integer x = 0;
+        x = sum(inc(3),inc(1));
         return x;
     }
 }

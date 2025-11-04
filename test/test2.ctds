@@ -1,23 +1,14 @@
-Program {
-    integer sum(){
-        return 1;
-        return 2;
-    }
+Program
+{
+    integer print(integer a) extern;
 
-    integer main(){
-        integer x = 1;
-        while (true)  {
-            return 7;
-            return x;
-        }
-        if (true) then {
-            return x + 2;
-            return 3 + 2;
-        }
+    integer main() {
+        integer y = 1;
+        integer x = 0;
+        x = y + 3;
+        y = x * 2;
 
-        {
-            return x + 12;
-            return 23 + 2;
-        }
+        print(y);
+        return y;
     }
 }

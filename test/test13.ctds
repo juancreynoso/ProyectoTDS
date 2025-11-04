@@ -1,0 +1,8 @@
+Program {
+    void print(integer n) extern;
+    integer get_int() extern;
+    void main() {
+        integer x = get_int();
+        print(x);
+    }
+}

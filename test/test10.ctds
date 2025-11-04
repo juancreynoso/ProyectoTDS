@@ -1,21 +1,20 @@
 // While correcto con variable booleana
 
 Program {
-    integer sum(integer a, integer b, bool c, bool d, bool e, bool f, bool g) {
-        integer x = a + b;
+    integer sum(integer a, integer b, integer c, integer d, integer e, integer f, integer g) {
+        integer x = a * b;
         integer j = 1;
-        return x;
+        return x + g;
     }
-    integer x = 1;
     integer main() {
+        integer x = 1;
         integer i = 0;
-        bool a = true;
-        bool b = true;
-        bool c = true;
-        bool d = true;
-        bool e = true;
+        integer a = 0;
+        integer b = 0;
+        integer c = 0;
+        integer d = 0;
         
-        i = sum(i, x, a, b, c, d, e);
-        return 3;
+        i = sum(i, x, a, b, c, d, 4);
+        return i;
     }
 }

@@ -1,0 +1,15 @@
+Program {
+    integer x = 10;
+
+    integer main() {
+        x = 1;
+        return x + 3;
+
+        x = 2;
+        if (x ==3)then {
+            x = 2;
+        }
+        return 2;
+    }
+    
+}

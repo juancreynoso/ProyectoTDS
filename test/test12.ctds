@@ -1,0 +1,20 @@
+Program
+{
+    integer fact(integer n) {
+        if (n == 0 || n == 1) then {
+            return 1;
+        } else {
+            if (n > 1) then {
+                return n * fact(n-1);
+            }
+        }
+    }
+    integer print(integer x) extern;
+
+    integer main() {
+        integer x = 5;
+        x = fact(x);
+        print(x);
+        return x;
+    }
+}
