@@ -1,6 +1,10 @@
 #include "optimizations.h"
 #include <stdlib.h>
 
+/**
+ * Recorre el AST y simplifica expresiones compuestas por constantes por el valor que denotan.
+ * @param root nodo raiz del AST.
+ */
 node* optimize_constants(node* root) {
     if (root == NULL) {
         return NULL;
@@ -75,6 +79,10 @@ node* optimize_constants(node* root) {
     return root;
 }
 
+/**
+ * Recorre el AST y elimina los subarboles que representan codigo siguiente a un return en el mismo bloque.
+ * @param root nodo raiz del AST.
+ */
 void remove_dead_code(node* root) {
     if (root == NULL) {
         return;
@@ -100,13 +108,20 @@ void remove_dead_code(node* root) {
     }
 }
 
+/**
+ * Funcion principal que se encarga de ejecutar las optimizaciones disponibles sobre el AST
+ * @param root Nodo raiz del AST.
+ */
 void run_optimization(node* root) {
     optimize_constants(root);
     remove_dead_code(root);
     return;
 }
 
-
+/**
+ * Se encarga de eliminar un sub arbol del AST.
+ * @param root Nodo raiz del sub arbol que se liberará.
+ */
 void delete_subtree(node* root) {
     if (root == NULL) {
         return;
