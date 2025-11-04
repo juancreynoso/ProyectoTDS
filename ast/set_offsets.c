@@ -4,6 +4,7 @@
 static int var_offset = 0;
 static int param_offset = 8;
 static int max_offset = 0;
+static offset_list *free_offsets = NULL;
 
 /**
  * Resetea los offsets
@@ -17,12 +18,19 @@ void reset_offsets(){
  * Genera un nuevo offset para una variable o temporal
  */
 int new_var_offset() {
-    var_offset -= 8;
+    print_offsets(free_offsets);
+    if (!is_empty(free_offsets)){
+        return get_offset(&free_offsets);
+    } else {
+        var_offset -= 8;
+    }
+    
     if (var_offset < max_offset) {
         max_offset = var_offset; 
     }
     return var_offset;
 }
+
 
 /**
  * Genera un nuevo offset para un parametro
@@ -59,8 +67,8 @@ void set_offsets(node* root) {
                 }
             }
             break;
-        case NODE_OP:
-            switch(root->info->OP.name) {
+        case NODE_OP: {
+            switch (root->info->OP.name) {
                 case OP_PLUS:
                 case OP_SUB:
                 case OP_MULT:
@@ -72,17 +80,44 @@ void set_offsets(node* root) {
                 case OP_EQUALS:
                 case OP_AND:
                 case OP_OR:
-                case OP_NOT:
+                case OP_NOT: {
+                    set_offsets(root->left);
+                    set_offsets(root->right);
+
                     root->info->OP.offset = new_var_offset();
-                    set_offsets(root->right);
-                    set_offsets(root->left);
+                    printf("Asigno offset a temporal (OP): %d\n", root->info->OP.offset);
+
+                    if (root->left && root->left->type == NODE_OP) {
+                        add_offset(&free_offsets, root->left->info->OP.offset);
+                        printf("Libero offset %d (temp izquierdo)\n", root->left->info->OP.offset);
+                    }
+                    if (root->right && root->right->type == NODE_OP) {
+                        add_offset(&free_offsets, root->right->info->OP.offset);
+                        printf("Libero offset %d (temp derecho)\n", root->right->info->OP.offset);
+                    }
+
                     break;
-                case OP_ASSIGN:
+                }
+                case OP_ASSIGN: {
                     set_offsets(root->right);
                     set_offsets(root->left);
+
+                    // Si se asigna un temporal se libera el offset
+                    if (root->right && root->right->type == NODE_OP) {
+                        add_offset(&free_offsets, root->right->info->OP.offset);
+                        printf("Libero offset %d por asignación\n", root->right->info->OP.offset);
+                    }
+                    break;
+                }
+                default:
+                    set_offsets(root->left);
+                    set_offsets(root->right);
                     break;
             }
             break;
+        }
+
+
         case NODE_IF_ELSE:
             set_offsets(root->info->IF_ELSE.expr);
             set_offsets(root->info->IF_ELSE.if_block);
@@ -146,4 +181,44 @@ void set_offsets_actual_params(node* root) {
             set_offsets_actual_params(root->right);
             break;
     }
+}
+
+
+// Inicializar lista vacia
+offset_list* init_offset_list() {
+    return NULL;
+}
+
+
+int is_empty(offset_list *list) {
+    return (list == NULL);
+}
+
+// Agrego un offset al inicio
+void add_offset(offset_list **list, int offset) {
+    offset_list *new_node = malloc(sizeof(offset_list));
+    new_node->info = offset;
+    new_node->next = *list;  // el nuevo apunta al anterior
+    *list = new_node;        // actualiza cabeza
+}
+
+int get_offset(offset_list **list) {
+    if (is_empty(*list)) {
+        fprintf(stderr, "Error: no hay offsets disponibles.\n");
+        exit(EXIT_FAILURE);
+    }
+    offset_list *temp = *list;
+    int res = temp->info;
+    *list = temp->next;
+    free(temp);
+    return res;
+}
+
+void print_offsets(offset_list *list) {
+    printf("Offsets libres: ");
+    while (list) {
+        printf("%d ", list->info);
+        list = list->next;
+    }
+    printf("\n");
 }
