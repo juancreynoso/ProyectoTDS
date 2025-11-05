@@ -83,6 +83,26 @@ void check_filename(char *filename, char *ext){
     return;
 }
 
+char* gen_output_file_name(char* filename) {
+
+    char* name = strrchr(filename, '/');
+    char result[128] = "";
+    char* ret = malloc(200);
+    if (name) {
+        name++;
+    } else {
+        name = filename;
+    }
+
+    strcat(result, "outputs/");
+    name = strtok(name, ".");
+    strcat(name, ".s");
+    strcat(result, name);
+    snprintf(ret, 128, "%s", result);
+    return ret;
+}
+
+
 /**
  * Funcion principal que ejecuta el compilador
  */
@@ -93,6 +113,8 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "%s", invalidCommandMessage(0));
         exit(EXIT_FAILURE);
     }
+
+    char* output_file_name;
 
     if (strcmp(argv[1], "-o") == 0) {
         printf("Renombre de archivo ejecutable a... \n");
@@ -155,6 +177,8 @@ int main(int argc, char *argv[]) {
             }
 
             check_filename(argv[3], "ctds");
+            output_file_name = gen_output_file_name(argv[3]);
+            printf("Archivo de salida: %s\n",output_file_name);
 
             yyin = input_file;
             yylineno = 1;
@@ -225,7 +249,7 @@ int main(int argc, char *argv[]) {
                 FILE *parser_out = fopen("outputs/output.sint", "w");
                 FILE *semantic_out = fopen("outputs/output.sem", "w");
                 FILE *tac_out = fopen("outputs/output.ci", "w");
-                FILE *ass_out = fopen("outputs/output.s", "w");
+                FILE *ass_out = fopen(output_file_name, "w");
 
                 set_file(lex_out);
                 
@@ -261,12 +285,14 @@ int main(int argc, char *argv[]) {
             }      
 
             check_filename(argv[1], "ctds");
+            output_file_name = gen_output_file_name(argv[1]);
+            printf("Archivo de salida: %s\n",output_file_name);
 
             FILE *lex_out = fopen("outputs/output.lex", "w");
             FILE *parser_out = fopen("outputs/output.sint", "w"); 
             FILE *semantic_out = fopen("outputs/output.sem", "w");
             FILE *tac_out = fopen("outputs/output.ci", "w");
-            FILE *ass_out = fopen("outputs/output.s", "w");
+            FILE *ass_out = fopen(output_file_name, "w");
             
             set_file(lex_out);
 
