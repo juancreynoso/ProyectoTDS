@@ -17,18 +17,26 @@ void reset_offsets(){
 /**
  * Genera un nuevo offset para una variable o temporal
  */
-int new_var_offset() {
-    print_offsets(free_offsets);
-    if (!is_empty(free_offsets)){
-        return get_offset(&free_offsets);
+int new_var_offset(int opt) {
+    if (opt == 1) {
+        if (!is_empty(free_offsets)){
+            return get_offset(&free_offsets);
+        } else {
+            var_offset -= 8;
+        }
+        
+        if (var_offset < max_offset) {
+            max_offset = var_offset; 
+        }
+        return var_offset;
     } else {
         var_offset -= 8;
+        
+        if (var_offset < max_offset) {
+            max_offset = var_offset; 
+        }
+        return var_offset;
     }
-    
-    if (var_offset < max_offset) {
-        max_offset = var_offset; 
-    }
-    return var_offset;
 }
 
 
@@ -48,21 +56,21 @@ int get_frame_size() {
  * Se encarga de asignar offsets tanto a variables, parametros y temporales, para la generacion de assembler.
  * @param root Nodo raiz del AST.
  */
-void set_offsets(node* root) {
+void set_offsets(node* root, int opt) {
     if (root == NULL) {
         return;
     }
 
     switch(root->type) {
         case NODE_DECL:
-            root->info->ID.offset = new_var_offset(); 
+            root->info->ID.offset = new_var_offset(opt); 
             break;
         case NODE_CALL_METH:
-            root->info->METH_CALL.offset = new_var_offset(); 
+            root->info->METH_CALL.offset = new_var_offset(opt); 
             if (root->info->METH_CALL.c_params != NULL) {
                 Node_C_List* cursor = root->info->METH_CALL.c_params->head;
                 while (cursor != NULL) {
-                    set_offsets_actual_params(cursor->p);
+                    set_offsets_actual_params(cursor->p, opt);
                     cursor = cursor->next;
                 }
             }
@@ -81,37 +89,33 @@ void set_offsets(node* root) {
                 case OP_AND:
                 case OP_OR:
                 case OP_NOT: {
-                    set_offsets(root->left);
-                    set_offsets(root->right);
+                    set_offsets(root->left, opt);
+                    set_offsets(root->right, opt);
 
-                    root->info->OP.offset = new_var_offset();
-                    printf("Asigno offset a temporal (OP): %d\n", root->info->OP.offset);
+                    root->info->OP.offset = new_var_offset(opt);
 
                     if (root->left && root->left->type == NODE_OP) {
                         add_offset(&free_offsets, root->left->info->OP.offset);
-                        printf("Libero offset %d (temp izquierdo)\n", root->left->info->OP.offset);
                     }
                     if (root->right && root->right->type == NODE_OP) {
                         add_offset(&free_offsets, root->right->info->OP.offset);
-                        printf("Libero offset %d (temp derecho)\n", root->right->info->OP.offset);
                     }
 
                     break;
                 }
                 case OP_ASSIGN: {
-                    set_offsets(root->right);
-                    set_offsets(root->left);
+                    set_offsets(root->right, opt);
+                    set_offsets(root->left, opt);
 
                     // Si se asigna un temporal se libera el offset
                     if (root->right && root->right->type == NODE_OP) {
                         add_offset(&free_offsets, root->right->info->OP.offset);
-                        printf("Libero offset %d por asignación\n", root->right->info->OP.offset);
                     }
                     break;
                 }
                 default:
-                    set_offsets(root->left);
-                    set_offsets(root->right);
+                    set_offsets(root->left, opt);
+                    set_offsets(root->right, opt);
                     break;
             }
             break;
@@ -119,19 +123,19 @@ void set_offsets(node* root) {
 
 
         case NODE_IF_ELSE:
-            set_offsets(root->info->IF_ELSE.expr);
-            set_offsets(root->info->IF_ELSE.if_block);
-            set_offsets(root->info->IF_ELSE.else_block);
+            set_offsets(root->info->IF_ELSE.expr, opt);
+            set_offsets(root->info->IF_ELSE.if_block, opt);
+            set_offsets(root->info->IF_ELSE.else_block, opt);
             break;
         case NODE_WHILE:
-            set_offsets(root->info->WHILE.block);
-            set_offsets(root->info->WHILE.expr);
+            set_offsets(root->info->WHILE.block, opt);
+            set_offsets(root->info->WHILE.expr, opt);
             break;
         case NODE_DECL_METH:
             reset_offsets();
             int count = 0;
             if (root->info->METH_DECL.f_params == NULL) {
-                set_offsets(root->left);
+                set_offsets(root->left, opt);
                 root->info->METH_DECL.frame_size = get_frame_size();
                 break;
             }
@@ -140,7 +144,7 @@ void set_offsets(node* root) {
             
             while (cursor != NULL) {
                 if (count < 6) {
-                    cursor->p.offset = new_var_offset();
+                    cursor->p.offset = new_var_offset(opt);
                     count++;
                 } else {
                     cursor->p.offset = new_param_offset();
@@ -148,14 +152,14 @@ void set_offsets(node* root) {
                 cursor = cursor->next;
             }
 
-            set_offsets(root->left);
+            set_offsets(root->left, opt);
 
 
             root->info->METH_DECL.frame_size = get_frame_size();
             break;
         default:
-            set_offsets(root->left);
-            set_offsets(root->right);
+            set_offsets(root->left, opt);
+            set_offsets(root->right, opt);
             break;
     }
 }
@@ -164,21 +168,21 @@ void set_offsets(node* root) {
  * Se encarga de asignar offsets a los sub arboles que representan parametros actuales.
  * @param root Nodo raiz del subarbol que representa una expresion.
  */
-void set_offsets_actual_params(node* root) {
+void set_offsets_actual_params(node* root, int opt) {
     if (root == NULL) {
         return ;
     }    
 
     switch(root->type){
         case NODE_OP:
-            root->info->OP.offset = new_var_offset();
+            root->info->OP.offset = new_var_offset(opt);
             break;
         case NODE_CALL_METH:
-            set_offsets(root);
+            set_offsets(root, opt);
             break;
         default:
-            set_offsets_actual_params(root->left);
-            set_offsets_actual_params(root->right);
+            set_offsets_actual_params(root->left, opt);
+            set_offsets_actual_params(root->right, opt);
             break;
     }
 }

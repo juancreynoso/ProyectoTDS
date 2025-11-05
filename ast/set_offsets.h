@@ -13,12 +13,12 @@ typedef struct offset_list {
 } offset_list;
 
 void reset_offsets();
-int new_var_offset();
+int new_var_offset(int opt);
 int new_param_offset();
 int get_frame_size();
 
-void set_offsets(node* root);
-void set_offsets_actual_params(node* root);
+void set_offsets(node* root, int opt);
+void set_offsets_actual_params(node* root, int opt);
 
 offset_list* init_offset_list();
 int is_empty(offset_list *list);
