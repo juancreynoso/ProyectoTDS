@@ -9,7 +9,7 @@ sintax.tab.h
 sintax.output
 lex.yy.c
 
-outputs/
+output/
 
 .vscode
 script

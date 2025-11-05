@@ -11,7 +11,7 @@ OBJS = sintax/sintax.tab.o lexer/lex.yy.o ast/ast.o ast/set_offsets.o main.o sem
 TARGET = c-tds
 
 # Carpeta de archivos de salida
-OUTDIR = outputs
+OUTDIR = output
 
 # Regla principal
 all: $(OUTDIR) $(TARGET) 

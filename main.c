@@ -94,7 +94,7 @@ char* gen_output_file_name(char* filename) {
         name = filename;
     }
 
-    strcat(result, "outputs/");
+    strcat(result, "output/");
     name = strtok(name, ".");
     strcat(name, ".s");
     strcat(result, name);
@@ -132,11 +132,11 @@ int main(int argc, char *argv[]) {
 
             check_filename(argv[2], "ctds");
 
-            FILE *lex_out = fopen("outputs/output.lex", "w");
-            FILE *parser_out = fopen("outputs/output.sint", "w"); 
-            FILE *semantic_out = fopen("outputs/output.sem", "w");
-            FILE *tac_out = fopen("outputs/output.ci", "w");
-            FILE *ass_out = fopen("outputs/output.s", "w");
+            FILE *lex_out = fopen("output/output.lex", "w");
+            FILE *parser_out = fopen("output/output.sint", "w"); 
+            FILE *semantic_out = fopen("output/output.sem", "w");
+            FILE *tac_out = fopen("output/output.ci", "w");
+            FILE *ass_out = fopen("output/output.s", "w");
             
             set_file(lex_out);
 
@@ -164,8 +164,43 @@ int main(int argc, char *argv[]) {
         }
         
     } else if (strcmp(argv[1], "-debug") == 0) {
-        printf("Imprimir informacion sobre debugging... \n");
-        return 1;    
+        printf(">> Generando archivos de debugging... \n");
+        // No especificando etapa
+        FILE *input_file = fopen(argv[2], "r");
+        if (!input_file) {
+            fprintf(stderr, "%s", invalidCommandMessage(0));
+            exit(EXIT_FAILURE);
+            return 1;
+        }      
+
+        check_filename(argv[2], "ctds");
+        output_file_name = gen_output_file_name(argv[2]);
+
+        FILE *lex_out = fopen("output/output.lex", "w");
+        FILE *parser_out = fopen("output/output.sint", "w"); 
+        FILE *semantic_out = fopen("output/output.sem", "w");
+        FILE *tac_out = fopen("output/output.ci", "w");
+        FILE *ass_out = fopen(output_file_name, "w");
+        
+        set_file(lex_out);
+
+        yyin = input_file;
+        yylineno = 1;
+
+        if (yyparse() == 0) {
+            save_ast(root, 0, parser_out);
+            set_offsets(root, 0);
+            analyze_semantics(root, semantic_out);
+            instruction_list* list = tac_code(root, tac_out);
+            ass_gen(list, ass_out);
+        }
+        fclose(lex_out);
+        fclose(parser_out); 
+        fclose(semantic_out);
+        fclose(tac_out);
+        fclose(ass_out);
+        fclose(input_file);  
+
     } else if (strcmp(argv[1], "-target") == 0) {
         
         if (argc == 4) {
@@ -188,7 +223,7 @@ int main(int argc, char *argv[]) {
             if (strcmp(stage, "lex") == 0) {
                 printf(">> Ejecutando analizador léxico...\n");
                 
-                FILE *lex_out = fopen("outputs/output.lex", "w");
+                FILE *lex_out = fopen("output/output.lex", "w");
                 
                 set_file(lex_out);
                 while (yylex() != 0) {
@@ -199,8 +234,8 @@ int main(int argc, char *argv[]) {
             } else if (strcmp(stage, "parse") == 0) {
                 printf(">> Ejecutando analizador sintáctico...\n");
                 
-                FILE *lex_out = fopen("outputs/output.lex", "w");
-                FILE *parser_out = fopen("outputs/output.sint", "w");
+                FILE *lex_out = fopen("output/output.lex", "w");
+                FILE *parser_out = fopen("output/output.sint", "w");
 
                 set_file(lex_out);
                 
@@ -209,11 +244,14 @@ int main(int argc, char *argv[]) {
                 }   
                 fclose(lex_out);
                 fclose(parser_out); 
+
+                remove("output/output.lex");
+
             } else if (strcmp(stage, "sem") == 0) {
                 printf(">> Ejecutando analizador semántico...\n");
-                FILE *lex_out = fopen("outputs/output.lex", "w");
-                FILE *parser_out = fopen("outputs/output.sint", "w");
-                FILE *semantic_out = fopen("outputs/output.sem", "w");
+                FILE *lex_out = fopen("output/output.lex", "w");
+                FILE *parser_out = fopen("output/output.sint", "w");
+                FILE *semantic_out = fopen("output/output.sem", "w");
 
                 set_file(lex_out);
                 
@@ -224,12 +262,16 @@ int main(int argc, char *argv[]) {
                 fclose(lex_out);
                 fclose(parser_out); 
                 fclose(semantic_out);
+
+                remove("output/output.lex");
+                remove("output/output.sint");
+                
             } else if (strcmp(stage, "tac") == 0) {
                 printf(">> Ejecutando generador de código intermedio...\n");
-                FILE *lex_out = fopen("outputs/output.lex", "w");
-                FILE *parser_out = fopen("outputs/output.sint", "w");
-                FILE *semantic_out = fopen("outputs/output.sem", "w");
-                FILE *tac_out = fopen("outputs/output.ci", "w");
+                FILE *lex_out = fopen("output/output.lex", "w");
+                FILE *parser_out = fopen("output/output.sint", "w");
+                FILE *semantic_out = fopen("output/output.sem", "w");
+                FILE *tac_out = fopen("output/output.ci", "w");
 
                 set_file(lex_out);
                 
@@ -243,12 +285,16 @@ int main(int argc, char *argv[]) {
                 fclose(semantic_out);
                 fclose(tac_out);
 
+                remove("output/output.lex");
+                remove("output/output.sint");
+                remove("output/output.sem");
+
             } else if (strcmp(stage, "ass") == 0) {
                 printf(">> Ejecutando generador de código assembly...\n");
-                FILE *lex_out = fopen("outputs/output.lex", "w");
-                FILE *parser_out = fopen("outputs/output.sint", "w");
-                FILE *semantic_out = fopen("outputs/output.sem", "w");
-                FILE *tac_out = fopen("outputs/output.ci", "w");
+                FILE *lex_out = fopen("output/output.lex", "w");
+                FILE *parser_out = fopen("output/output.sint", "w");
+                FILE *semantic_out = fopen("output/output.sem", "w");
+                FILE *tac_out = fopen("output/output.ci", "w");
                 FILE *ass_out = fopen(output_file_name, "w");
 
                 set_file(lex_out);
@@ -265,7 +311,13 @@ int main(int argc, char *argv[]) {
                 fclose(semantic_out);
                 fclose(tac_out);
                 fclose(ass_out);
-            }else{
+
+                remove("output/output.lex");
+                remove("output/output.sint");
+                remove("output/output.sem");
+                remove("output/output.ci");
+
+            } else{
                     fprintf(stderr, "%s", invalidCommandMessage(1));
                     exit(EXIT_FAILURE);
             } 
@@ -277,41 +329,45 @@ int main(int argc, char *argv[]) {
         }
     } else {
         // No especificando etapa
-            FILE *input_file = fopen(argv[1], "r");
-            if (!input_file) {
-                fprintf(stderr, "%s", invalidCommandMessage(0));
-                exit(EXIT_FAILURE);
-                return 1;
-            }      
+        FILE *input_file = fopen(argv[1], "r");
+        if (!input_file) {
+            fprintf(stderr, "%s", invalidCommandMessage(0));
+            exit(EXIT_FAILURE);
+            return 1;
+        }      
 
-            check_filename(argv[1], "ctds");
-            output_file_name = gen_output_file_name(argv[1]);
-            printf("Archivo de salida: %s\n",output_file_name);
+        check_filename(argv[1], "ctds");
+        output_file_name = gen_output_file_name(argv[1]);
 
-            FILE *lex_out = fopen("outputs/output.lex", "w");
-            FILE *parser_out = fopen("outputs/output.sint", "w"); 
-            FILE *semantic_out = fopen("outputs/output.sem", "w");
-            FILE *tac_out = fopen("outputs/output.ci", "w");
-            FILE *ass_out = fopen(output_file_name, "w");
-            
-            set_file(lex_out);
+        FILE *lex_out = fopen("output/output.lex", "w");
+        FILE *parser_out = fopen("output/output.sint", "w"); 
+        FILE *semantic_out = fopen("output/output.sem", "w");
+        FILE *tac_out = fopen("output/output.ci", "w");
+        FILE *ass_out = fopen(output_file_name, "w");
+        
+        set_file(lex_out);
 
-            yyin = input_file;
-            yylineno = 1;
+        yyin = input_file;
+        yylineno = 1;
 
-            if (yyparse() == 0) {
-                save_ast(root, 0, parser_out);
-                set_offsets(root, 0);
-                analyze_semantics(root, semantic_out);
-                instruction_list* list = tac_code(root, tac_out);
-                ass_gen(list, ass_out);
-            }
-            fclose(lex_out);
-            fclose(parser_out); 
-            fclose(semantic_out);
-            fclose(tac_out);
-            fclose(ass_out);
-            fclose(input_file);  
+        if (yyparse() == 0) {
+            save_ast(root, 0, parser_out);
+            set_offsets(root, 0);
+            analyze_semantics(root, semantic_out);
+            instruction_list* list = tac_code(root, tac_out);
+            ass_gen(list, ass_out);
+        }
+        fclose(lex_out);
+        fclose(parser_out); 
+        fclose(semantic_out);
+        fclose(tac_out);
+        fclose(ass_out);
+        fclose(input_file);  
+
+        remove("output/output.lex");
+        remove("output/output.sint");
+        remove("output/output.sem");
+        remove("output/output.ci");
     }
 
     return 0;
