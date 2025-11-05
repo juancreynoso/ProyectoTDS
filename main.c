@@ -26,14 +26,15 @@ char* invalidCommandMessage(int cod_msg){
     switch(cod_msg){
         case 0:
             msg = "Por favor utilice una de las siguientes opciones:\n"
+            "  c-tds <archivo>\n"
             "  c-tds -target <etapa> <archivo>\n"
-            "  c-tds -o <salida>\n"
-            "  c-tds -opt [optimizacion]\n"
-            "  c-tds -debug\n";
+            "  c-tds -o <salida> <archivo>\n"
+            "  c-tds -opt <archivo>\n"
+            "  c-tds -debug <archivo>\n";
             break;
         case 1:
             msg = "Por favor utilice una de las siguientes opciones:\n"
-            " Etapas: [lex, parse, sem, tac, ass, opt] \n"
+            " Etapas: [lex, parse, sem, tac, ass] \n"
             "  c-tds -target <etapa> <archivo>\n\n";
             break;
         default:
@@ -97,8 +98,49 @@ int main(int argc, char *argv[]) {
         printf("Renombre de archivo ejecutable a... \n");
         return 1;
     } else if (strcmp(argv[1], "-opt") == 0) {
-        printf("Realizar optimizaciones... \n");
-        return 1;
+        if (argc == 3) {
+            printf(">> Ejecutando optimizaciones... \n");
+            // No especificando etapa
+            FILE *input_file = fopen(argv[2], "r");
+            if (!input_file) {
+                fprintf(stderr, "%s", invalidCommandMessage(0));
+                exit(EXIT_FAILURE);
+                return 1;
+            }      
+
+            check_filename(argv[2], "ctds");
+
+            FILE *lex_out = fopen("outputs/output.lex", "w");
+            FILE *parser_out = fopen("outputs/output.sint", "w"); 
+            FILE *semantic_out = fopen("outputs/output.sem", "w");
+            FILE *tac_out = fopen("outputs/output.ci", "w");
+            FILE *ass_out = fopen("outputs/output.s", "w");
+            
+            set_file(lex_out);
+
+            yyin = input_file;
+            yylineno = 1;
+
+            if (yyparse() == 0) {
+                run_optimization(root);
+                save_ast(root, 0, parser_out);
+                set_offsets(root, 1);
+                analyze_semantics(root, semantic_out);
+                instruction_list* list = tac_code(root, tac_out);
+                ass_gen(list, ass_out);
+            }
+            fclose(lex_out);
+            fclose(parser_out); 
+            fclose(semantic_out);
+            fclose(tac_out);
+            fclose(ass_out);
+            fclose(input_file);  
+        } else {
+            fprintf(stderr, "%s", invalidCommandMessage(0));
+            exit(EXIT_FAILURE);
+            return 1;
+        }
+        
     } else if (strcmp(argv[1], "-debug") == 0) {
         printf("Imprimir informacion sobre debugging... \n");
         return 1;    
@@ -120,7 +162,7 @@ int main(int argc, char *argv[]) {
             char *stage = argv[2];
 
             if (strcmp(stage, "lex") == 0) {
-                printf(">> Ejecutando Analizador Lexico...\n");
+                printf(">> Ejecutando analizador léxico...\n");
                 
                 FILE *lex_out = fopen("outputs/output.lex", "w");
                 
@@ -129,11 +171,9 @@ int main(int argc, char *argv[]) {
                     yylex();
                 }
                 fclose(lex_out);
-                printf(">> Analisis correcto, sin errores lexicos\n");
 
             } else if (strcmp(stage, "parse") == 0) {
-                printf(">> Ejecutando Analizador Lexico...\n");
-                printf(">> Ejecutando Parser...\n");
+                printf(">> Ejecutando analizador sintáctico...\n");
                 
                 FILE *lex_out = fopen("outputs/output.lex", "w");
                 FILE *parser_out = fopen("outputs/output.sint", "w");
@@ -141,13 +181,12 @@ int main(int argc, char *argv[]) {
                 set_file(lex_out);
                 
                 if (yyparse() == 0) {
-                    printf("Parseado correctamente, sin errores sintacticos.\n");
                     save_ast(root, 0, parser_out);
                 }   
                 fclose(lex_out);
                 fclose(parser_out); 
             } else if (strcmp(stage, "sem") == 0) {
-                
+                printf(">> Ejecutando analizador semántico...\n");
                 FILE *lex_out = fopen("outputs/output.lex", "w");
                 FILE *parser_out = fopen("outputs/output.sint", "w");
                 FILE *semantic_out = fopen("outputs/output.sem", "w");
@@ -155,16 +194,14 @@ int main(int argc, char *argv[]) {
                 set_file(lex_out);
                 
                 if (yyparse() == 0) {
-                    printf("Parseado correctamente, sin errores sintactico.\n");
                     save_ast(root, 0, parser_out);
-                    printf("Realizando analisis semantico...\n");
                     analyze_semantics(root, semantic_out);
                 }  
                 fclose(lex_out);
                 fclose(parser_out); 
                 fclose(semantic_out);
             } else if (strcmp(stage, "tac") == 0) {
-        
+                printf(">> Ejecutando generador de código intermedio...\n");
                 FILE *lex_out = fopen("outputs/output.lex", "w");
                 FILE *parser_out = fopen("outputs/output.sint", "w");
                 FILE *semantic_out = fopen("outputs/output.sem", "w");
@@ -173,9 +210,7 @@ int main(int argc, char *argv[]) {
                 set_file(lex_out);
                 
                 if (yyparse() == 0) {
-                    printf("Parseado correctamente, sin errores sintactico.\n");
                     save_ast(root, 0, parser_out);
-                    printf("Realizando analisis semantico...\n");
                     analyze_semantics(root, semantic_out);
                     tac_code(root, tac_out);
                 }  
@@ -185,7 +220,7 @@ int main(int argc, char *argv[]) {
                 fclose(tac_out);
 
             } else if (strcmp(stage, "ass") == 0) {
-        
+                printf(">> Ejecutando generador de código assembly...\n");
                 FILE *lex_out = fopen("outputs/output.lex", "w");
                 FILE *parser_out = fopen("outputs/output.sint", "w");
                 FILE *semantic_out = fopen("outputs/output.sem", "w");
@@ -195,11 +230,8 @@ int main(int argc, char *argv[]) {
                 set_file(lex_out);
                 
                 if (yyparse() == 0) {
-                    printf("Parseado correctamente, sin errores sintactico.\n");
-                    run_optimization(root);
                     save_ast(root, 0, parser_out);
-                    printf("Realizando analisis semantico...\n");
-                    set_offsets(root);
+                    set_offsets(root, 0);
                     analyze_semantics(root, semantic_out);
                     instruction_list* list = tac_code(root, tac_out);
                     ass_gen(list, ass_out);
@@ -214,16 +246,21 @@ int main(int argc, char *argv[]) {
                     exit(EXIT_FAILURE);
             } 
                
-            fclose(input_file);
-        } else if (argc == 3){
-            // No especificando etapa
-            FILE *input_file = fopen(argv[2], "r");
+            fclose(input_file);  
+        } else {
+            fprintf(stderr, "%s", invalidCommandMessage(0));
+            exit(EXIT_FAILURE); 
+        }
+    } else {
+        // No especificando etapa
+            FILE *input_file = fopen(argv[1], "r");
             if (!input_file) {
-                perror("No se pudo abrir el archivo");
+                fprintf(stderr, "%s", invalidCommandMessage(0));
+                exit(EXIT_FAILURE);
                 return 1;
             }      
 
-            check_filename(argv[2], "ctds");
+            check_filename(argv[1], "ctds");
 
             FILE *lex_out = fopen("outputs/output.lex", "w");
             FILE *parser_out = fopen("outputs/output.sint", "w"); 
@@ -237,10 +274,8 @@ int main(int argc, char *argv[]) {
             yylineno = 1;
 
             if (yyparse() == 0) {
-                printf("Parseado correctamente, sin errores sintactico.\n");
-                run_optimization(root);
                 save_ast(root, 0, parser_out);
-                set_offsets(root);
+                set_offsets(root, 0);
                 analyze_semantics(root, semantic_out);
                 instruction_list* list = tac_code(root, tac_out);
                 ass_gen(list, ass_out);
@@ -250,14 +285,7 @@ int main(int argc, char *argv[]) {
             fclose(semantic_out);
             fclose(tac_out);
             fclose(ass_out);
-            fclose(input_file);    
-        } else {
-            fprintf(stderr, "%s", invalidCommandMessage(0));
-            exit(EXIT_FAILURE); 
-        }
-    } else {
-        fprintf(stderr, "%s", invalidCommandMessage(0));
-        exit(EXIT_FAILURE);
+            fclose(input_file);  
     }
 
     return 0;
