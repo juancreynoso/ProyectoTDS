@@ -58,31 +58,68 @@ make
 ```
 
 ## Ejecución de tests
-Utilizar archivos del directorio `test/` para probar el funcionamiento del mini compilador.
+
+Los archivos de prueba se encuentran en el directorio `test/`.
+
+Para compilar un archivo `.ctds` simplemente ejecutar: `./c-tds test/<archivo>.ctds`
+
+
+Esto genera como salida **únicamente** el archivo Assembly (`.s`) correspondiente en el directorio `outputs/`.  
+Ese archivo `.s` es el equivalente a nuestro “ejecutable” generado por el compilador.
+
+### Compilación del `.s` a un binario real
+
+#### Linux
+
+Si se está en Linux (x86_64 / amd64), simplemente:
 ```
-./c-tds -target <etapa> test/<archivo_fuente>
+gcc -o program outputs/<archivo>.s
+./program
 ```
 
-* `Etapas disponibles:`
-    * lexer → análisis léxico
-    * parser → análisis sintáctico
-    * semantic → análisis semantico
-    * tac → generacion de código de tres direcciones
-    * ass → generacion de código assembler
 
-Al ejecutar un `test`, cada etapa generará su propio archivo dentro de la carpeta `outputs`. Por ejemplo:
+#### macOS
 
-* La etapa lexer produce `output.lex` con la información correspondiente al análisis léxico.
+En macOS **no se puede compilar directamente el `.s` generado**, ya que el compilador produce assembly para arquitectura **x86_64**, mientras que macOS utiliza ARM64.
 
-* La etapa parser produce `output.pars` con la información correspondiente al análisis sintáctico.
+Para compilar y ejecutar correctamente, se debe usar Docker con una imagen Linux `amd64`.
 
-Cada etapa guarda sus resultados de forma independiente, permitiendo revisar fácilmente el output de cada fase del compilador.
+Primero, si no tiene la imagen, crearla (solo una vez): `docker build --platform linux/amd64 -t my-ubuntu-gcc ./docker`
 
-### Ejecutar todas las etapas
-Sino se especifica una etapa, el compilador las ejecutara todas en orden
+Luego entrar al entorno de compilación:
 ```
-./c-tds -target test/<archivo_fuente>
+--platform linux/amd64 -it --rm -v "$PWD":/work -w /work my-ubuntu-gcc bash
 ```
+
+Y ahora sí compilar:
+```
+gcc -no-pie -o program outputs/<archivo>.s
+./program
+```
+
+---
+
+## Ejecución por etapas
+
+También es posible ejecutar el compilador hasta una etapa específica: `./c-tds -target <etapa> test/<archivo>.ctds`
+
+**Etapas disponibles:**
+
+| Comando   | Etapa |
+|--------|-------------|
+| lex    | Análisis léxico |
+| parse  | Análisis sintáctico |
+| sem    | Análisis semántico |
+| tac    | Generación de código de tres direcciones |
+| ass    | Generación de código assembly |
+
+En modo normal **solo se genera el archivo `.s`**.  
+Si se desea ver *todos* los archivos intermedios (`output.lex`, `output.sint`, `output.sem`, `output.ci`), se debe usar:
+```
+./c-tds -debug test/<archivo>.ctds
+```
+
+Esto facilita la inspección y depuración interna del compilador.
 
 ## Limpiar archivos generados
 ```
