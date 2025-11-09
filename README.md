@@ -61,8 +61,10 @@ make
 
 Los archivos de prueba se encuentran en el directorio `test/`.
 
-Para compilar un archivo `.ctds` simplemente ejecutar: `./c-tds test/<archivo>.ctds`
-
+Para compilar un archivo `.ctds` simplemente ejecutar:
+```
+./c-tds test/<archivo>.ctds
+```
 
 Esto genera como salida **únicamente** el archivo Assembly (`.s`) correspondiente en el directorio `outputs/`.  
 Ese archivo `.s` es el equivalente a nuestro “ejecutable” generado por el compilador.
@@ -71,7 +73,7 @@ Ese archivo `.s` es el equivalente a nuestro “ejecutable” generado por el co
 
 #### Linux
 
-Si se está en Linux (x86_64 / amd64), simplemente:
+Si está en Linux (x86_64 / amd64), simplemente:
 ```
 gcc -o program outputs/<archivo>.s
 ./program
@@ -91,9 +93,9 @@ Luego entrar al entorno de compilación:
 --platform linux/amd64 -it --rm -v "$PWD":/work -w /work my-ubuntu-gcc bash
 ```
 
-Y ahora sí compilar:
+Finalmente, compilar:
 ```
-gcc -no-pie -o program outputs/<archivo>.s
+gcc -o program outputs/<archivo>.s
 ./program
 ```
 
@@ -101,7 +103,10 @@ gcc -no-pie -o program outputs/<archivo>.s
 
 ## Ejecución por etapas
 
-También es posible ejecutar el compilador hasta una etapa específica: `./c-tds -target <etapa> test/<archivo>.ctds`
+También es posible ejecutar el compilador hasta una etapa específica:
+```
+./c-tds -target <etapa> test/<archivo>.ctds
+```
 
 **Etapas disponibles:**
 
