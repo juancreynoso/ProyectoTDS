@@ -16,6 +16,9 @@ Este proyecto implementa un mini compilador para un lenguaje de programación qu
 - **Cuarta entrega**  
     Rama: `object-code`
 
+- **Quinta entrega**
+    Rama: `optimization`
+
 ## Características
 
 * Tipos de datos soportados: int y bool
