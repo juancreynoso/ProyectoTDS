@@ -1,0 +1,8 @@
+Program {
+    void assert(integer n, integer m) extern;
+
+    void main() {
+        integer x = 1 + 2 * 3; // precedence: * before +
+        assert(x, 7);
+    }
+}

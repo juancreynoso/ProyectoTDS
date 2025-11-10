@@ -1,6 +1,7 @@
 Program
 {
     integer print(integer a) extern;
+    void assert(integer n, integer m) extern;
 
     integer main() {
         integer y = 1;
@@ -8,6 +9,7 @@ Program
         x = y + 3;
         y = x * 2;
 
+        assert(y, 8);
         print(y);
         return y;
     }

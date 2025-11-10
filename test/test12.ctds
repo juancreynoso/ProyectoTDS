@@ -1,5 +1,6 @@
 Program
 {
+    void assert(integer n, integer m) extern;
     integer fact(integer n) {
         if (n == 0 || n == 1) then {
             return 1;
@@ -10,10 +11,10 @@ Program
         }
     }
     integer print(integer x) extern;
-
     integer main() {
         integer x = 5;
         x = fact(x);
+        assert(x, 120);
         print(x);
         return x;
     }

@@ -1,0 +1,10 @@
+Program {
+    void assert(integer n, integer m) extern;
+    void main() {
+        integer x = 1;
+        integer y = 2;
+
+        integer z = x + y;
+        assert(z, 3);
+    }
+}

@@ -1,0 +1,11 @@
+Program {
+    void assert(integer n, integer m) extern;
+
+    void main() {
+        integer a = 7 / 3;
+        integer b = 7 % 3;
+
+        assert(a, 2);
+        assert(b, 1);
+    }
+}

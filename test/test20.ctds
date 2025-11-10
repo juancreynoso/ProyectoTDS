@@ -1,0 +1,7 @@
+Program {
+    void assert(integer n, integer m) extern;
+    integer x = 0;
+    void main() {
+        assert(x,0);
+    }
+}

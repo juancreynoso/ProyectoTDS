@@ -1,0 +1,13 @@
+Program {
+    void assert(integer n, integer m) extern;
+
+    void main() {
+        integer a = -5;
+        integer b = 3 - 8;
+        integer c = -2;
+
+        assert(a, -5);
+        assert(b, -5);
+        assert(c, -2);
+    }
+}

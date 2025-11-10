@@ -14,7 +14,9 @@ Program {
         integer c = 0;
         integer d = 0;
         
+        void assert(integer n, integer m) extern;
         i = sum(i, x, a, b, c, d, 4);
+        assert(i, 4);
         return i;
     }
 }

@@ -1,0 +1,29 @@
+Program {
+    void assert(integer n, integer m) extern;
+
+    bool lor(bool a, bool b) {
+        return a || b;
+    }
+
+    bool land(bool a, bool b) {
+        return a && b;
+    }
+
+    void main() {
+        integer r = -1;
+
+        if (lor(true, false)) then {
+            r = 1;
+        } else {
+            r = 0;
+        }
+        assert(r, 1);
+
+        if (land(true, false)) then {
+            r = 1;
+        } else {
+            r = 0;
+        }
+        assert(r, 0);
+    }
+}
