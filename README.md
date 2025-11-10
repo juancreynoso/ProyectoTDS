@@ -90,7 +90,7 @@ Primero, si no tiene la imagen, crearla (solo una vez): `docker build --platform
 
 Luego entrar al entorno de compilación:
 ```
---platform linux/amd64 -it --rm -v "$PWD":/work -w /work my-ubuntu-gcc bash
+docker run --platform linux/amd64 -it --rm -v "$PWD":/work -w /work my-ubuntu-gcc bas  
 ```
 
 Finalmente, compilar:
