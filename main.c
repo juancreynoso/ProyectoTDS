@@ -83,6 +83,11 @@ void check_filename(char *filename, char *ext){
     return;
 }
 
+/**
+ * Funcion que genera el archivo de salida assembler
+ * @param filename nombre del archivo ctds que se usa para generar el archivo de salida
+ */
+
 char* gen_output_file_name(char* filename) {
 
     char* name = strrchr(filename, '/');

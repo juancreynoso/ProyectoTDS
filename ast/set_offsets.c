@@ -198,7 +198,11 @@ int is_empty(offset_list *list) {
     return (list == NULL);
 }
 
-// Agrego un offset al inicio
+/**
+ * Agrega un offset al inicio de la lista de offsets
+ * @param list Lista de offsets.
+ * @param offset Nuevo offset.
+ */
 void add_offset(offset_list **list, int offset) {
     offset_list *new_node = malloc(sizeof(offset_list));
     new_node->info = offset;
@@ -206,6 +210,11 @@ void add_offset(offset_list **list, int offset) {
     *list = new_node;        // actualiza cabeza
 }
 
+/**
+ * Obtiene un offset de la lista de offsets que se pueden reutilizar
+ * @param list Lista de offsets.
+ * @return offset a reutilizar.
+ */
 int get_offset(offset_list **list) {
     if (is_empty(*list)) {
         fprintf(stderr, "Error: no hay offsets disponibles.\n");
@@ -218,6 +227,10 @@ int get_offset(offset_list **list) {
     return res;
 }
 
+/**
+ * Imprime la lista de offsets libres
+ * @param list Lista de offsets libres
+ */
 void print_offsets(offset_list *list) {
     printf("Offsets libres: ");
     while (list) {
