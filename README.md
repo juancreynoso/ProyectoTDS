@@ -16,7 +16,7 @@ Este proyecto implementa un mini compilador para un lenguaje de programación qu
 - **Cuarta entrega**  
     Rama: `object-code`
 
-- **Quinta entrega**
+- **Quinta entrega**  
     Rama: `optimization`
 
 ## Características
