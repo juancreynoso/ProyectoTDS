@@ -131,13 +131,14 @@ int main(int argc, char *argv[]) {
             }      
 
             check_filename(argv[2], "ctds");
+            output_file_name = gen_output_file_name(argv[2]);
 
             FILE *lex_out = fopen("output/output.lex", "w");
             FILE *parser_out = fopen("output/output.sint", "w"); 
             FILE *semantic_out = fopen("output/output.sem", "w");
-            FILE *tac_out = fopen("output/output.ci", "w");
-            FILE *ass_out = fopen("output/output.s", "w");
-            
+            FILE *tac_out = fopen("output/output.ci", "w");;
+            FILE *ass_out = fopen(output_file_name, "w");
+
             set_file(lex_out);
 
             yyin = input_file;
