@@ -46,12 +46,13 @@ void semantic_analysis_recursive(node* root, tables_stack* stack, symbol_table* 
         }
 
         case NODE_IF_ELSE: {
+            semantic_analysis_recursive(root->info->IF_ELSE.expr, stack, table, NULL, semantic_out);
+            
             VarType cond_type = get_expression_type(root->info->IF_ELSE.expr, stack);
             if (cond_type != TYPE_BOOL) {
                 printf("Error de tipo [línea %d, columna %d]: la condición del IF debe ser bool\n", root->line, root->column);
                 exit(EXIT_FAILURE);
             }
-            semantic_analysis_recursive(root->info->IF_ELSE.expr, stack, table, NULL, semantic_out);
             
             scope++;
 
@@ -68,6 +69,7 @@ void semantic_analysis_recursive(node* root, tables_stack* stack, symbol_table* 
         }
 
         case NODE_WHILE: {
+            semantic_analysis_recursive(root->info->IF_ELSE.expr, stack, table, NULL, semantic_out);
             VarType cond_type = get_expression_type(root->info->WHILE.expr, stack);
             if (cond_type != TYPE_BOOL) {
                 printf("Error de tipo [línea %d, columna %d]: la condición del WHILE debe ser bool\n", root->line, root->column);
