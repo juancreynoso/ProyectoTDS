@@ -45,7 +45,7 @@ Este proyecto implementa un mini compilador completo para un lenguaje imperativo
   - Contiene el codigo fuente que genera el codigo de tres direcciones.
 - `ass/`
   - Contiene el codigo fuente que genera el codigo assembler.
-- `ass/`
+- `opt/`
   - Contiene el codigo fuente que implementa optimizaciones.
 - `test/`: Archivos con código de prueba.
 
@@ -72,7 +72,7 @@ Para compilar un archivo `.ctds` simplemente ejecutar:
 ./c-tds test/<archivo>.ctds
 ```
 
-Esto genera como salida **únicamente** el archivo Assembly (`.s`) correspondiente en el directorio `outputs/`.  
+Esto genera como salida **únicamente** el archivo Assembly (`.s`) correspondiente en el directorio `output/`.  
 Ese archivo `.s` es el equivalente a nuestro “ejecutable” generado por el compilador.
 
 ### Compilación del `.s` a un binario real
@@ -120,7 +120,7 @@ Archivos relevantes:
 - `scripts/run_tests_docker_v2.sh` — construye la imagen Docker (si falta) y ejecuta la suite dentro del contenedor.
 - `scripts/inside_run.sh` — script que se ejecuta dentro del contenedor: compila con `make`, genera `.s` para cada `.ctds`, compila los binarios (enlazando `functions.c`) y ejecuta cada uno con un timeout, mostrando un resumen.
 
-Uso (macOS / Docker):
+**Uso (macOS / Docker):**
 
 1. Hacer los scripts ejecutables:
 
@@ -144,7 +144,7 @@ Qué hace el runner:
   - Ejecuta el binario con `timeout` (por defecto 5s) para evitar colgados.
 - Muestra `[OK]`/`[FAIL]` según las aserciones implementadas en `functions.c` y un resumen `passed/failed`.
 
-Ejecución local en Linux:
+**Ejecución local en Linux:**
 
 - Si está en Linux x86_64 y tiene las dependencias instaladas (`make`, `gcc`, `bison`, `flex`), puede ejecutar el runner directamente sin Docker:
 
